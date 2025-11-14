@@ -44,9 +44,8 @@ export function QuestPopup({ quest, onSelect }: QuestPopupProps) {
     hover:shadow-[0_18px_36px_rgba(37,99,235,0.32)]'
 				onClick={() => onSelect(quest)}
 			>
-				Участвовать в квесте
+				Подробнее
 			</button>
 		</div>
 	)
 }
-

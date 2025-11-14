@@ -1,5 +1,7 @@
 import { X } from 'lucide-react'
+import { useState } from 'react'
 import { ASSISTANCE_OPTIONS } from '@/constants'
+import { ImageGallery } from '@/components/ui/ImageGallery'
 import type { Organization } from '../../types/types'
 
 interface OrganizationDetailsProps {
@@ -21,16 +23,19 @@ export function OrganizationDetails({
 	onClose,
 	isClosing = false,
 }: OrganizationDetailsProps) {
+	const [galleryIndex, setGalleryIndex] = useState<number | null>(null)
+
 	if (!organization && !isClosing) {
 		return null
 	}
 
 	return (
-		<section
-			className={`fixed left-5 top-[88px] bottom-20 w-[420px] max-w-[calc(100vw-40px)] z-[100] bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
-				isClosing ? 'animate-slide-out-left' : 'animate-slide-in-left'
-			}`}
-		>
+		<>
+			<section
+				className={`fixed left-5 top-[88px] bottom-20 w-[420px] max-w-[calc(100vw-40px)] z-[100] bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+					isClosing ? 'animate-slide-out-left' : 'animate-slide-in-left'
+				}`}
+			>
 			{organization && (
 				<>
 					<header className='sticky top-0 bg-white/98 backdrop-blur-xl border-b border-slate-200 p-6 z-10'>
@@ -182,20 +187,28 @@ export function OrganizationDetails({
 							</div>
 						</div>
 
+						{/* Галерея */}
 						{organization.gallery && organization.gallery.length > 0 && (
-							<div className='space-y-2'>
+							<div className='space-y-3'>
 								<h3 className='text-lg font-semibold text-slate-900 m-0'>
 									Галерея
 								</h3>
-								<div className='grid grid-cols-2 gap-2'>
-									{organization.gallery.map(image => (
-										<img
-											key={image}
-											src={image}
-											alt={organization.name}
-											loading='lazy'
-											className='w-full h-32 object-cover rounded-lg'
-										/>
+								<div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+									{organization.gallery.map((image, index) => (
+										<button
+											key={`gallery-${index}-${image.slice(0, 20)}`}
+											type='button'
+											onClick={() => setGalleryIndex(index)}
+											className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
+										>
+											<img
+												src={image}
+												alt={`Фото ${index + 1} из галереи организации`}
+												className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-200'
+												loading='lazy'
+											/>
+											<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
+										</button>
 									))}
 								</div>
 							</div>
@@ -203,6 +216,17 @@ export function OrganizationDetails({
 					</div>
 				</>
 			)}
-		</section>
+			</section>
+
+			{/* Галерея изображений */}
+			{galleryIndex !== null && organization && (
+				<ImageGallery
+					images={organization.gallery}
+					currentIndex={galleryIndex}
+					onClose={() => setGalleryIndex(null)}
+					onChangeIndex={setGalleryIndex}
+				/>
+			)}
+		</>
 	)
 }

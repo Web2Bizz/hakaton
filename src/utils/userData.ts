@@ -56,11 +56,24 @@ export function updateUserQuest(quest: Quest): void {
 	try {
 		const existingQuests = getUserCreatedQuests()
 		const updatedQuests = existingQuests.map(q => (q.id === quest.id ? quest : q))
-		localStorage.setItem('user_created_quests', JSON.stringify(updatedQuests))
+		const questsJson = JSON.stringify(updatedQuests)
+		
+		// Проверяем размер перед сохранением
+		const sizeInBytes = new Blob([questsJson]).size
+		const sizeInMB = sizeInBytes / (1024 * 1024)
+		if (sizeInMB > 4) {
+			throw new DOMException('QuotaExceededError')
+		}
+		
+		localStorage.setItem('user_created_quests', questsJson)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'development') {
+		if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+			throw error
+		}
+		if (import.meta.env.DEV) {
 			console.error('Error updating quest:', error)
 		}
+		throw error
 	}
 }
 

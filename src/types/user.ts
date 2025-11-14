@@ -11,6 +11,7 @@ export type AchievementId =
 	| 'community_hero'
 	| 'donation_champion'
 	| 'quest_completer'
+	| 'social_ambassador'
 
 export interface Achievement {
 	id: AchievementId

@@ -133,11 +133,15 @@ export function AddOrganizationForm({ onSuccess }: AddOrganizationFormProps) {
 					summary: formData.summary,
 					description: formData.description,
 					mission: formData.mission,
+					gallery: formData.gallery,
 				}}
 				onChange={(field, value) =>
 					setFormData(prev => ({ ...prev, [field]: value }))
 				}
 				onCityChange={handleCityChange}
+				onGalleryChange={gallery =>
+					setFormData(prev => ({ ...prev, gallery }))
+				}
 			/>
 
 			<OrganizationAssistanceSection

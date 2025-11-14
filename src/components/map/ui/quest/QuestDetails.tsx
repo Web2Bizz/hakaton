@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ImageGallery } from '@/components/ui/ImageGallery'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useUser } from '@/hooks/useUser'
 import { formatCurrency, formatDate } from '@/utils/format'
@@ -12,6 +13,7 @@ import {
 	X,
 } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import type { Quest, QuestStage } from '../../types/quest-types'
 import { AmbassadorShare } from './AmbassadorShare'
 import { DonationPanel } from './DonationPanel'
@@ -43,6 +45,7 @@ export function QuestDetails({
 }: QuestDetailsProps) {
 	const {
 		user,
+		setUser,
 		participateInQuest,
 		contributeToQuest,
 		checkAndUnlockAchievements,
@@ -56,6 +59,7 @@ export function QuestDetails({
 		stage: QuestStage
 	} | null>(null)
 	const [showAmbassadorShare, setShowAmbassadorShare] = useState(false)
+	const [galleryIndex, setGalleryIndex] = useState<number | null>(null)
 
 	// Если quest undefined, возвращаем null (во время анимации закрытия или когда не выбран)
 	if (!quest) {
@@ -129,8 +133,70 @@ export function QuestDetails({
 		})
 	}
 
-	const handleShare = () => {
-		// Логика уже в AmbassadorShare
+	const handleShare = (platform: string) => {
+		if (quest) {
+			// Засчитываем шаринг как вклад в квест
+			contributeToQuest({
+				questId: quest.id,
+				stageId: quest.stages[0]?.id || '', // Используем первый этап или пустую строку
+				action: `Поделился в ${platform}`,
+				contributedAt: new Date().toISOString(),
+				impact: `Поделился квестом "${quest.title}" в ${platform}`,
+			})
+
+			// Проверяем и разблокируем достижение за шаринг
+			if (user) {
+				const hasSocialAmbassador = user.achievements.some(
+					a => a.id === 'social_ambassador'
+				)
+
+				if (!hasSocialAmbassador) {
+					const updatedUser = {
+						...user,
+						achievements: [
+							...user.achievements,
+							{
+								id: 'social_ambassador' as const,
+								title: 'Социальный амбассадор',
+								description: 'Поделились квестом в социальных сетях',
+								icon: '📢',
+								rarity: 'common' as const,
+								unlockedAt: new Date().toISOString(),
+							},
+						],
+					}
+
+					setUser(updatedUser)
+
+					// Показываем уведомление о достижении
+					addNotification({
+						type: 'achievement_unlocked',
+						title: '🎉 Достижение разблокировано!',
+						message:
+							'Социальный амбассадор - Поделились квестом в социальных сетях',
+						questId: quest.id,
+						icon: '🏆',
+					})
+				}
+			}
+
+			checkAndUnlockAchievements(quest.id)
+
+			// Показываем благодарность за репост через toast
+			toast.success('🙏 Спасибо за распространение!', {
+				description: `Ваш репост поможет квесту "${quest.title}" найти больше участников! Вы получили опыт за помощь.`,
+				duration: 5000,
+			})
+
+			// Также добавляем в систему уведомлений
+			addNotification({
+				type: 'quest_update',
+				title: '🙏 Спасибо за распространение!',
+				message: `Ваш репост поможет квесту "${quest.title}" найти больше участников! Вы получили опыт за помощь.`,
+				questId: quest.id,
+				icon: '📢',
+			})
+		}
 	}
 
 	return (
@@ -227,7 +293,7 @@ export function QuestDetails({
 									<Button
 										type='button'
 										onClick={() => setShowAmbassadorShare(true)}
-										className='w-full bg-gradient-to-br from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700'
+										className='w-full bg-gradient-to-br from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-900'
 									>
 										<Share2 className='h-4 w-4 mr-2' />
 										Поделиться квестом
@@ -243,16 +309,63 @@ export function QuestDetails({
 									История
 								</h3>
 								{quest.storyMedia?.image && (
-									<img
-										src={quest.storyMedia.image}
-										alt={quest.title}
-										className='w-full h-48 object-cover rounded-xl'
-									/>
+									<button
+										type='button'
+										onClick={() => {
+											const allImages = [
+												quest.storyMedia?.image,
+												...(quest.gallery || []),
+											].filter(Boolean) as string[]
+											const index = allImages.indexOf(quest.storyMedia!.image!)
+											setGalleryIndex(Math.max(index, 0))
+										}}
+										className='w-full h-48 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity'
+										aria-label='Открыть изображение в галерее'
+									>
+										<img
+											src={quest.storyMedia.image}
+											alt={quest.title}
+											className='w-full h-full object-cover'
+										/>
+									</button>
 								)}
 								<p className='text-base text-slate-700 leading-relaxed m-0'>
 									{quest.story}
 								</p>
 							</div>
+
+							{/* Галерея */}
+							{quest.gallery && quest.gallery.length > 0 && (
+								<div className='space-y-3'>
+									<h3 className='text-lg font-semibold text-slate-900 m-0'>
+										Галерея
+									</h3>
+									<div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+										{quest.gallery.map((image, index) => {
+											const galleryIndexInAll = quest.storyMedia?.image
+												? index + 1
+												: index
+
+											return (
+												<button
+													key={`gallery-${index}-${image.slice(0, 20)}`}
+													type='button'
+													onClick={() => setGalleryIndex(galleryIndexInAll)}
+													className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
+												>
+													<img
+														src={image}
+														alt={`Фото ${index + 1} из галереи квеста`}
+														className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-200'
+														loading='lazy'
+													/>
+													<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
+												</button>
+											)
+										})}
+									</div>
+								</div>
+							)}
 
 							{/* Табы для этапов и обновлений */}
 							<div className='border-b border-slate-200'>
@@ -522,6 +635,20 @@ export function QuestDetails({
 					</>
 				)}
 			</section>
+
+			{/* Галерея изображений */}
+			{galleryIndex !== null && quest && (
+				<ImageGallery
+					images={
+						[quest.storyMedia?.image, ...(quest.gallery || [])].filter(
+							Boolean
+						) as string[]
+					}
+					currentIndex={galleryIndex}
+					onClose={() => setGalleryIndex(null)}
+					onChangeIndex={setGalleryIndex}
+				/>
+			)}
 		</>
 	)
 }

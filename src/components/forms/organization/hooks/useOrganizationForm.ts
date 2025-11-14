@@ -26,6 +26,7 @@ export interface OrganizationFormData {
 	website: string
 	coordinates: { lat: number; lng: number }
 	socials: SocialFormData[]
+	gallery: string[]
 }
 
 export function useOrganizationForm(onSuccess?: (organizationId: string) => void) {
@@ -61,6 +62,7 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 		website: '',
 		coordinates: { lat: 0, lng: 0 },
 		socials: [{ name: 'VK', url: '' }],
+		gallery: [],
 	})
 
 	useEffect(() => {
@@ -99,6 +101,7 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 								url: s.url || '',
 						  }))
 						: [{ name: 'VK' as const, url: '' }],
+				gallery: existingOrg.gallery || [],
 			})
 			setIsDataLoaded(true)
 		} else if (!existingOrg) {
@@ -151,7 +154,7 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 						name: social.name,
 						url: social.url,
 					})),
-				gallery: [],
+				gallery: formData.gallery,
 			}
 
 			if (isEditMode) {

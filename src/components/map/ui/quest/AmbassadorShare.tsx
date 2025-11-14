@@ -14,7 +14,7 @@ const sharePlatforms = [
 	{
 		id: 'vk',
 		name: 'ВКонтакте',
-		icon: '/public/vk.png',
+		icon: '/vk.png',
 		color: 'bg-blue-500 hover:bg-blue-600',
 		url: (text: string, url: string) =>
 			`https://vk.com/share.php?url=${encodeURIComponent(
@@ -24,7 +24,7 @@ const sharePlatforms = [
 	{
 		id: 'telegram',
 		name: 'Telegram',
-		icon: '/public/telegram.png',
+		icon: '/telegram.png',
 		color: 'bg-cyan-500 hover:bg-cyan-600',
 		url: (text: string, url: string) =>
 			`https://t.me/share/url?url=${encodeURIComponent(
@@ -34,7 +34,7 @@ const sharePlatforms = [
 	{
 		id: 'whatsapp',
 		name: 'WhatsApp',
-		icon: '/public/whatsapp.png',
+		icon: '/whatsapp.png',
 		color: 'bg-green-500 hover:bg-green-600',
 		url: (text: string, url: string) =>
 			`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
@@ -58,13 +58,7 @@ export function AmbassadorShare({
 		const url = platform.url(shareText, shareUrl)
 		window.open(url, '_blank', 'width=600,height=400')
 		onShare(platform.id)
-		addNotification({
-			type: 'quest_update',
-			title: 'Спасибо за распространение!',
-			message: `Вы поделились квестом "${quest.title}" в ${platform.name}`,
-			questId: quest.id,
-			icon: '📢',
-		})
+		// Уведомление о благодарности показывается в handleShare в QuestDetails
 	}
 
 	const handleCopyLink = async () => {
@@ -80,7 +74,8 @@ export function AmbassadorShare({
 				icon: '📋',
 			})
 		} catch (err) {
-			if (process.env.NODE_ENV === 'development') {
+			// В production логируем в систему мониторинга
+			if (import.meta.env.DEV) {
 				console.error('Failed to copy:', err)
 			}
 		}

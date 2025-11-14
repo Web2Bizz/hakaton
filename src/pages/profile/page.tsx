@@ -27,8 +27,15 @@ export default function ProfilePage() {
 
 	const handleLogout = () => {
 		logout()
-		toast.success('Вы вышли из аккаунта')
-		globalThis.location.href = '/login'
+		toast.success('👋 Вы вышли из аккаунта', {
+			description: 'До встречи! Надеемся увидеть вас снова.',
+			duration: 3000,
+		})
+		
+		// Небольшая задержка перед редиректом, чтобы пользователь увидел toast
+		setTimeout(() => {
+			globalThis.location.href = '/login'
+		}, 500)
 	}
 
 	return (

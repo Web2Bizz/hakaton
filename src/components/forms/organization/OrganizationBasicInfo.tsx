@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input'
 import { organizationTypes } from '@/components/map/data/organizations'
 import { cities as orgCities } from '@/components/map/data/organizations'
 import { questCities } from '@/components/map/data/quests'
+import { MediaUpload } from '../shared/MediaUpload'
 import { useMemo } from 'react'
 
 interface OrganizationBasicInfoProps {
@@ -12,15 +13,18 @@ interface OrganizationBasicInfoProps {
 		summary: string
 		description: string
 		mission: string
+		gallery: string[]
 	}
-	onChange: (field: string, value: string) => void
+	onChange: (field: string, value: string | string[]) => void
 	onCityChange: (city: string) => void
+	onGalleryChange?: (gallery: string[]) => void
 }
 
 export function OrganizationBasicInfo({
 	formData,
 	onChange,
 	onCityChange,
+	onGalleryChange,
 }: OrganizationBasicInfoProps) {
 	const allCities = useMemo(
 		() =>
@@ -147,6 +151,16 @@ export function OrganizationBasicInfo({
 					placeholder='Миссия организации...'
 				/>
 			</div>
+
+			{/* Галерея */}
+			{onGalleryChange && (
+				<MediaUpload
+					images={formData.gallery}
+					onImagesChange={onGalleryChange}
+					maxImages={10}
+					label='Галерея организации'
+				/>
+			)}
 		</div>
 	)
 }

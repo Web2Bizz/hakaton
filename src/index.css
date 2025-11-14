@@ -209,3 +209,16 @@ leaflet-control {
 .animate-slide-out-left {
 	animation: slideOutLeft 0.3s ease-out;
 }
+
+/* Ограничение размера выпадающего списка для выбора города */
+select[id*='city'],
+select[id*='filter-city'] {
+	max-height: 200px;
+}
+
+/* Для браузеров, которые поддерживают стилизацию выпадающего списка */
+select[id*='city'] option,
+select[id*='filter-city'] option {
+	max-height: 200px;
+	overflow-y: auto;
+}

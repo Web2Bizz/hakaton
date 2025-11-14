@@ -47,10 +47,17 @@ export default function LoginPage() {
 					name: userName,
 				})
 
-				toast.success('Вы успешно вошли в систему')
-				window.location.href = '/'
+				toast.success('✅ Вход выполнен успешно!', {
+					description: `Добро пожаловать, ${userName}!`,
+					duration: 3000,
+				})
+
+				// Небольшая задержка перед редиректом, чтобы пользователь увидел toast
+				setTimeout(() => {
+					window.location.href = '/'
+				}, 500)
 			} catch (error) {
-				if (process.env.NODE_ENV === 'development') {
+				if (import.meta.env.DEV) {
 					console.error('Login error:', error)
 				}
 				toast.error('Ошибка входа. Попробуйте еще раз.')
@@ -84,10 +91,17 @@ export default function LoginPage() {
 					name: formData.name,
 				})
 
-				toast.success('Регистрация успешна! Добро пожаловать!')
-				window.location.href = '/'
+				toast.success('🎉 Регистрация успешна!', {
+					description: `Добро пожаловать, ${formData.name}! Ваш аккаунт создан.`,
+					duration: 4000,
+				})
+
+				// Небольшая задержка перед редиректом, чтобы пользователь увидел toast
+				setTimeout(() => {
+					window.location.href = '/'
+				}, 500)
 			} catch (error) {
-				if (process.env.NODE_ENV === 'development') {
+				if (import.meta.env.DEV) {
 					console.error('Registration error:', error)
 				}
 				toast.error('Ошибка регистрации. Попробуйте еще раз.')

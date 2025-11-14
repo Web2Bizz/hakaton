@@ -2,6 +2,7 @@ import { useUser } from '@/hooks/useUser'
 import { getCityCoordinates } from '@/utils/cityCoordinates'
 import { calculateQuestProgress, getQuestProgressColor } from '@/utils/quest'
 import { getUserQuest as getUserQuestById, updateUserQuest } from '@/utils/userData'
+import { checkLocalStorageSize } from '@/utils/storage'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Quest } from '@/components/map/types/quest-types'
@@ -14,6 +15,8 @@ export interface QuestFormData {
 	type: string
 	category: Quest['category']
 	story: string
+	storyImage?: string
+	gallery: string[]
 	address: string
 	curatorName: string
 	curatorPhone: string
@@ -40,6 +43,8 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 		type: '',
 		category: 'environment',
 		story: '',
+		storyImage: undefined,
+		gallery: [],
 		address: '',
 		curatorName: user?.name || '',
 		curatorPhone: '',
@@ -65,6 +70,8 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				type: existingQuest.type || '',
 				category: existingQuest.category || 'environment',
 				story: existingQuest.story || '',
+				storyImage: existingQuest.storyMedia?.image,
+				gallery: existingQuest.gallery || [],
 				address: existingQuest.address || '',
 				curatorName: existingQuest.curator?.name || user?.name || '',
 				curatorPhone: existingQuest.curator?.phone || '',
@@ -185,13 +192,22 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				return
 			}
 
-			const newQuest: Quest = {
+			// Удаляем видео из данных, так как они слишком большие для localStorage
+			// Видео будут храниться только в памяти во время редактирования
+			const questDataWithoutVideo: Omit<Quest, 'storyMedia'> & {
+				storyMedia?: { image?: string }
+			} = {
 				id: questId,
 				title: formData.title,
 				city: formData.city,
 				type: formData.type,
 				category: formData.category,
 				story: formData.story,
+				storyMedia: formData.storyImage
+					? {
+							image: formData.storyImage,
+					  }
+					: undefined,
 				stages: questStages,
 				overallProgress: 0,
 				status: 'active',
@@ -210,27 +226,62 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 						name: social.name,
 						url: social.url,
 					})),
-				gallery: [],
+				// Ограничиваем галерею - оставляем только первые 5 изображений для экономии места
+				gallery: formData.gallery.slice(0, 5),
 				createdAt:
 					existingQuest?.createdAt || new Date().toISOString().split('T')[0],
 				updatedAt: new Date().toISOString().split('T')[0],
 			}
 
+			const newQuest = questDataWithoutVideo as Quest
+
+			// Проверяем размер данных перед сохранением
+			const questJson = JSON.stringify(newQuest)
+			if (!checkLocalStorageSize(questJson)) {
+				toast.error(
+					'Квест слишком большой для сохранения. Пожалуйста, уменьшите количество или размер медиафайлов.'
+				)
+				setIsSubmitting(false)
+				return
+			}
+
 			newQuest.overallProgress = calculateQuestProgress(newQuest)
 			newQuest.progressColor = getQuestProgressColor(newQuest.overallProgress)
 
-			if (isEditMode) {
-				updateUserQuest(newQuest)
-			} else {
-				const existingQuests = JSON.parse(
-					localStorage.getItem('user_created_quests') || '[]'
-				)
-				existingQuests.push(newQuest)
-				localStorage.setItem(
-					'user_created_quests',
-					JSON.stringify(existingQuests)
-				)
-				createQuest(questId)
+			try {
+				if (isEditMode) {
+					updateUserQuest(newQuest)
+				} else {
+					const existingQuests = JSON.parse(
+						localStorage.getItem('user_created_quests') || '[]'
+					)
+					existingQuests.push(newQuest)
+					const allQuestsJson = JSON.stringify(existingQuests)
+					
+					// Проверяем общий размер всех квестов
+					if (!checkLocalStorageSize(allQuestsJson)) {
+						toast.error(
+							'Недостаточно места в хранилище. Пожалуйста, удалите старые квесты или уменьшите размер медиафайлов.'
+						)
+						setIsSubmitting(false)
+						return
+					}
+					
+					localStorage.setItem('user_created_quests', allQuestsJson)
+					createQuest(questId)
+				}
+			} catch (error) {
+				if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+					toast.error(
+						'Недостаточно места в хранилище браузера. Пожалуйста, удалите старые квесты или уменьшите размер медиафайлов.',
+						{
+							duration: 5000,
+						}
+					)
+					setIsSubmitting(false)
+					return
+				}
+				throw error
 			}
 
 			toast.success(
@@ -241,10 +292,19 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				onSuccess(questId)
 			}
 		} catch (error) {
-			if (process.env.NODE_ENV === 'development') {
-				console.error('Error creating quest:', error)
+			if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+				toast.error(
+					'Недостаточно места в хранилище браузера. Пожалуйста, удалите старые квесты или уменьшите размер медиафайлов.',
+					{
+						duration: 5000,
+					}
+				)
+			} else {
+				if (import.meta.env.DEV) {
+					console.error('Error creating quest:', error)
+				}
+				toast.error('Не удалось создать квест. Попробуйте еще раз.')
 			}
-			toast.error('Не удалось создать квест. Попробуйте еще раз.')
 		} finally {
 			setIsSubmitting(false)
 		}

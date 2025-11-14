@@ -121,11 +121,19 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 					type: formData.type,
 					category: formData.category,
 					story: formData.story,
+					storyImage: formData.storyImage,
+					gallery: formData.gallery,
 				}}
 				onChange={(field, value) =>
 					setFormData(prev => ({ ...prev, [field]: value }))
 				}
 				onCityChange={handleCityChange}
+				onStoryImageChange={image =>
+					setFormData(prev => ({ ...prev, storyImage: image }))
+				}
+				onGalleryChange={gallery =>
+					setFormData(prev => ({ ...prev, gallery }))
+				}
 			/>
 
 			<QuestStagesSection

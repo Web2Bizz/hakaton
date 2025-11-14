@@ -71,6 +71,13 @@ export const allAchievements: Record<AchievementId, Achievement> = {
 		icon: '🏆',
 		rarity: 'legendary',
 	},
+	social_ambassador: {
+		id: 'social_ambassador',
+		title: 'Социальный амбассадор',
+		description: 'Поделились квестом в социальных сетях',
+		icon: '📢',
+		rarity: 'common',
+	},
 }
 
 export function getAchievementById(id: AchievementId): Achievement {
