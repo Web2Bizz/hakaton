@@ -17,7 +17,7 @@ export function HomePage({ onNavigate }: { onNavigate: (page: Page) => void }) {
 						onClick={() => onNavigate('add')}
 						type='button'
 					>
-						Добавить организацию
+						Добавить точку
 					</button>
 					<button
 						className='ghost-button'
@@ -39,4 +39,3 @@ export function HomePage({ onNavigate }: { onNavigate: (page: Page) => void }) {
 		</header>
 	)
 }
-

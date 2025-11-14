@@ -34,11 +34,10 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 						onClick={() => onNavigate('add')}
 						type='button'
 					>
-						Добавить организацию
+						Добавить точку
 					</button>
 				</div>
 			</div>
 		</nav>
 	)
 }
-

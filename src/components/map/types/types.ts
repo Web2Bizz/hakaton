@@ -1,15 +1,4 @@
-export type AssistanceTypeId =
-	| 'volunteers'
-	| 'donations'
-	| 'things'
-	| 'mentors'
-	| 'blood'
-	| 'experts'
-
-export type SocialLink = {
-	name: 'VK' | 'Telegram' | 'Website'
-	url: string
-}
+import type { AssistanceTypeId, SocialLink, Coordinates, ContactInfo } from '@/types/common'
 
 export interface Organization {
 	id: string
@@ -22,13 +11,13 @@ export interface Organization {
 	mission: string
 	goals: string[]
 	needs: string[]
-	coordinates: [number, number]
+	coordinates: Coordinates
 	address: string
-	contacts: {
-		phone: string
-		email?: string
-	}
+	contacts: ContactInfo
 	website?: string
 	socials?: SocialLink[]
 	gallery: string[]
 }
+
+// Re-export для обратной совместимости
+export type { AssistanceTypeId, SocialLink }

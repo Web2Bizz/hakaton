@@ -7,12 +7,17 @@ import type { Organization } from '../types/types'
 
 type SearchResult =
 	| { type: 'address'; data: GeocodeResult }
-	| { type: 'organization'; data: Organization }
+	| { type: 'organization'; data: Organization & { isQuest?: boolean } }
 
 interface AddressSearchInputProps {
-	readonly organizations: Organization[]
+	readonly organizations: (
+		| Organization
+		| (Organization & { isQuest?: boolean })
+	)[]
 	readonly onAddressSelect: (result: GeocodeResult) => void
-	readonly onOrganizationSelect: (organization: Organization) => void
+	readonly onOrganizationSelect: (
+		organization: Organization & { isQuest?: boolean }
+	) => void
 	readonly placeholder?: string
 	readonly className?: string
 }

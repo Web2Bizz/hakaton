@@ -1,4 +1,7 @@
 import { Header } from '@/components'
+import { Toaster } from '@/components/ui/sonner'
+import { UserProvider } from '@/contexts/UserContext'
+import { NotificationProvider } from '@/contexts/NotificationContext'
 
 interface LayoutProps {
 	children: React.ReactNode
@@ -6,9 +9,14 @@ interface LayoutProps {
 
 export default function Layout({ children }: Readonly<LayoutProps>) {
 	return (
-		<div>
-			<Header />
-			<main>{children}</main>
-		</div>
+		<UserProvider>
+			<NotificationProvider>
+				<div>
+					<Header />
+					<main>{children}</main>
+					<Toaster />
+				</div>
+			</NotificationProvider>
+		</UserProvider>
 	)
 }

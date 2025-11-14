@@ -1,3 +1,4 @@
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { useEffect, useState } from 'react'
 
 export const Header = () => {
@@ -30,7 +31,8 @@ export const Header = () => {
 	const navLinks = [
 		{ href: '/', label: 'Главная' },
 		{ href: '/map', label: 'Карта' },
-		{ href: '/add-organization', label: 'Добавить организацию' },
+		{ href: '/add-organization', label: 'Добавить точку' },
+		{ href: '/profile', label: 'Профиль' },
 	]
 
 	const isActive = (href: string) => {
@@ -47,26 +49,29 @@ export const Header = () => {
 					АТОМ ДОБРО
 				</span>
 
-				<div className='flex items-center gap-2'>
-					{navLinks.map(link => {
-						const active = isActive(link.href)
-						return (
-							<a
-								key={link.href}
-								href={link.href}
-								className={`relative rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
-									active
-										? 'bg-sky-500/12 text-sky-600 font-semibold'
-										: 'text-slate-600 hover:bg-sky-500/8 hover:text-slate-900'
-								}`}
-							>
-								{link.label}
-								{active && (
-									<span className='absolute -bottom-px left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-t-full bg-sky-500' />
-								)}
-							</a>
-						)
-					})}
+				<div className='flex items-center gap-4'>
+					<div className='flex items-center gap-2'>
+						{navLinks.map(link => {
+							const active = isActive(link.href)
+							return (
+								<a
+									key={link.href}
+									href={link.href}
+									className={`relative rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+										active
+											? 'bg-sky-500/12 text-sky-600 font-semibold'
+											: 'text-slate-600 hover:bg-sky-500/8 hover:text-slate-900'
+									}`}
+								>
+									{link.label}
+									{active && (
+										<span className='absolute -bottom-px left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-t-full bg-sky-500' />
+									)}
+								</a>
+							)
+						})}
+					</div>
+					<NotificationBell />
 				</div>
 			</div>
 		</nav>

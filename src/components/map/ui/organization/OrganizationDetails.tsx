@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
-import { assistanceOptions } from '../data/organizations'
-import type { Organization } from '../types/types'
+import { ASSISTANCE_OPTIONS } from '@/constants'
+import type { Organization } from '../../types/types'
 
 interface OrganizationDetailsProps {
 	readonly organization?: Organization
@@ -8,7 +8,7 @@ interface OrganizationDetailsProps {
 	readonly isClosing?: boolean
 }
 
-const assistanceLabels = assistanceOptions.reduce<Record<string, string>>(
+const assistanceLabels = ASSISTANCE_OPTIONS.reduce<Record<string, string>>(
 	(acc, option) => {
 		acc[option.id] = option.label
 		return acc
@@ -27,8 +27,8 @@ export function OrganizationDetails({
 
 	return (
 		<section
-			className={`fixed right-2 top-20 bottom-20 w-[420px] max-w-[calc(100vw-40px)] z-1000 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
-				isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
+			className={`fixed left-5 top-[88px] bottom-20 w-[420px] max-w-[calc(100vw-40px)] z-1000 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+				isClosing ? 'animate-slide-out-left' : 'animate-slide-in-left'
 			}`}
 		>
 			{organization && (

@@ -1,46 +1,12 @@
-export type AssistanceTypeId =
-	| 'volunteers'
-	| 'donations'
-	| 'things'
-	| 'mentors'
-	| 'blood'
-	| 'experts'
+import type { AssistanceTypeId, SocialLink } from '@/types/common'
+import { ASSISTANCE_OPTIONS } from '@/constants'
+import type { Organization } from '../types/types'
 
-export type SocialLink = {
-	name: 'VK' | 'Telegram' | 'Website'
-	url: string
-}
+// Re-export для обратной совместимости
+export const assistanceOptions = ASSISTANCE_OPTIONS
 
-export interface Organization {
-	id: string
-	name: string
-	city: string
-	type: string
-	assistance: AssistanceTypeId[]
-	summary: string
-	description: string
-	mission: string
-	goals: string[]
-	needs: string[]
-	coordinates: [number, number]
-	address: string
-	contacts: {
-		phone: string
-		email?: string
-	}
-	website?: string
-	socials?: SocialLink[]
-	gallery: string[]
-}
-
-export const assistanceOptions: { id: AssistanceTypeId; label: string }[] = [
-	{ id: 'volunteers', label: 'Требуются волонтеры' },
-	{ id: 'donations', label: 'Нужны финансовые пожертвования' },
-	{ id: 'things', label: 'Принимают вещи' },
-	{ id: 'mentors', label: 'Требуются наставники' },
-	{ id: 'blood', label: 'Нужны доноры' },
-	{ id: 'experts', label: 'Требуются эксперты' },
-]
+// Re-export типов
+export type { AssistanceTypeId, SocialLink, Organization }
 
 export const organizations: Organization[] = [
 	{
@@ -268,6 +234,304 @@ export const organizations: Organization[] = [
 			'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=600&q=80',
 			'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80',
 			'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'krov-dobro',
+		name: 'Кровь Добра',
+		city: 'Саров',
+		type: 'Донорство крови',
+		assistance: ['blood', 'volunteers'],
+		summary:
+			'Организуем донорские акции и помогаем людям, нуждающимся в переливании крови.',
+		description:
+			'Центр «Кровь Добра» проводит регулярные донорские акции, информирует о важности донорства и координирует помощь больницам.',
+		mission:
+			'Создать активное сообщество доноров крови и обеспечить доступность донорской крови для всех нуждающихся.',
+		goals: [
+			'Провести 50 донорских акций в 2025 году',
+			'Привлечь 500 новых доноров',
+			'Организовать мобильные пункты забора крови',
+		],
+		needs: [
+			'Доноры крови всех групп',
+			'Волонтеры для организации акций',
+			'Информационная поддержка',
+		],
+		coordinates: [54.9200, 43.3500],
+		address: 'Саров, ул. Медицинская, 8',
+		contacts: {
+			phone: '+7 (900) 111-22-33',
+			email: 'donor@krov-dobro.ru',
+		},
+		website: 'https://krov-dobro.ru',
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/krov_dobro' },
+			{ name: 'Telegram', url: 'https://t.me/krov_dobro' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'atom-deti',
+		name: 'Атом Детям',
+		city: 'Озёрск',
+		type: 'Помощь детям',
+		assistance: ['volunteers', 'donations', 'things', 'mentors'],
+		summary:
+			'Поддерживаем детей из многодетных и малообеспеченных семей: игрушки, одежда, образование.',
+		description:
+			'Проект помогает детям получить все необходимое для развития: от школьных принадлежностей до участия в кружках и секциях.',
+		mission:
+			'Обеспечить равные возможности для всех детей, независимо от финансового положения семьи.',
+		goals: [
+			'Организовать сбор школьных принадлежностей',
+			'Запустить программу наставничества',
+			'Провести новогодние праздники для 200 детей',
+		],
+		needs: [
+			'Школьные принадлежности и одежда',
+			'Волонтеры для организации мероприятий',
+			'Наставники для детей',
+			'Финансовая поддержка',
+		],
+		coordinates: [55.7600, 60.7100],
+		address: 'Озёрск, ул. Детская, 15',
+		contacts: {
+			phone: '+7 (900) 222-33-44',
+			email: 'info@atom-deti.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/atom_deti' },
+			{ name: 'Telegram', url: 'https://t.me/atom_deti' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'kultura-atom',
+		name: 'Культура Атома',
+		city: 'Нововоронеж',
+		type: 'Культура',
+		assistance: ['volunteers', 'donations', 'experts'],
+		summary:
+			'Развиваем культурную жизнь города: театр, музыка, литература, народное творчество.',
+		description:
+			'Организуем концерты, спектакли, выставки, литературные вечера и мастер-классы для всех жителей города.',
+		mission:
+			'Сделать культуру доступной для всех и создать творческое сообщество в атомных городах.',
+		goals: [
+			'Провести 30 культурных мероприятий в год',
+			'Создать молодежный театр',
+			'Организовать фестиваль искусств',
+		],
+		needs: [
+			'Волонтеры для организации мероприятий',
+			'Финансовая поддержка проектов',
+			'Эксперты в области культуры',
+		],
+		coordinates: [51.3200, 39.2200],
+		address: 'Нововоронеж, ул. Культурная, 3',
+		contacts: {
+			phone: '+7 (950) 666-77-88',
+			email: 'culture@atom-kultura.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/kultura_atom' },
+			{ name: 'Website', url: 'https://kultura-atom.ru' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'med-pomosh',
+		name: 'Медицинская Помощь',
+		city: 'Десногорск',
+		type: 'Медицинская помощь',
+		assistance: ['volunteers', 'donations', 'experts'],
+		summary:
+			'Оказываем медицинскую помощь и поддержку людям, нуждающимся в лечении.',
+		description:
+			'Организуем медицинские консультации, помощь в получении лечения, поддержку семей с тяжелобольными.',
+		mission:
+			'Обеспечить доступную медицинскую помощь и поддержку для всех жителей города.',
+		goals: [
+			'Организовать бесплатные медицинские консультации',
+			'Помочь 100 семьям с лечением',
+			'Создать базу медицинских волонтеров',
+		],
+		needs: [
+			'Врачи-волонтеры',
+			'Финансовая поддержка для лечения',
+			'Медицинское оборудование',
+		],
+		coordinates: [54.1550, 33.2850],
+		address: 'Десногорск, ул. Медицинская, 7',
+		contacts: {
+			phone: '+7 (910) 234-56-78',
+			email: 'help@med-pomosh.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/med_pomosh' },
+			{ name: 'Telegram', url: 'https://t.me/med_pomosh' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1576091160550-2173dba999e8?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'sotsialnaya-podderzhka',
+		name: 'Социальная Поддержка',
+		city: 'Заречный',
+		type: 'Социальная поддержка',
+		assistance: ['volunteers', 'donations', 'things', 'mentors'],
+		summary:
+			'Помогаем людям в трудной жизненной ситуации: бездомным, безработным, семьям в кризисе.',
+		description:
+			'Оказываем комплексную помощь: временное жилье, питание, помощь в трудоустройстве, психологическая поддержка.',
+		mission:
+			'Вернуть людям веру в себя и помочь им встать на ноги в трудной ситуации.',
+		goals: [
+			'Помочь 50 людям найти работу',
+			'Организовать временное жилье для 20 семей',
+			'Создать центр социальной адаптации',
+		],
+		needs: [
+			'Волонтеры для работы с людьми',
+			'Одежда и предметы первой необходимости',
+			'Финансовая поддержка',
+			'Наставники для социальной адаптации',
+		],
+		coordinates: [53.2000, 45.1750],
+		address: 'Заречный, ул. Социальная, 5',
+		contacts: {
+			phone: '+7 (902) 333-44-55',
+			email: 'support@sotsialnaya-podderzhka.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/sotsialnaya_podderzhka' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'ekstrennaya-pomosh',
+		name: 'Экстренная Помощь',
+		city: 'Снежинск',
+		type: 'Экстренная помощь',
+		assistance: ['volunteers', 'donations'],
+		summary:
+			'Оказываем экстренную помощь в кризисных ситуациях: пожары, наводнения, другие ЧС.',
+		description:
+			'Быстро реагируем на кризисные ситуации, организуем сбор помощи, координируем волонтеров.',
+		mission:
+			'Быть готовыми помочь в любой момент и минимизировать последствия кризисных ситуаций.',
+		goals: [
+			'Создать сеть быстрого реагирования',
+			'Обучить 100 волонтеров первой помощи',
+			'Организовать склад экстренной помощи',
+		],
+		needs: [
+			'Волонтеры для экстренного реагирования',
+			'Финансовая поддержка',
+			'Оборудование для помощи',
+		],
+		coordinates: [56.0900, 60.7350],
+		address: 'Снежинск, ул. Экстренная, 1',
+		contacts: {
+			phone: '+7 (951) 888-99-00',
+			email: 'emergency@ekstrennaya-pomosh.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/ekstrennaya_pomosh' },
+			{ name: 'Telegram', url: 'https://t.me/ekstrennaya_pomosh' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'zashchita-prirody',
+		name: 'Защита Природы',
+		city: 'Саров',
+		type: 'Экология',
+		assistance: ['volunteers', 'donations', 'experts'],
+		summary:
+			'Защищаем природу и окружающую среду: очистка лесов, защита редких видов, экологическое просвещение.',
+		description:
+			'Проводим экологические акции, мониторинг состояния природы, образовательные программы.',
+		mission:
+			'Сохранить природу для будущих поколений и воспитать экологическое сознание.',
+		goals: [
+			'Очистить 10 гектаров леса',
+			'Провести 20 экологических акций',
+			'Обучить 500 школьников экологии',
+		],
+		needs: [
+			'Волонтеры для экологических акций',
+			'Эксперты-экологи',
+			'Инвентарь для уборки',
+		],
+		coordinates: [54.9150, 43.3450],
+		address: 'Саров, ул. Лесная, 20',
+		contacts: {
+			phone: '+7 (900) 444-55-66',
+			email: 'info@zashchita-prirody.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/zashchita_prirody' },
+			{ name: 'Website', url: 'https://zashchita-prirody.ru' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=600&q=80',
+		],
+	},
+	{
+		id: 'molodezhnyy-tsentr',
+		name: 'Молодежный Центр',
+		city: 'Озёрск',
+		type: 'Молодежная работа',
+		assistance: ['volunteers', 'donations', 'mentors'],
+		summary:
+			'Развиваем молодежное сообщество: досуг, образование, карьера, волонтерство.',
+		description:
+			'Организуем мероприятия для молодежи, помогаем в профориентации, развиваем лидерские качества.',
+		mission:
+			'Создать активное молодежное сообщество и помочь молодым людям реализовать свой потенциал.',
+		goals: [
+			'Провести 40 молодежных мероприятий',
+			'Обучить 200 молодых лидеров',
+			'Создать молодежный совет',
+		],
+		needs: [
+			'Волонтеры для организации мероприятий',
+			'Наставники для молодежи',
+			'Финансовая поддержка проектов',
+		],
+		coordinates: [55.7650, 60.7150],
+		address: 'Озёрск, ул. Молодежная, 12',
+		contacts: {
+			phone: '+7 (900) 555-66-77',
+			email: 'info@molodezhnyy-tsentr.ru',
+		},
+		socials: [
+			{ name: 'VK', url: 'https://vk.com/molodezhnyy_tsentr' },
+			{ name: 'Telegram', url: 'https://t.me/molodezhnyy_tsentr' },
+		],
+		gallery: [
+			'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+			'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80',
 		],
 	},
 ]

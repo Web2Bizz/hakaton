@@ -1,4 +1,5 @@
 import L from 'leaflet'
+import { useMemo } from 'react'
 import {
 	MapContainer,
 	Marker,
@@ -6,11 +7,13 @@ import {
 	TileLayer,
 	ZoomControl,
 } from 'react-leaflet'
-import { useMapCenter } from '../hooks/useMapCenter'
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants'
 import { getMarkerIcon } from '../lib/markerIcon'
 import type { Organization } from '../types/types'
+import type { Quest } from '../types/quest-types'
 import { MapController } from './MapController'
 import { OrganizationPopup } from './organization/OrganizationPopup'
+import { QuestPopup } from './quest/QuestPopup'
 
 // Иконка для найденного адреса
 const searchMarkerIcon = L.divIcon({
@@ -29,22 +32,44 @@ const searchMarkerIcon = L.divIcon({
 	popupAnchor: [0, -24],
 })
 
-interface MapViewProps {
+interface UnifiedMapViewProps {
+	readonly quests: Quest[]
 	readonly organizations: Organization[]
-	readonly onSelect: (organization: Organization) => void
-	readonly onMarkerClick?: (organization: Organization) => void
+	readonly onSelectQuest: (quest: Quest) => void
+	readonly onSelectOrganization: (organization: Organization) => void
+	readonly onMarkerClick?: (item: Quest | Organization) => void
 	readonly searchCenter?: [number, number]
 	readonly searchZoom?: number
 }
 
-export function MapView({
+export function UnifiedMapView({
+	quests,
 	organizations,
-	onSelect,
+	onSelectQuest,
+	onSelectOrganization,
 	onMarkerClick,
 	searchCenter,
 	searchZoom,
-}: MapViewProps) {
-	const mapCenter = useMapCenter(organizations)
+}: UnifiedMapViewProps) {
+	// Вычисляем центр карты для всех элементов
+	const mapCenter = useMemo(() => {
+		const allItems = [
+			...quests.map(q => q.coordinates),
+			...organizations.map(o => o.coordinates),
+		]
+
+		if (allItems.length === 0) {
+			return { lat: DEFAULT_MAP_CENTER[0], lng: DEFAULT_MAP_CENTER[1], zoom: DEFAULT_MAP_ZOOM }
+		}
+
+		const latSum = allItems.reduce((acc, [lat]) => acc + lat, 0)
+		const lngSum = allItems.reduce((acc, [, lng]) => acc + lng, 0)
+		const avgLat = latSum / allItems.length
+		const avgLng = lngSum / allItems.length
+
+		return { lat: avgLat, lng: avgLng, zoom: 5 }
+	}, [quests, organizations])
+
 	const initialCenter: [number, number] = searchCenter || [
 		mapCenter.lat,
 		mapCenter.lng,
@@ -79,9 +104,28 @@ export function MapView({
 					</Marker>
 				)}
 
+				{quests.map(quest => (
+					<Marker
+						key={`quest-${quest.id}`}
+						position={quest.coordinates}
+						icon={getMarkerIcon(quest.type, quest.progressColor)}
+						eventHandlers={{
+							click: () => {
+								if (onMarkerClick) {
+									onMarkerClick(quest)
+								}
+							},
+						}}
+					>
+						<Popup>
+							<QuestPopup quest={quest} onSelect={onSelectQuest} />
+						</Popup>
+					</Marker>
+				))}
+
 				{organizations.map(organization => (
 					<Marker
-						key={organization.id}
+						key={`org-${organization.id}`}
 						position={organization.coordinates}
 						icon={getMarkerIcon(organization.type)}
 						eventHandlers={{
@@ -95,7 +139,7 @@ export function MapView({
 						<Popup>
 							<OrganizationPopup
 								organization={organization}
-								onSelect={onSelect}
+								onSelect={onSelectOrganization}
 							/>
 						</Popup>
 					</Marker>
@@ -104,3 +148,4 @@ export function MapView({
 		</div>
 	)
 }
+
