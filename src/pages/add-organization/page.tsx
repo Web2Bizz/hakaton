@@ -1,6 +1,6 @@
 import { AddQuestForm } from '@/components/forms/AddQuestForm'
 import { AddOrganizationForm } from '@/components/forms/AddOrganizationForm'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import { useState } from 'react'
 
 type FormType = 'quest' | 'organization'

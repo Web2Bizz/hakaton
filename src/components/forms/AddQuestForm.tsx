@@ -8,7 +8,7 @@ import type { Quest } from '@/components/map/types/quest-types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import { getCityCoordinates } from '@/utils/cityCoordinates'
 import { calculateQuestProgress, getQuestProgressColor } from '@/utils/quest'
 import {
@@ -24,7 +24,7 @@ interface AddQuestFormProps {
 	onSuccess?: (questId: string) => void
 }
 
-export function AddQuestForm({ onSuccess }: AddQuestFormProps) {
+export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 	const { user, createQuest, canCreateQuest, deleteQuest, getUserQuest } =
 		useUser()
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,7 +62,25 @@ export function AddQuestForm({ onSuccess }: AddQuestFormProps) {
 		deadline?: string
 	}
 
-	const [formData, setFormData] = useState({
+	type SocialFormData = {
+		name: 'VK' | 'Telegram' | 'Website'
+		url: string
+	}
+
+	const [formData, setFormData] = useState<{
+		title: string
+		city: string
+		type: string
+		category: Quest['category']
+		story: string
+		address: string
+		curatorName: string
+		curatorPhone: string
+		curatorEmail: string
+		coordinates: { lat: number; lng: number }
+		stages: StageFormData[]
+		socials: SocialFormData[]
+	}>({
 		title: '',
 		city: '',
 		type: '',
@@ -86,7 +104,7 @@ export function AddQuestForm({ onSuccess }: AddQuestFormProps) {
 
 	// Загружаем данные существующего квеста для редактирования (только один раз)
 	useEffect(() => {
-		if (existingQuest && existingQuest.curator && !isDataLoaded) {
+		if (existingQuest?.curator && !isDataLoaded) {
 			setFormData({
 				title: existingQuest.title || '',
 				city: existingQuest.city || '',
@@ -130,11 +148,17 @@ export function AddQuestForm({ onSuccess }: AddQuestFormProps) {
 						  ],
 				socials:
 					existingQuest.socials && existingQuest.socials.length > 0
-						? existingQuest.socials.map(s => ({
+						? (existingQuest.socials.map(s => ({
 								name: s.name,
 								url: s.url || '',
-						  }))
-						: [{ name: 'VK' as const, url: '' }],
+						  })) as Array<{
+								name: 'VK' | 'Telegram' | 'Website'
+								url: string
+						  }>)
+						: ([{ name: 'VK' as const, url: '' }] as Array<{
+								name: 'VK' | 'Telegram' | 'Website'
+								url: string
+						  }>),
 			})
 			setIsDataLoaded(true)
 		} else if (!existingQuest) {

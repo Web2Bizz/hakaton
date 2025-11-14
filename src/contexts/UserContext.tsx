@@ -1,7 +1,8 @@
 import { allAchievements } from '@/data/achievements'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import type { QuestContribution, User } from '@/types/user'
-import { createContext, ReactNode, useCallback, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useCallback, useMemo } from 'react'
 
 interface UserContextType {
 	user: User | null
@@ -20,7 +21,8 @@ interface UserContextType {
 	getUserOrganization: () => string | undefined
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined)
+// eslint-disable-next-line react-refresh/only-export-components
+export const UserContext = createContext<UserContextType | undefined>(undefined)
 
 // Моковые данные пользователя для демонстрации
 const createMockUser = (): User => ({
@@ -51,7 +53,7 @@ const createMockUser = (): User => ({
 	createdAt: new Date().toISOString(),
 })
 
-export function UserProvider({ children }: { children: ReactNode }) {
+export function UserProvider({ children }: Readonly<{ children: ReactNode }>) {
 	const [user, setUser] = useLocalStorage<User | null>(
 		'ecoquest_user',
 		createMockUser()
@@ -105,7 +107,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 				// Разблокируем достижение "Первый шаг"
 				if (updatedUser.stats.totalQuests === 1) {
 					const firstQuestAchievement = allAchievements.first_quest
-					if (!updatedUser.achievements.find(a => a.id === 'first_quest')) {
+					if (!updatedUser.achievements.some(a => a.id === 'first_quest')) {
 						updatedUser.achievements.push({
 							...firstQuestAchievement,
 							unlockedAt: new Date().toISOString(),
@@ -137,7 +139,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
 						totalDonations:
 							currentUser.stats.totalDonations + (contribution.amount || 0),
 						totalVolunteerHours:
-							currentUser.stats.totalVolunteerHours + (contribution.hours || 0),
+							currentUser.stats.totalVolunteerHours +
+							(contribution.role === 'volunteer' && contribution.action
+								? 1
+								: 0),
 					},
 				}
 
@@ -146,7 +151,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 					if (updatedUser.stats.totalDonations >= 100000) {
 						const achievement = allAchievements.donation_champion
 						if (
-							!updatedUser.achievements.find(a => a.id === 'donation_champion')
+							!updatedUser.achievements.some(a => a.id === 'donation_champion')
 						) {
 							updatedUser.achievements.push({
 								...achievement,
@@ -156,7 +161,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 					} else if (updatedUser.stats.totalDonations >= 50000) {
 						const achievement = allAchievements.crowdfunding_master
 						if (
-							!updatedUser.achievements.find(
+							!updatedUser.achievements.some(
 								a => a.id === 'crowdfunding_master'
 							)
 						) {
@@ -202,7 +207,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 				// Проверяем различные достижения на основе квеста
 				if (
 					questId === 'ozero-chistoe' &&
-					!updatedUser.achievements.find(a => a.id === 'lake_saver')
+					!updatedUser.achievements.some(a => a.id === 'lake_saver')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.lake_saver,
@@ -213,7 +218,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 				if (
 					questId === 'les-1000-derev' &&
-					!updatedUser.achievements.find(a => a.id === 'tree_planter')
+					!updatedUser.achievements.some(a => a.id === 'tree_planter')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.tree_planter,
@@ -224,7 +229,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
 				if (
 					questId === 'volk-berkut' &&
-					!updatedUser.achievements.find(a => a.id === 'wildlife_protector')
+					!updatedUser.achievements.some(a => a.id === 'wildlife_protector')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.wildlife_protector,
@@ -369,34 +374,42 @@ export function UserProvider({ children }: { children: ReactNode }) {
 		return user?.createdOrganizationId
 	}, [user])
 
-	return (
-		<UserContext.Provider
-			value={{
-				user,
-				setUser: saveUser,
-				participateInQuest,
-				contributeToQuest,
-				checkAndUnlockAchievements,
-				updateUserStats,
-				createQuest,
-				createOrganization,
-				canCreateQuest,
-				canCreateOrganization,
-				deleteQuest,
-				deleteOrganization,
-				getUserQuest,
-				getUserOrganization,
-			}}
-		>
-			{children}
-		</UserContext.Provider>
+	const value = useMemo(
+		() => ({
+			user,
+			setUser: saveUser,
+			participateInQuest,
+			contributeToQuest,
+			checkAndUnlockAchievements,
+			updateUserStats,
+			createQuest,
+			createOrganization,
+			canCreateQuest,
+			canCreateOrganization,
+			deleteQuest,
+			deleteOrganization,
+			getUserQuest,
+			getUserOrganization,
+		}),
+		[
+			user,
+			saveUser,
+			participateInQuest,
+			contributeToQuest,
+			checkAndUnlockAchievements,
+			updateUserStats,
+			createQuest,
+			createOrganization,
+			canCreateQuest,
+			canCreateOrganization,
+			deleteQuest,
+			deleteOrganization,
+			getUserQuest,
+			getUserOrganization,
+		]
 	)
+
+	return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
 
-export function useUser() {
-	const context = useContext(UserContext)
-	if (context === undefined) {
-		throw new Error('useUser must be used within a UserProvider')
-	}
-	return context
-}
+// useUser hook exported from separate file to fix Fast Refresh

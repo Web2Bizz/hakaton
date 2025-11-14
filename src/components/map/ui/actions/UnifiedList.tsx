@@ -144,19 +144,10 @@ export function UnifiedList({
 											return (
 												<article
 													key={organization.id}
-													onClick={() => onSelectOrganization(organization)}
-													onKeyDown={e => {
-														if (e.key === 'Enter' || e.key === ' ') {
-															e.preventDefault()
-															onSelectOrganization(organization)
-														}
-													}}
-													role='button'
-													tabIndex={0}
-													className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+													className={`p-4 rounded-xl border-2 transition-all ${
 														isActive
 															? 'border-blue-500 bg-blue-50 shadow-md'
-															: 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm'
+															: 'border-slate-200 bg-white'
 													}`}
 												>
 													<div className='flex items-center justify-between gap-2 mb-2'>
@@ -174,7 +165,7 @@ export function UnifiedList({
 														{organization.summary}
 													</p>
 													{organization.assistance.length > 0 && (
-														<div className='flex flex-wrap gap-1.5'>
+														<div className='flex flex-wrap gap-1.5 mb-3'>
 															{organization.assistance.map(item => (
 																<span
 																	key={item}
@@ -185,6 +176,16 @@ export function UnifiedList({
 															))}
 														</div>
 													)}
+													<button
+														type='button'
+														onClick={e => {
+															e.stopPropagation()
+															onSelectOrganization(organization)
+														}}
+														className='w-full mt-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors'
+													>
+														Перейти к организации
+													</button>
 												</article>
 											)
 										})}

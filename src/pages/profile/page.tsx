@@ -1,7 +1,7 @@
-import { Trophy, TrendingUp, Heart, Users, Award } from 'lucide-react'
-import { useUser } from '@/contexts/UserContext'
+import { ActiveQuests } from '@/components/profile/ActiveQuests'
 import { allAchievements } from '@/data/achievements'
-import { ContributionHistory } from '@/components/profile/ContributionHistory'
+import { useUser } from '@/hooks/useUser'
+import { Award, Heart, TrendingUp, Trophy, Users } from 'lucide-react'
 
 const rarityColors = {
 	common: 'bg-slate-100 border-slate-300 text-slate-700',
@@ -23,14 +23,14 @@ export default function ProfilePage() {
 
 	const unlockedAchievements = user.achievements.filter(a => a.unlockedAt)
 	const lockedAchievements = Object.values(allAchievements).filter(
-		a => !user.achievements.find(ua => ua.id === a.id)
+		a => !user.achievements.some(ua => ua.id === a.id)
 	)
 
 	const levelProgress =
 		(user.level.experience / user.level.experienceToNext) * 100
 
 	return (
-		<div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4'>
+		<div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 mt-16'>
 			<div className='max-w-4xl mx-auto space-y-8'>
 				{/* Профиль пользователя */}
 				<div className='bg-white rounded-2xl shadow-lg p-8'>
@@ -179,7 +179,9 @@ export default function ProfilePage() {
 								{unlockedAchievements.map(achievement => (
 									<div
 										key={achievement.id}
-										className={`p-4 rounded-xl border-2 ${rarityColors[achievement.rarity]}`}
+										className={`p-4 rounded-xl border-2 ${
+											rarityColors[achievement.rarity]
+										}`}
 									>
 										<div className='flex items-start gap-3'>
 											<div className='text-3xl'>{achievement.icon}</div>
@@ -193,9 +195,9 @@ export default function ProfilePage() {
 												{achievement.unlockedAt && (
 													<p className='text-xs text-slate-500'>
 														Разблокировано:{' '}
-														{new Date(achievement.unlockedAt).toLocaleDateString(
-															'ru-RU'
-														)}
+														{new Date(
+															achievement.unlockedAt
+														).toLocaleDateString('ru-RU')}
 													</p>
 												)}
 											</div>
@@ -219,7 +221,9 @@ export default function ProfilePage() {
 										className='p-4 rounded-xl border-2 border-slate-200 bg-slate-50 opacity-60'
 									>
 										<div className='flex items-start gap-3'>
-											<div className='text-3xl grayscale'>{achievement.icon}</div>
+											<div className='text-3xl grayscale'>
+												{achievement.icon}
+											</div>
 											<div className='flex-1'>
 												<h4 className='font-semibold text-slate-600 mb-1'>
 													???
@@ -237,9 +241,8 @@ export default function ProfilePage() {
 				</div>
 			</div>
 
-			{/* История участия */}
-			<ContributionHistory />
+			{/* Последняя активность */}
+			<ActiveQuests />
 		</div>
 	)
 }
-

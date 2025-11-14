@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { ASSISTANCE_OPTIONS } from '@/constants'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import {
 	cities as orgCities,
 	organizationTypes,

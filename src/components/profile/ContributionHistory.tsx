@@ -1,5 +1,5 @@
 import { Calendar, Heart, Users, Share2 } from 'lucide-react'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import { quests } from '@/components/map/data/quests'
 import { formatDateTime } from '@/utils/format'
 import type { QuestContribution } from '@/types/user'

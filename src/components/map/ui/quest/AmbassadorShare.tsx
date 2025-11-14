@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Share2, Copy, Check, X } from 'lucide-react'
 import type { Quest } from '../../types/quest-types'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import { useNotifications } from '@/contexts/NotificationContext'
 
 interface AmbassadorShareProps {

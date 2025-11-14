@@ -1,6 +1,6 @@
 import { CheckCircle2, Circle, Clock, Heart, Share2, Users, X } from 'lucide-react'
 import { useState } from 'react'
-import { useUser } from '@/contexts/UserContext'
+import { useUser } from '@/hooks/useUser'
 import { useNotifications } from '@/contexts/NotificationContext'
 import { Button } from '@/components/ui/button'
 import { formatDate, formatCurrency } from '@/utils/format'

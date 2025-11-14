@@ -4,7 +4,7 @@ import {
 	SEARCH_MAP_ZOOM,
 } from '@/constants'
 import { getAllQuests, getAllOrganizations } from '@/utils/userData'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
 	cities as orgCities,
 	organizationTypes,
@@ -163,6 +163,26 @@ export const MapComponent = () => {
 		console.log('Участие в квесте:', questId)
 		// В будущем здесь будет API вызов для регистрации участия
 	}
+
+	// Обработка URL параметров для открытия квеста или организации
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const questId = params.get('quest')
+		const orgId = params.get('organization')
+
+		if (questId) {
+			const quest = allQuests.find(q => q.id === questId)
+			if (quest) {
+				handleSelectQuest(quest)
+			}
+		} else if (orgId) {
+			const org = allOrganizations.find(o => o.id === orgId)
+			if (org) {
+				handleSelectOrganization(org)
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []) // Запускаем только при монтировании
 
 	const handleToggleFilters = () => {
 		if (isFiltersOpen) {
