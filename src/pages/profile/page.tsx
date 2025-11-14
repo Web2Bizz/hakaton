@@ -1,7 +1,6 @@
 import { ActiveQuests } from '@/components/profile/ActiveQuests'
 import { ProfileAchievements } from '@/components/profile/ProfileAchievements'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
-import { ProfileImpact } from '@/components/profile/ProfileImpact'
 import { ProfileLevelProgress } from '@/components/profile/ProfileLevelProgress'
 import { ProfileStats } from '@/components/profile/ProfileStats'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -38,23 +37,17 @@ export default function ProfilePage() {
 
 	return (
 		<ProtectedRoute>
-			<div className='min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 mt-16'>
-				<div className='max-w-4xl mx-auto space-y-8'>
+			<div className='min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-6 sm:py-12 px-4 mt-16'>
+				<div className='max-w-4xl mx-auto space-y-4 sm:space-y-8'>
 					<ProfileHeader user={user} onLogout={handleLogout} />
 
-					<div className='bg-white rounded-2xl shadow-lg p-8'>
+					<div className='bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8'>
 						<ProfileLevelProgress
+							level={user.level.level}
 							experience={user.level.experience}
 							experienceToNext={user.level.experienceToNext}
 						/>
-
-						<ProfileStats
-							stats={user.stats}
-							unlockedAchievementsCount={unlockedAchievements.length}
-						/>
 					</div>
-
-					<ProfileImpact impact={user.stats.totalImpact} />
 
 					<ProfileAchievements userAchievements={user.achievements} />
 

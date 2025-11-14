@@ -1,7 +1,7 @@
 import { Header } from '@/components'
 import { Toaster } from '@/components/ui/sonner'
-import { UserProvider } from '@/contexts/UserContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { UserProvider } from '@/contexts/UserContext'
 
 interface LayoutProps {
 	children: React.ReactNode

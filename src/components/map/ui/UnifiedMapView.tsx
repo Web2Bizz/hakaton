@@ -76,7 +76,7 @@ export function UnifiedMapView({
 	]
 
 	return (
-		<div className='map-wrapper h-full w-full'>
+		<div className='map-wrapper h-full w-full relative z-0'>
 			<MapContainer
 				center={initialCenter}
 				zoom={searchZoom || mapCenter.zoom}

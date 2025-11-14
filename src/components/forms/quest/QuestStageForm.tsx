@@ -34,7 +34,9 @@ export function QuestStageForm({
 	return (
 		<div className='border border-slate-200 rounded-lg p-4 bg-slate-50'>
 			<div className='flex items-center justify-between mb-3'>
-				<h3 className='text-sm font-semibold text-slate-900'>Этап {index + 1}</h3>
+				<h3 className='text-sm font-semibold text-slate-900'>
+					Этап {index + 1}
+				</h3>
 				{canRemove && (
 					<Button type='button' variant='outline' size='sm' onClick={onRemove}>
 						Удалить
@@ -107,7 +109,7 @@ export function QuestStageForm({
 						Требования этапа (необязательно)
 					</p>
 
-					<div className='space-y-2'>
+					<div className='space-y-4 pr-4'>
 						<label className='flex items-center gap-2'>
 							<input
 								type='checkbox'
@@ -139,7 +141,9 @@ export function QuestStageForm({
 								onChange={e => onUpdate('hasVolunteers', e.target.checked)}
 								className='w-4 h-4 rounded border-slate-300'
 							/>
-							<span className='text-xs text-slate-700'>Требуются волонтеры</span>
+							<span className='text-xs text-slate-700'>
+								Требуются волонтеры
+							</span>
 						</label>
 						{stage.hasVolunteers && (
 							<Input
@@ -177,7 +181,9 @@ export function QuestStageForm({
 									type='number'
 									min={0}
 									value={stage.itemsNeeded || ''}
-									onChange={e => onUpdate('itemsNeeded', Number(e.target.value))}
+									onChange={e =>
+										onUpdate('itemsNeeded', Number(e.target.value))
+									}
 									placeholder='Количество'
 								/>
 							</div>
@@ -199,4 +205,3 @@ export function QuestStageForm({
 		</div>
 	)
 }
-

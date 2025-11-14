@@ -1,10 +1,12 @@
 import { memo, useCallback } from 'react'
-import { AddressSearchInput } from './AddressSearchInput'
 import type { GeocodeResult } from '../hooks/useGeocode'
 import type { Quest } from '../types/quest-types'
 import type { Organization } from '../types/types'
+import { AddressSearchInput } from './AddressSearchInput'
 
-type SearchItem = (Quest & { isQuest: true }) | (Organization & { isQuest: false })
+type SearchItem =
+	| (Quest & { isQuest: true })
+	| (Organization & { isQuest: false })
 
 interface MapSearchProps {
 	searchItems: SearchItem[]
@@ -27,7 +29,7 @@ export const MapSearch = memo(function MapSearch({
 		[searchItems, onItemSelect]
 	)
 	return (
-		<div className='absolute top-20 left-5 w-full max-w-[400px] z-999'>
+		<div className='absolute top-20 left-0 right-0 max-w-[80%] lg:max-w-[400px] z-10 ml-auto mr-auto items-center justify-center lg:left-5 lg:right-auto lg:w-full placeholder:truncate'>
 			<AddressSearchInput
 				organizations={searchItems}
 				onAddressSelect={onAddressSelect}
@@ -37,4 +39,3 @@ export const MapSearch = memo(function MapSearch({
 		</div>
 	)
 })
-

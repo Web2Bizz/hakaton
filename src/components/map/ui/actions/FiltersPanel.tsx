@@ -68,7 +68,7 @@ export function FiltersPanel({
 
 	return (
 		<aside
-			className={`fixed right-5 top-[88px] bottom-20 w-[380px] max-w-[calc(100vw-40px)] z-1000 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+			className={`fixed right-5 top-[88px] bottom-20 w-[380px] max-w-[calc(100vw-40px)] z-10 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
 				isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
 			}`}
 		>

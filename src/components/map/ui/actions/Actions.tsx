@@ -15,7 +15,7 @@ export function Actions({
 	onToggleList,
 }: ActionsProps) {
 	return (
-		<div className='absolute right-5 top-32 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-2 z-1000'>
+		<div className='absolute right-5 top-32 flex flex-col gap-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-2 z-10'>
 			<Button
 				variant='ghost'
 				size='icon'

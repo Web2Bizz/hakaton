@@ -27,7 +27,7 @@ export function UnifiedList({
 
 	return (
 		<section
-			className={`fixed right-5 top-[88px] bottom-20 w-[380px] max-w-[calc(100vw-40px)] z-1000 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-hidden flex flex-col ${
+			className={`fixed right-5 top-[88px] bottom-20 w-[380px] max-w-[calc(100vw-40px)] z-10 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-hidden flex flex-col ${
 				isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
 			}`}
 		>

@@ -1,6 +1,6 @@
-import { memo } from 'react'
-import { Heart, Trophy, Users, Award } from 'lucide-react'
 import type { User } from '@/types/user'
+import { Award, Heart, Trophy, Users } from 'lucide-react'
+import { memo } from 'react'
 
 interface ProfileStatsProps {
 	stats: User['stats']
@@ -34,7 +34,9 @@ export const ProfileStats = memo(function ProfileStats({
 			<div className='p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200'>
 				<div className='flex items-center gap-2 mb-2'>
 					<Users className='h-5 w-5 text-purple-600' />
-					<span className='text-sm font-medium text-slate-700'>Волонтерство</span>
+					<span className='text-sm font-medium text-slate-700'>
+						Волонтерство
+					</span>
 				</div>
 				<p className='text-2xl font-bold text-slate-900'>
 					{stats.totalVolunteerHours} ч
@@ -53,4 +55,3 @@ export const ProfileStats = memo(function ProfileStats({
 		</div>
 	)
 })
-

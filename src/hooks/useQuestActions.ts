@@ -1,7 +1,8 @@
-import { allAchievements } from '@/data/achievements'
 import { UserContext } from '@/contexts/UserContext'
-import { useCallback, useContext } from 'react'
+import { allAchievements } from '@/data/achievements'
 import type { QuestContribution, User } from '@/types/user'
+import { getLevelTitle, MAX_LEVEL, normalizeUserLevel } from '@/utils/level'
+import { useCallback, useContext } from 'react'
 
 export function useQuestActions() {
 	const context = useContext(UserContext)
@@ -109,18 +110,25 @@ export function useQuestActions() {
 				const experienceGain = contribution.amount
 					? Math.floor(contribution.amount / 100)
 					: 10
+
+				// Если уже максимальный уровень, не добавляем опыт
+				if (updatedUser.level.level >= MAX_LEVEL) {
+					return updatedUser
+				}
+
 				updatedUser.level.experience += experienceGain
 
-				// Проверяем повышение уровня
-				if (
-					updatedUser.level.experience >= updatedUser.level.experienceToNext
-				) {
-					updatedUser.level.level += 1
-					updatedUser.level.experience -= updatedUser.level.experienceToNext
-					updatedUser.level.experienceToNext = Math.floor(
-						updatedUser.level.experienceToNext * 1.5
-					)
-				}
+				// Нормализуем уровень и опыт (обрабатываем избыточный опыт в цикле)
+				const normalized = normalizeUserLevel(
+					updatedUser.level.level,
+					updatedUser.level.experience,
+					updatedUser.level.experienceToNext
+				)
+
+				updatedUser.level.level = normalized.level
+				updatedUser.level.experience = normalized.experience
+				updatedUser.level.experienceToNext = normalized.experienceToNext
+				updatedUser.level.title = getLevelTitle(updatedUser.level.level)
 
 				return updatedUser
 			})
@@ -182,4 +190,3 @@ export function useQuestActions() {
 		checkAndUnlockAchievements,
 	}
 }
-
