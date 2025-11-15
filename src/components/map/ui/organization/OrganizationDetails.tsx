@@ -79,13 +79,13 @@ export function OrganizationDetails({
 						<div className='flex items-start justify-between gap-4'>
 							<div className='flex-1 min-w-0'>
 								<p className='text-xs font-medium text-slate-500 uppercase tracking-wider mb-1'>
-									{organization.city.name}
+									{organization.city?.name || ''}
 								</p>
 								<h2 className='text-2xl font-bold text-slate-900 m-0 mb-2'>
 									{organization.name}
 								</h2>
 								<p className='text-sm text-slate-600 m-0'>
-									{organization.organizationTypes[0]?.name || ''}
+									{organization.organizationTypes?.[0]?.name || ''}
 								</p>
 							</div>
 							{onClose && (
@@ -115,51 +115,57 @@ export function OrganizationDetails({
 							</p>
 						</div>
 
-						<div className='space-y-2'>
-							<h3 className='text-lg font-semibold text-slate-900 m-0'>Цели</h3>
-							<ul className='list-none m-0 p-0 space-y-1.5'>
-								{organization.goals.map(item => (
-									<li
-										key={item}
-										className='text-sm text-slate-600 pl-4 relative before:content-["•"] before:absolute before:left-0 before:text-slate-400'
-									>
-										{item}
-									</li>
-								))}
-							</ul>
-						</div>
-
-						<div className='space-y-2'>
-							<h3 className='text-lg font-semibold text-slate-900 m-0'>
-								Актуальные нужды
-							</h3>
-							<ul className='list-none m-0 p-0 space-y-1.5'>
-								{organization.needs.map(item => (
-									<li
-										key={item}
-										className='text-sm text-slate-600 pl-4 relative before:content-["•"] before:absolute before:left-0 before:text-slate-400'
-									>
-										{item}
-									</li>
-								))}
-							</ul>
-						</div>
-
-						<div className='space-y-2'>
-							<h3 className='text-lg font-semibold text-slate-900 m-0'>
-								Как можно помочь
-							</h3>
-							<div className='flex flex-wrap gap-2'>
-								{organization.helpTypes.map((item, index) => (
-									<span
-										key={item.id || index}
-										className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200'
-									>
-										{item.name}
-									</span>
-								))}
+						{organization.goals && organization.goals.length > 0 && (
+							<div className='space-y-2'>
+								<h3 className='text-lg font-semibold text-slate-900 m-0'>Цели</h3>
+								<ul className='list-none m-0 p-0 space-y-1.5'>
+									{organization.goals.map(item => (
+										<li
+											key={item}
+											className='text-sm text-slate-600 pl-4 relative before:content-["•"] before:absolute before:left-0 before:text-slate-400'
+										>
+											{item}
+										</li>
+									))}
+								</ul>
 							</div>
-						</div>
+						)}
+
+						{organization.needs && organization.needs.length > 0 && (
+							<div className='space-y-2'>
+								<h3 className='text-lg font-semibold text-slate-900 m-0'>
+									Актуальные нужды
+								</h3>
+								<ul className='list-none m-0 p-0 space-y-1.5'>
+									{organization.needs.map(item => (
+										<li
+											key={item}
+											className='text-sm text-slate-600 pl-4 relative before:content-["•"] before:absolute before:left-0 before:text-slate-400'
+										>
+											{item}
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+
+						{organization.helpTypes && organization.helpTypes.length > 0 && (
+							<div className='space-y-2'>
+								<h3 className='text-lg font-semibold text-slate-900 m-0'>
+									Как можно помочь
+								</h3>
+								<div className='flex flex-wrap gap-2'>
+									{organization.helpTypes.map((item, index) => (
+										<span
+											key={item.id || index}
+											className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200'
+										>
+											{item.name}
+										</span>
+									))}
+								</div>
+							</div>
+						)}
 
 						<div className='space-y-2'>
 							<h3 className='text-lg font-semibold text-slate-900 m-0'>
@@ -167,9 +173,9 @@ export function OrganizationDetails({
 							</h3>
 							<div className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm'>
 								<span className='font-medium text-slate-500'>Адрес</span>
-								<p className='text-slate-700 m-0'>{organization.address}</p>
+								<p className='text-slate-700 m-0'>{organization.address || 'Не указан'}</p>
 
-								{organization.contacts.map((contact, index) => (
+								{organization.contacts && organization.contacts.length > 0 && organization.contacts.map((contact, index) => (
 									<>
 										<span
 											key={`label-${index}`}
