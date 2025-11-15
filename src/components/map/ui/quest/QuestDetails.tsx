@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { ImageGallery } from '@/components/ui/ImageGallery'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useQuestActions } from '@/hooks/useQuestActions'
 import { useUser } from '@/hooks/useUser'
@@ -17,6 +18,77 @@ import { toast } from 'sonner'
 import type { Quest, QuestStage } from '../../types/quest-types'
 import { AmbassadorShare } from './AmbassadorShare'
 import { VolunteerRegistration } from './VolunteerRegistration'
+
+// Компонент для изображения истории с скелетоном
+function StoryImage({
+	image,
+	alt,
+	onClick,
+}: {
+	image: string
+	alt: string
+	onClick: () => void
+}) {
+	const [loading, setLoading] = useState(true)
+
+	return (
+		<button
+			type='button'
+			onClick={onClick}
+			className='relative w-full h-48 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity'
+			aria-label='Открыть изображение в галерее'
+		>
+			{loading && (
+				<Skeleton className='absolute inset-0 w-full h-full rounded-xl' />
+			)}
+			<img
+				src={image}
+				alt={alt}
+				className={`w-full h-full object-cover transition-opacity duration-300 ${
+					loading ? 'opacity-0' : 'opacity-100'
+				}`}
+				onLoad={() => setLoading(false)}
+				onError={() => setLoading(false)}
+			/>
+		</button>
+	)
+}
+
+// Компонент для изображения галереи с скелетоном
+function GalleryImage({
+	image,
+	index,
+	onClick,
+}: {
+	image: string
+	index: number
+	onClick: () => void
+}) {
+	const [loading, setLoading] = useState(true)
+
+	return (
+		<button
+			type='button'
+			onClick={onClick}
+			className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
+		>
+			{loading && (
+				<Skeleton className='absolute inset-0 w-full h-full rounded-lg' />
+			)}
+			<img
+				src={image}
+				alt={`Фото ${index + 1} из галереи квеста`}
+				className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-200 ${
+					loading ? 'opacity-0' : 'opacity-100'
+				}`}
+				loading='lazy'
+				onLoad={() => setLoading(false)}
+				onError={() => setLoading(false)}
+			/>
+			<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
+		</button>
+	)
+}
 
 interface QuestDetailsProps {
 	quest: Quest | undefined
@@ -362,8 +434,9 @@ export function QuestDetails({
 									История
 								</h3>
 								{quest.storyMedia?.image && (
-									<button
-										type='button'
+									<StoryImage
+										image={quest.storyMedia.image}
+										alt={quest.title}
 										onClick={() => {
 											const allImages = [
 												quest.storyMedia?.image,
@@ -372,15 +445,7 @@ export function QuestDetails({
 											const index = allImages.indexOf(quest.storyMedia!.image!)
 											setGalleryIndex(Math.max(index, 0))
 										}}
-										className='w-full h-48 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity'
-										aria-label='Открыть изображение в галерее'
-									>
-										<img
-											src={quest.storyMedia.image}
-											alt={quest.title}
-											className='w-full h-full object-cover'
-										/>
-									</button>
+									/>
 								)}
 								<p className='text-base text-slate-700 leading-relaxed m-0'>
 									{quest.story}
@@ -400,20 +465,12 @@ export function QuestDetails({
 												: index
 
 											return (
-												<button
+												<GalleryImage
 													key={`gallery-${index}-${image.slice(0, 20)}`}
-													type='button'
+													image={image}
+													index={index}
 													onClick={() => setGalleryIndex(galleryIndexInAll)}
-													className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
-												>
-													<img
-														src={image}
-														alt={`Фото ${index + 1} из галереи квеста`}
-														className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-200'
-														loading='lazy'
-													/>
-													<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
-												</button>
+												/>
 											)
 										})}
 									</div>

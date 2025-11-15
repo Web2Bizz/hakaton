@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import { useState } from 'react'
 import { ASSISTANCE_OPTIONS } from '@/constants'
 import { ImageGallery } from '@/components/ui/ImageGallery'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Organization } from '../../types/types'
 
 interface OrganizationDetailsProps {
@@ -17,6 +18,42 @@ const assistanceLabels = ASSISTANCE_OPTIONS.reduce<Record<string, string>>(
 	},
 	{}
 )
+
+// Компонент для изображения галереи с скелетоном
+function GalleryImage({
+	image,
+	index,
+	onClick,
+}: {
+	image: string
+	index: number
+	onClick: () => void
+}) {
+	const [loading, setLoading] = useState(true)
+
+	return (
+		<button
+			type='button'
+			onClick={onClick}
+			className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
+		>
+			{loading && (
+				<Skeleton className='absolute inset-0 w-full h-full rounded-lg' />
+			)}
+			<img
+				src={image}
+				alt={`Фото ${index + 1} из галереи организации`}
+				className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-200 ${
+					loading ? 'opacity-0' : 'opacity-100'
+				}`}
+				loading='lazy'
+				onLoad={() => setLoading(false)}
+				onError={() => setLoading(false)}
+			/>
+			<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
+		</button>
+	)
+}
 
 export function OrganizationDetails({
 	organization,
@@ -195,20 +232,12 @@ export function OrganizationDetails({
 								</h3>
 								<div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
 									{organization.gallery.map((image, index) => (
-										<button
+										<GalleryImage
 											key={`gallery-${index}-${image.slice(0, 20)}`}
-											type='button'
+											image={image}
+											index={index}
 											onClick={() => setGalleryIndex(index)}
-											className='relative aspect-square rounded-lg overflow-hidden group cursor-pointer'
-										>
-											<img
-												src={image}
-												alt={`Фото ${index + 1} из галереи организации`}
-												className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-200'
-												loading='lazy'
-											/>
-											<div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors' />
-										</button>
+										/>
 									))}
 								</div>
 							</div>

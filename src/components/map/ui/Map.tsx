@@ -83,6 +83,26 @@ export const MapComponent = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
+	// Обработка зума на созданную точку
+	useEffect(() => {
+		const zoomData = localStorage.getItem('zoomToCoordinates')
+		if (zoomData) {
+			try {
+				const { lat, lng, zoom } = JSON.parse(zoomData)
+				if (lat && lng) {
+					setSearchCenter([lat, lng])
+					setSearchZoom(zoom || 15)
+					// Очищаем после использования
+					localStorage.removeItem('zoomToCoordinates')
+				}
+			} catch (error) {
+				// Если ошибка парсинга, просто удаляем
+				localStorage.removeItem('zoomToCoordinates')
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
+
 	// Объединяем данные для поиска
 	const searchItems = useMemo(() => {
 		const questItems = filteredQuests.map(q => ({

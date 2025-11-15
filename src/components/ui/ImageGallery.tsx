@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Skeleton } from './skeleton'
 
 interface ImageGalleryProps {
 	images: string[]
@@ -15,6 +16,20 @@ export function ImageGallery({
 	onChangeIndex,
 }: ImageGalleryProps) {
 	const currentImage = images[currentIndex]
+	const [imageLoading, setImageLoading] = useState(true)
+	const [thumbnailsLoading, setThumbnailsLoading] = useState<boolean[]>(
+		images.map(() => true)
+	)
+
+	// Сброс состояния загрузки при смене изображения
+	useEffect(() => {
+		setImageLoading(true)
+	}, [currentIndex])
+
+	// Сброс состояния загрузки миниатюр при смене массива изображений
+	useEffect(() => {
+		setThumbnailsLoading(images.map(() => true))
+	}, [images])
 
 	const handlePrevious = useCallback(() => {
 		const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1
@@ -99,10 +114,17 @@ export function ImageGallery({
 				className='relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center'
 				onClick={e => e.stopPropagation()}
 			>
+				{imageLoading && (
+					<Skeleton className='w-full max-w-4xl h-[70vh] rounded-lg' />
+				)}
 				<img
 					src={currentImage}
 					alt={`Изображение ${currentIndex + 1} из ${images.length}`}
-					className='max-w-full max-h-full object-contain rounded-lg'
+					className={`max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300 ${
+						imageLoading ? 'opacity-0 absolute' : 'opacity-100'
+					}`}
+					onLoad={() => setImageLoading(false)}
+					onError={() => setImageLoading(false)}
 				/>
 			</div>
 
@@ -124,16 +146,35 @@ export function ImageGallery({
 								e.stopPropagation()
 								onChangeIndex(index)
 							}}
-							className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
+							className={`relative flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
 								index === currentIndex
 									? 'border-white scale-110'
 									: 'border-transparent opacity-60 hover:opacity-100'
 							}`}
 						>
+							{thumbnailsLoading[index] && (
+								<Skeleton className='absolute inset-0 w-full h-full' />
+							)}
 							<img
 								src={image}
 								alt={`Миниатюра ${index + 1}`}
-								className='w-full h-full object-cover'
+								className={`w-full h-full object-cover transition-opacity duration-300 ${
+									thumbnailsLoading[index] ? 'opacity-0' : 'opacity-100'
+								}`}
+								onLoad={() => {
+									setThumbnailsLoading(prev => {
+										const newState = [...prev]
+										newState[index] = false
+										return newState
+									})
+								}}
+								onError={() => {
+									setThumbnailsLoading(prev => {
+										const newState = [...prev]
+										newState[index] = false
+										return newState
+									})
+								}}
 							/>
 						</button>
 					))}

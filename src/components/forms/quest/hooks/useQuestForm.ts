@@ -326,6 +326,18 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				isEditMode ? 'Квест успешно обновлен!' : 'Квест успешно создан!'
 			)
 
+			// Сохраняем координаты для зума на карте (только при создании, не при редактировании)
+			if (!isEditMode && formData.coordinates.lat && formData.coordinates.lng) {
+				localStorage.setItem(
+					'zoomToCoordinates',
+					JSON.stringify({
+						lat: formData.coordinates.lat,
+						lng: formData.coordinates.lng,
+						zoom: 15,
+					})
+				)
+			}
+
 			if (onSuccess) {
 				onSuccess(questId)
 			}
