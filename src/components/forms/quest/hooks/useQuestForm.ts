@@ -9,6 +9,8 @@ import type { Quest } from '@/components/map/types/quest-types'
 import type { StageFormData } from '../QuestStageForm'
 import type { SocialFormData } from '../QuestSocialsSection'
 
+import type { UpdateFormData } from '../QuestUpdatesSection'
+
 export interface QuestFormData {
 	title: string
 	city: string
@@ -24,6 +26,7 @@ export interface QuestFormData {
 	coordinates: { lat: number; lng: number }
 	stages: StageFormData[]
 	socials: SocialFormData[]
+	updates: UpdateFormData[]
 	// Пользовательское достижение (опционально)
 	customAchievement?: {
 		icon: string
@@ -65,6 +68,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 			},
 		],
 		socials: [{ name: 'VK', url: '' }],
+		updates: [],
 		customAchievement: undefined,
 	})
 
@@ -114,6 +118,15 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 									progress: 0,
 								},
 						  ],
+				updates:
+					existingQuest.updates && existingQuest.updates.length > 0
+						? existingQuest.updates.map(update => ({
+								id: update.id || `update-${Date.now()}-${Math.random()}`,
+								title: update.title || '',
+								content: update.content || '',
+								images: update.images || [],
+						  }))
+						: [],
 				socials:
 					existingQuest.socials && existingQuest.socials.length > 0
 						? (existingQuest.socials.map(s => ({
@@ -242,7 +255,24 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				overallProgress: 0,
 				status: 'active',
 				progressColor: 'red',
-				updates: [],
+				updates:
+					formData.updates && formData.updates.length > 0
+						? formData.updates.map(update => {
+								// При редактировании сохраняем оригинальную дату, если она есть
+								const existingUpdate = existingQuest?.updates?.find(
+									u => u.id === update.id
+								)
+								return {
+									id: update.id,
+									date:
+										existingUpdate?.date || new Date().toISOString(),
+									title: update.title,
+									content: update.content,
+									images: update.images || [],
+									author: formData.curatorName,
+								}
+						  })
+						: [],
 				coordinates: [formData.coordinates.lat, formData.coordinates.lng],
 				address: formData.address,
 				curator: {
@@ -326,8 +356,8 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				isEditMode ? 'Квест успешно обновлен!' : 'Квест успешно создан!'
 			)
 
-			// Сохраняем координаты для зума на карте (только при создании, не при редактировании)
-			if (!isEditMode && formData.coordinates.lat && formData.coordinates.lng) {
+			// Сохраняем координаты для зума на карте при сохранении
+			if (formData.coordinates.lat && formData.coordinates.lng) {
 				localStorage.setItem(
 					'zoomToCoordinates',
 					JSON.stringify({

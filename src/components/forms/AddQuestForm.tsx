@@ -7,10 +7,12 @@ import { QuestLocationSection } from './quest/QuestLocationSection'
 import { QuestCuratorSection } from './quest/QuestCuratorSection'
 import { QuestSocialsSection } from './quest/QuestSocialsSection'
 import { QuestAchievementSection } from './quest/QuestAchievementSection'
+import { QuestUpdatesSection } from './quest/QuestUpdatesSection'
 import { DangerZone } from './shared/DangerZone'
 import { useQuestForm } from './quest/hooks/useQuestForm'
 import { useState } from 'react'
 import type { StageFormData } from './quest/QuestStageForm'
+import type { UpdateFormData } from './quest/QuestUpdatesSection'
 
 interface AddQuestFormProps {
 	onSuccess?: (questId: string) => void
@@ -105,6 +107,41 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 									: value,
 					  }
 					: social
+			),
+		}))
+	}
+
+	const addUpdate = () => {
+		setFormData(prev => ({
+			...prev,
+			updates: [
+				...prev.updates,
+				{
+					id: `update-${Date.now()}-${Math.random()}`,
+					title: '',
+					content: '',
+					images: [],
+				},
+			],
+		}))
+	}
+
+	const removeUpdate = (id: string) => {
+		setFormData(prev => ({
+			...prev,
+			updates: prev.updates.filter(update => update.id !== id),
+		}))
+	}
+
+	const updateUpdate = (
+		id: string,
+		field: keyof UpdateFormData,
+		value: unknown
+	) => {
+		setFormData(prev => ({
+			...prev,
+			updates: prev.updates.map(update =>
+				update.id === id ? { ...update, [field]: value } : update
 			),
 		}))
 	}
@@ -223,11 +260,12 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 			{/* Вкладка 3: Обновления */}
 			{currentStep === 'updates' && (
 				<div className='space-y-6'>
-					<div className='bg-slate-50 border border-slate-200 rounded-lg p-6 text-center'>
-						<p className='text-slate-600'>
-							Раздел обновлений будет доступен в будущих версиях
-						</p>
-					</div>
+					<QuestUpdatesSection
+						updates={formData.updates}
+						onAdd={addUpdate}
+						onRemove={removeUpdate}
+						onUpdate={updateUpdate}
+					/>
 				</div>
 			)}
 

@@ -177,8 +177,8 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 					: 'Организация успешно создана!'
 			)
 
-			// Сохраняем координаты для зума на карте (только при создании, не при редактировании)
-			if (!isEditMode && formData.coordinates.lat && formData.coordinates.lng) {
+			// Сохраняем координаты для зума на карте при сохранении
+			if (formData.coordinates.lat && formData.coordinates.lng) {
 				localStorage.setItem(
 					'zoomToCoordinates',
 					JSON.stringify({
