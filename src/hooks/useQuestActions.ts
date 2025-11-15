@@ -1,6 +1,6 @@
 import { UserContext } from '@/contexts/UserContext'
 import { allAchievements } from '@/data/achievements'
-import type { QuestContribution, User } from '@/types/user'
+import type { Achievement, QuestContribution, User } from '@/types/user'
 import { getLevelTitle, MAX_LEVEL, normalizeUserLevel } from '@/utils/level'
 import { useCallback, useContext } from 'react'
 import type { Quest } from '@/components/map/types/quest-types'
@@ -134,7 +134,7 @@ export function useQuestActions() {
 				// Проверяем различные достижения на основе квеста
 				if (
 					questId === 'ozero-chistoe' &&
-					!updatedUser.achievements.some(a => a.id === 'lake_saver')
+					!updatedUser.achievements.some((a: Achievement) => a.id === 'lake_saver')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.lake_saver,
@@ -145,7 +145,7 @@ export function useQuestActions() {
 
 				if (
 					questId === 'les-1000-derev' &&
-					!updatedUser.achievements.some(a => a.id === 'tree_planter')
+					!updatedUser.achievements.some((a: Achievement) => a.id === 'tree_planter')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.tree_planter,
@@ -156,7 +156,7 @@ export function useQuestActions() {
 
 				if (
 					questId === 'volk-berkut' &&
-					!updatedUser.achievements.some(a => a.id === 'wildlife_protector')
+					!updatedUser.achievements.some((a: Achievement) => a.id === 'wildlife_protector')
 				) {
 					updatedUser.achievements.push({
 						...allAchievements.wildlife_protector,
@@ -191,7 +191,7 @@ export function useQuestActions() {
 
 				// Проверяем, что достижение еще не разблокировано
 				const achievementId = `custom-${questId}`
-				if (currentUser.achievements.some(a => a.id === achievementId)) {
+				if (currentUser.achievements.some((a: Achievement) => a.id === achievementId)) {
 					return currentUser
 				}
 
@@ -253,7 +253,7 @@ export function useQuestActions() {
 					const achievementId = `custom-${quest.id}`
 					
 					// Проверяем, что достижение еще не разблокировано
-					if (!updatedUser.achievements.some(a => a.id === achievementId)) {
+					if (!updatedUser.achievements.some((a: Achievement) => a.id === achievementId)) {
 						// Разблокируем пользовательское достижение
 						updatedUser = {
 							...updatedUser,

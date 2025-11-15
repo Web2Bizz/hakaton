@@ -13,16 +13,12 @@ export function ActiveQuests() {
 	const { checkQuestCompletion } = useQuestActions()
 	const { addNotification } = useNotifications()
 
-	if (!user) {
-		return null
-	}
-
 	// Получаем все квесты (включая созданные пользователями)
 	const allQuests = getAllQuests(baseQuests)
 
 	// Фильтруем квесты, в которых участвует пользователь
 	const participatingQuests = allQuests.filter(q =>
-		user.participatingQuests.includes(q.id)
+		user?.participatingQuests.includes(q.id) ?? false
 	)
 
 	// Проверка завершения квестов и отправка уведомлений
@@ -104,7 +100,7 @@ export function ActiveQuests() {
 				}
 			}
 		})
-	}, [participatingQuests, user?.id, checkQuestCompletion, addNotification])
+	}, [user, participatingQuests, checkQuestCompletion, addNotification])
 
 	if (participatingQuests.length === 0) {
 		return (

@@ -95,7 +95,7 @@ export const MapComponent = () => {
 					// Очищаем после использования
 					localStorage.removeItem('zoomToCoordinates')
 				}
-			} catch (error) {
+			} catch {
 				// Если ошибка парсинга, просто удаляем
 				localStorage.removeItem('zoomToCoordinates')
 			}

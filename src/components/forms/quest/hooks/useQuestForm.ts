@@ -428,6 +428,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 			],
 			socials: [{ name: 'VK', url: '' }],
 			customAchievement: undefined,
+			updates: [],
 		})
 	}
 

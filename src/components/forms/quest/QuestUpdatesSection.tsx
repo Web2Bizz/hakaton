@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MediaUpload } from '../shared/MediaUpload'
 import { X, Plus } from 'lucide-react'
-import { useState } from 'react'
 
 export interface UpdateFormData {
 	id: string

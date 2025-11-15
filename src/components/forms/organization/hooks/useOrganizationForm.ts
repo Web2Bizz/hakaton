@@ -1,4 +1,6 @@
+import type { Organization } from '@/components/map/types/types'
 import { useUser } from '@/hooks/useUser'
+import type { AssistanceTypeId } from '@/types/common'
 import { getCityCoordinates } from '@/utils/cityCoordinates'
 import {
 	getUserOrganization as getUserOrganizationById,
@@ -6,9 +8,7 @@ import {
 } from '@/utils/userData'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import type { Organization } from '@/components/map/types/types'
-import type { AssistanceTypeId } from '@/types/common'
-import type { SocialFormData } from '../quest/QuestSocialsSection'
+import type { SocialFormData } from '../../quest'
 
 export interface OrganizationFormData {
 	name: string
@@ -29,7 +29,9 @@ export interface OrganizationFormData {
 	gallery: string[]
 }
 
-export function useOrganizationForm(onSuccess?: (organizationId: string) => void) {
+export function useOrganizationForm(
+	onSuccess?: (organizationId: string) => void
+) {
 	const {
 		user,
 		createOrganization,
@@ -193,7 +195,7 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 				onSuccess(organizationId)
 			}
 		} catch (error) {
-			if (process.env.NODE_ENV === 'development') {
+			if (import.meta.env.DEV) {
 				console.error('Error creating organization:', error)
 			}
 			toast.error('Не удалось создать организацию. Попробуйте еще раз.')
@@ -233,6 +235,7 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 			website: '',
 			coordinates: { lat: 0, lng: 0 },
 			socials: [{ name: 'VK', url: '' }],
+			gallery: [],
 		})
 	}
 
@@ -246,4 +249,3 @@ export function useOrganizationForm(onSuccess?: (organizationId: string) => void
 		handleDelete,
 	}
 }
-

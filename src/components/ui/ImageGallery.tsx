@@ -23,12 +23,20 @@ export function ImageGallery({
 
 	// Сброс состояния загрузки при смене изображения
 	useEffect(() => {
-		setImageLoading(true)
+		// Используем setTimeout для избежания синхронного setState
+		const timeoutId = setTimeout(() => {
+			setImageLoading(true)
+		}, 0)
+		return () => clearTimeout(timeoutId)
 	}, [currentIndex])
 
 	// Сброс состояния загрузки миниатюр при смене массива изображений
 	useEffect(() => {
-		setThumbnailsLoading(images.map(() => true))
+		// Используем setTimeout для избежания синхронного setState
+		const timeoutId = setTimeout(() => {
+			setThumbnailsLoading(images.map(() => true))
+		}, 0)
+		return () => clearTimeout(timeoutId)
 	}, [images])
 
 	const handlePrevious = useCallback(() => {

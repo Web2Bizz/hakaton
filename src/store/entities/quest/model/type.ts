@@ -133,7 +133,7 @@ export interface ParticipateResponse {
 			role: string
 			joinedAt: string
 		}
-		user: any // UserFullData
+		user: unknown // UserFullData
 		message: string
 	}
 }
@@ -150,9 +150,9 @@ export interface ContributeResponse {
 			contributedAt: string
 			impact: string
 		}
-		user: any // UserFullData
+		user: unknown // UserFullData
 		quest: Quest
-		achievements?: any[]
+		achievements?: unknown[]
 		levelUp?: {
 			newLevel: number
 			title: string

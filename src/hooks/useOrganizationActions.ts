@@ -76,7 +76,7 @@ export function useOrganizationActions() {
 					)
 				} catch (error) {
 					// В production логируем в систему мониторинга
-					if (process.env.NODE_ENV === 'development') {
+					if (import.meta.env.DEV) {
 						console.error('Error deleting quest:', error)
 					}
 				}
@@ -111,7 +111,7 @@ export function useOrganizationActions() {
 					)
 				} catch (error) {
 					// В production логируем в систему мониторинга
-					if (process.env.NODE_ENV === 'development') {
+					if (import.meta.env.DEV) {
 						console.error('Error deleting organization:', error)
 					}
 				}

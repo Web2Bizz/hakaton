@@ -20,18 +20,53 @@ export const MapSearch = memo(function MapSearch({
 	onItemSelect,
 }: MapSearchProps) {
 	const handleOrganizationSelect = useCallback(
-		(item: SearchItem) => {
-			const foundItem = searchItems.find(s => s.id === item.id)
+		(organization: Organization & { isQuest?: boolean }) => {
+			const foundItem = searchItems.find(s => s.id === organization.id)
 			if (foundItem) {
 				onItemSelect(foundItem)
 			}
 		},
 		[searchItems, onItemSelect]
 	)
+
+	// Преобразуем SearchItem[] в формат для AddressSearchInput
+	const organizationsForSearch = searchItems.map(item => {
+		if ('isQuest' in item && item.isQuest) {
+			// Quest преобразуем в Organization-подобный формат
+			return {
+				id: item.id,
+				name: item.title,
+				city: item.city,
+				type: item.type,
+				assistance: [],
+				summary: item.story,
+				description: '',
+				mission: '',
+				goals: [],
+				needs: [],
+				address: item.address,
+				contacts: {
+					phone: item.curator.phone,
+					email: item.curator.email || '',
+				},
+				website: '',
+				coordinates: item.coordinates,
+				socials: item.socials || [],
+				gallery: item.gallery,
+				isQuest: true,
+			} as Organization & { isQuest: true }
+		} else {
+			return {
+				...item,
+				isQuest: false,
+			} as Organization & { isQuest: false }
+		}
+	})
+
 	return (
 		<div className='absolute top-20 left-0 right-0 max-w-[80%] lg:max-w-[400px] z-10 ml-auto mr-auto items-center justify-center lg:left-5 lg:right-auto lg:w-full placeholder:truncate'>
 			<AddressSearchInput
-				organizations={searchItems}
+				organizations={organizationsForSearch}
 				onAddressSelect={onAddressSelect}
 				onOrganizationSelect={handleOrganizationSelect}
 				placeholder='Поиск по адресу, квесту или организации...'

@@ -125,7 +125,7 @@ export function UnifiedList({
 														{quest.story}
 													</p>
 													<div className='flex items-center gap-2 text-xs text-slate-500'>
-														<span>Прогресс: {quest.progress}%</span>
+														<span>Прогресс: {quest.overallProgress}%</span>
 													</div>
 												</article>
 											)

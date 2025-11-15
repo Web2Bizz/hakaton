@@ -26,59 +26,6 @@ export function MediaUpload({
 	const [isDragging, setIsDragging] = useState(false)
 	const [isUploading, setIsUploading] = useState(false)
 
-	const convertFileToBase64 = useCallback((file: File): Promise<string> => {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader()
-
-			reader.onload = () => {
-				if (typeof reader.result === 'string') {
-					resolve(reader.result)
-				} else {
-					reject(
-						new Error(
-							'Failed to convert file to base64: result is not a string'
-						)
-					)
-				}
-			}
-
-			reader.onerror = event => {
-				const error = event.target?.error
-				if (error) {
-					if (error.name === 'NotReadableError') {
-						reject(
-							new Error('Файл не может быть прочитан. Возможно, он поврежден.')
-						)
-					} else if (error.name === 'EncodingError') {
-						reject(new Error('Ошибка кодирования файла'))
-					} else {
-						reject(
-							new Error(
-								`Ошибка чтения файла: ${error.name || 'Неизвестная ошибка'}`
-							)
-						)
-					}
-				} else {
-					reject(new Error('Неизвестная ошибка при чтении файла'))
-				}
-			}
-
-			reader.onabort = () => {
-				reject(new Error('Чтение файла было прервано'))
-			}
-
-			try {
-				reader.readAsDataURL(file)
-			} catch (error) {
-				reject(
-					error instanceof Error
-						? error
-						: new Error('Не удалось начать чтение файла')
-				)
-			}
-		})
-	}, [])
-
 	const formatFileSize = useCallback((bytes: number): string => {
 		if (bytes < 1024) return `${bytes} Б`
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`
@@ -172,14 +119,7 @@ export function MediaUpload({
 				setIsUploading(false)
 			}
 		},
-		[
-			images,
-			maxImages,
-			maxImageSizeMB,
-			onImagesChange,
-			convertFileToBase64,
-			formatFileSize,
-		]
+		[images, maxImages, maxImageSizeMB, onImagesChange, formatFileSize]
 	)
 
 	const handleDrop = useCallback(

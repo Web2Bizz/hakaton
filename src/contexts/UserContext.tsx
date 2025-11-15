@@ -1,12 +1,12 @@
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import type { User } from '@/types/user'
-import { normalizeUserLevel, getLevelTitle } from '@/utils/level'
+import { getLevelTitle, normalizeUserLevel } from '@/utils/level'
 import type { ReactNode } from 'react'
 import { createContext, useEffect, useMemo } from 'react'
 
 interface UserContextType {
 	user: User | null
-	setUser: (user: User | null) => void
+	setUser: (user: User | null | ((prev: User | null) => User | null)) => void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
