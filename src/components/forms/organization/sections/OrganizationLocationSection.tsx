@@ -31,55 +31,12 @@ export function OrganizationLocationSection({
 					<FormItem>
 						<FormLabel>Адрес *</FormLabel>
 						<FormControl>
-							<Input
-								placeholder='Например: ул. Ленина, 10'
-								{...field}
-							/>
+							<Input placeholder='Например: ул. Ленина, 10' {...field} />
 						</FormControl>
 						<FormMessage />
 					</FormItem>
 				)}
 			/>
-
-			<div className='grid grid-cols-2 gap-4'>
-				<FormField
-					control={form.control}
-					name='latitude'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Широта *</FormLabel>
-							<FormControl>
-								<Input
-									type='text'
-									placeholder='55.7558'
-									{...field}
-									readOnly
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name='longitude'
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Долгота *</FormLabel>
-							<FormControl>
-								<Input
-									type='text'
-									placeholder='37.6173'
-									{...field}
-									readOnly
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-			</div>
 
 			<Button
 				type='button'

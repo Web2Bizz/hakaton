@@ -1,4 +1,5 @@
 import { useUser } from '@/hooks/useUser'
+import { useUpdateUserMutation } from '@/store/entities'
 import {
 	useCreateOrganizationMutation,
 	useDeleteOrganizationMutation,
@@ -10,6 +11,7 @@ import {
 	type CreateOrganizationRequest,
 	type UpdateOrganizationRequest,
 } from '@/store/entities/organization'
+import { transformUserFromAPI } from '@/utils/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -24,6 +26,7 @@ export function useOrganizationForm(
 ) {
 	const {
 		user,
+		setUser,
 		createOrganization: setUserOrganizationId,
 		canCreateOrganization,
 		deleteOrganization: removeUserOrganizationId,
@@ -49,6 +52,7 @@ export function useOrganizationForm(
 		useDeleteOrganizationMutation()
 	const [uploadImagesMutation, { isLoading: isUploadingImages }] =
 		useUploadImagesMutation()
+	const [updateUserMutation] = useUpdateUserMutation()
 
 	const form = useForm<OrganizationFormData>({
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,33 +253,89 @@ export function useOrganizationForm(
 				const result = await createOrgMutation(
 					requestData as CreateOrganizationRequest
 				).unwrap()
+				console.log(result)
+				// Берем ID организации из ответа
+				if (!result) {
+					throw new Error('Организация не была создана')
+				}
 
-				// Проверяем успешность запроса - если нет ошибки, значит успешно
-				if (result && !('error' in result)) {
-					toast.success('Организация успешно создана!')
+				const createdOrganization = result
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const organizationId = (createdOrganization as any).id
+				const organizationIdString = String(organizationId)
 
-					if (result.data?.organization) {
-						const newOrgId = String(result.data.organization.id)
+				toast.success('Организация успешно создана!')
 
-						// Сохраняем ID организации в контексте пользователя
-						setUserOrganizationId(newOrgId)
+				// Обновляем organisationId пользователя через API
+				if (!user?.id) {
+					throw new Error('ID пользователя не найден')
+				}
 
-						// Сохраняем координаты для зума на карте
-						if (data.latitude && data.longitude) {
-							localStorage.setItem(
-								'zoomToCoordinates',
-								JSON.stringify({
-									lat: Number.parseFloat(data.latitude),
-									lng: Number.parseFloat(data.longitude),
-									zoom: 15,
-								})
+				try {
+					if (import.meta.env.DEV) {
+						console.log('Updating user with organisationId:', {
+							userId: user.id,
+							organizationId,
+							organizationIdType: typeof organizationId,
+						})
+					}
+
+					// Передаем ID организации (как число, если это число, иначе как строку)
+					const organisationIdValue =
+						typeof organizationId === 'number'
+							? organizationId
+							: organizationIdString
+
+					// Обновляем пользователя через PATCH /api/v1/users/{id}
+					const updateResult = await updateUserMutation({
+						userId: String(user.id),
+						data: { organisationId: organisationIdValue },
+					}).unwrap()
+
+					if (import.meta.env.DEV) {
+						console.log('User updated successfully:', updateResult)
+					}
+
+					// Обновляем локальное состояние пользователя с данными из API
+					if (updateResult && setUser) {
+						const updatedUser = transformUserFromAPI(updateResult)
+						setUser(updatedUser)
+
+						if (import.meta.env.DEV) {
+							console.log(
+								'Local user state updated. organisationId:',
+								updatedUser.createdOrganizationId
 							)
 						}
-
-						if (onSuccess) {
-							onSuccess(newOrgId)
+					}
+				} catch (error) {
+					if (import.meta.env.DEV) {
+						console.error('Error updating user organisationId:', error)
+						if (error && typeof error === 'object' && 'data' in error) {
+							console.error('Error details:', error.data)
 						}
 					}
+					// Показываем ошибку, но не блокируем процесс полностью
+					toast.error('Не удалось обновить ID организации у пользователя')
+				}
+
+				// Сохраняем ID организации в контексте пользователя (для обратной совместимости)
+				setUserOrganizationId(organizationIdString)
+
+				// Сохраняем координаты для зума на карте
+				if (data.latitude && data.longitude) {
+					localStorage.setItem(
+						'zoomToCoordinates',
+						JSON.stringify({
+							lat: Number.parseFloat(data.latitude),
+							lng: Number.parseFloat(data.longitude),
+							zoom: 15,
+						})
+					)
+				}
+
+				if (onSuccess) {
+					onSuccess(organizationIdString)
 				}
 			}
 		} catch (error: unknown) {
@@ -283,6 +343,7 @@ export function useOrganizationForm(
 				console.error('Error saving organization:', error)
 			}
 
+			console.log(error)
 			const errorMessage =
 				error && typeof error === 'object' && 'data' in error
 					? (error.data as { message?: string })?.message ||

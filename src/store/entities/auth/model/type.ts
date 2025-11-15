@@ -16,6 +16,7 @@ export interface LoginRequest {
 export interface UpdateUserRequest {
 	name?: string
 	avatar?: string
+	organisationId?: number | string | null
 }
 
 // Типы для ответов API
@@ -51,9 +52,10 @@ export type UserFullData = UserShortData & {
 		unlockedAt?: string
 	}>
 	participatingQuests: string[]
-	createdQuestId?: string
-	createdOrganizationId?: string | null
+	questId?: string | null
+	organisationId?: string | null
 	createdAt: string
+	updatedAt: string
 }
 
 export interface LoginErrorResponse {

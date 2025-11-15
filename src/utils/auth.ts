@@ -46,6 +46,8 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 		},
 		achievements: apiUser.achievements || [],
 		participatingQuests: apiUser.participatingQuests || [],
+		createdQuestId: apiUser.questId || undefined, // Преобразуем questId -> createdQuestId
+		createdOrganizationId: apiUser.organisationId || undefined, // Преобразуем organisationId -> createdOrganizationId
 		createdAt: apiUser.createdAt,
 	}
 }
