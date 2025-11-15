@@ -1,3 +1,4 @@
+export { AddQuestForm } from './AddQuestForm'
 export { QuestBasicInfo } from './QuestBasicInfo'
 export { QuestStageForm, type StageFormData } from './QuestStageForm'
 export { QuestStagesSection } from './QuestStagesSection'

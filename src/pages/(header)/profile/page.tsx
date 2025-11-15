@@ -2,9 +2,9 @@ import { ActiveQuests } from '@/components/profile/ActiveQuests'
 import { ProfileAchievements } from '@/components/profile/ProfileAchievements'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileLevelProgress } from '@/components/profile/ProfileLevelProgress'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
+import { ProtectedRoute } from '@/provider/ProtectedRoute'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
@@ -31,7 +31,7 @@ export default function ProfilePage() {
 			description: 'До встречи! Надеемся увидеть вас снова.',
 			duration: 3000,
 		})
-		
+
 		// Небольшая задержка перед редиректом, чтобы пользователь увидел toast
 		setTimeout(() => {
 			globalThis.location.href = '/login'

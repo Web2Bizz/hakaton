@@ -1,8 +1,8 @@
-import { Image, X, Upload } from 'lucide-react'
-import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
 import { compressImage } from '@/utils/storage'
+import { Upload, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 interface MediaUploadProps {
 	images?: string[]
@@ -26,51 +26,58 @@ export function MediaUpload({
 	const [isDragging, setIsDragging] = useState(false)
 	const [isUploading, setIsUploading] = useState(false)
 
-	const convertFileToBase64 = useCallback(
-		(file: File): Promise<string> => {
-			return new Promise((resolve, reject) => {
-				const reader = new FileReader()
-				
-				reader.onload = () => {
-					if (typeof reader.result === 'string') {
-						resolve(reader.result)
-					} else {
-						reject(new Error('Failed to convert file to base64: result is not a string'))
-					}
-				}
-				
-				reader.onerror = event => {
-					const error = event.target?.error
-					if (error) {
-						if (error.name === 'NotReadableError') {
-							reject(new Error('Файл не может быть прочитан. Возможно, он поврежден.'))
-						} else if (error.name === 'EncodingError') {
-							reject(new Error('Ошибка кодирования файла'))
-						} else {
-							reject(new Error(`Ошибка чтения файла: ${error.name || 'Неизвестная ошибка'}`))
-						}
-					} else {
-						reject(new Error('Неизвестная ошибка при чтении файла'))
-					}
-				}
-				
-				reader.onabort = () => {
-					reject(new Error('Чтение файла было прервано'))
-				}
-				
-				try {
-					reader.readAsDataURL(file)
-				} catch (error) {
+	const convertFileToBase64 = useCallback((file: File): Promise<string> => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader()
+
+			reader.onload = () => {
+				if (typeof reader.result === 'string') {
+					resolve(reader.result)
+				} else {
 					reject(
-						error instanceof Error
-							? error
-							: new Error('Не удалось начать чтение файла')
+						new Error(
+							'Failed to convert file to base64: result is not a string'
+						)
 					)
 				}
-			})
-		},
-		[]
-	)
+			}
+
+			reader.onerror = event => {
+				const error = event.target?.error
+				if (error) {
+					if (error.name === 'NotReadableError') {
+						reject(
+							new Error('Файл не может быть прочитан. Возможно, он поврежден.')
+						)
+					} else if (error.name === 'EncodingError') {
+						reject(new Error('Ошибка кодирования файла'))
+					} else {
+						reject(
+							new Error(
+								`Ошибка чтения файла: ${error.name || 'Неизвестная ошибка'}`
+							)
+						)
+					}
+				} else {
+					reject(new Error('Неизвестная ошибка при чтении файла'))
+				}
+			}
+
+			reader.onabort = () => {
+				reject(new Error('Чтение файла было прервано'))
+			}
+
+			try {
+				reader.readAsDataURL(file)
+			} catch (error) {
+				reject(
+					error instanceof Error
+						? error
+						: new Error('Не удалось начать чтение файла')
+				)
+			}
+		})
+	}, [])
 
 	const formatFileSize = useCallback((bytes: number): string => {
 		if (bytes < 1024) return `${bytes} Б`
@@ -92,7 +99,11 @@ export function MediaUpload({
 					const fileSizeMB = file.size / BYTES_PER_MB
 					if (fileSizeMB > maxImageSizeMB) {
 						errors.push(
-							`${file.name}: размер превышает ${maxImageSizeMB} МБ (${formatFileSize(file.size)})`
+							`${
+								file.name
+							}: размер превышает ${maxImageSizeMB} МБ (${formatFileSize(
+								file.size
+							)})`
 						)
 						return
 					}
@@ -104,7 +115,9 @@ export function MediaUpload({
 					}
 					imageFiles.push(file)
 				} else {
-					errors.push(`${file.name}: неподдерживаемый тип файла. Поддерживаются только изображения.`)
+					errors.push(
+						`${file.name}: неподдерживаемый тип файла. Поддерживаются только изображения.`
+					)
 				}
 			})
 
@@ -150,7 +163,6 @@ export function MediaUpload({
 						}
 					}
 				}
-
 			} catch (error) {
 				toast.error('Неожиданная ошибка при загрузке файлов')
 				if (import.meta.env.DEV) {
@@ -198,7 +210,6 @@ export function MediaUpload({
 		[images, onImagesChange]
 	)
 
-
 	return (
 		<div className='space-y-4'>
 			<label className='block text-sm font-medium text-slate-700 mb-2'>
@@ -234,9 +245,7 @@ export function MediaUpload({
 						input.accept = 'image/*'
 						input.multiple = true
 						input.onchange = e => {
-							handleFileSelect(
-								(e.target as HTMLInputElement).files
-							)
+							handleFileSelect((e.target as HTMLInputElement).files)
 						}
 						input.click()
 					}}
@@ -274,8 +283,6 @@ export function MediaUpload({
 					</div>
 				</div>
 			)}
-
 		</div>
 	)
 }
-

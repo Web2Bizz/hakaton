@@ -1,18 +1,18 @@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { LocationPicker } from './LocationPicker'
-import { QuestBasicInfo } from './quest/QuestBasicInfo'
-import { QuestStagesSection } from './quest/QuestStagesSection'
-import { QuestLocationSection } from './quest/QuestLocationSection'
-import { QuestCuratorSection } from './quest/QuestCuratorSection'
-import { QuestSocialsSection } from './quest/QuestSocialsSection'
-import { QuestAchievementSection } from './quest/QuestAchievementSection'
-import { QuestUpdatesSection } from './quest/QuestUpdatesSection'
-import { DangerZone } from './shared/DangerZone'
-import { useQuestForm } from './quest/hooks/useQuestForm'
+import { LocationPicker } from '../shared/LocationPicker'
+import { QuestBasicInfo } from './QuestBasicInfo'
+import { QuestStagesSection } from './QuestStagesSection'
+import { QuestLocationSection } from './QuestLocationSection'
+import { QuestCuratorSection } from './QuestCuratorSection'
+import { QuestSocialsSection } from './QuestSocialsSection'
+import { QuestAchievementSection } from './QuestAchievementSection'
+import { QuestUpdatesSection } from './QuestUpdatesSection'
+import { DangerZone } from '../shared/DangerZone'
+import { useQuestForm } from './hooks/useQuestForm'
 import { useState } from 'react'
-import type { StageFormData } from './quest/QuestStageForm'
-import type { UpdateFormData } from './quest/QuestUpdatesSection'
+import type { StageFormData } from './QuestStageForm'
+import type { UpdateFormData } from './QuestUpdatesSection'
 
 interface AddQuestFormProps {
 	onSuccess?: (questId: string) => void
@@ -310,3 +310,4 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 		</form>
 	)
 }
+

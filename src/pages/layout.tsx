@@ -2,7 +2,7 @@ import { Header } from '@/components'
 import { Toaster } from '@/components/ui/sonner'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import { UserProvider } from '@/contexts/UserContext'
-import { ReduxProvider } from '@/provider/redux-provider'
+import { ReduxProvider } from '@/provider/Redux-provider'
 
 interface LayoutProps {
 	children: React.ReactNode

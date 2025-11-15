@@ -1,24 +1,55 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
-import { useUser } from '@/hooks/useUser'
 import {
-	useLazyGetUserQuery,
-	useLoginMutation,
-} from '@/store/entities/auth/model/auth-service'
+	Button,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	Input,
+	Spinner,
+} from '@/components/ui'
+import { useUser } from '@/hooks/useUser'
+import { useLazyGetUserQuery, useLoginMutation } from '@/store/entities'
 import { saveToken, transformUserFromAPI } from '@/utils/auth'
-import { useEffect, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { z } from 'zod'
+
+const loginSchema = z.object({
+	email: z.string().email('Введите корректный email адрес'),
+	password: z.string().min(1, 'Пароль обязателен для заполнения'),
+})
+
+const getErrorMessage = (error: unknown) => {
+	if (import.meta.env.DEV) {
+		console.error('Login error:', error)
+	}
+
+	const errorMessage =
+		(error as { data?: { message?: string } })?.data?.message ||
+		(error as { message?: string })?.message ||
+		'Ошибка входа. Попробуйте еще раз.'
+
+	toast.error(errorMessage)
+}
+
+type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
 	const { user, setUser } = useUser()
-	const [formData, setFormData] = useState({
-		email: '',
-		password: '',
-	})
-
 	const [loginMutation, { isLoading: isLoggingIn }] = useLoginMutation()
 	const [getUser, { isLoading: isFetchingUser }] = useLazyGetUserQuery()
+
+	const form = useForm<LoginFormData>({
+		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			email: '',
+			password: '',
+		},
+	})
 
 	const isSubmitting = isLoggingIn || isFetchingUser
 
@@ -33,36 +64,48 @@ export function LoginForm() {
 		return null
 	}
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-
-		if (!formData.email || !formData.password) {
-			toast.error('Заполните все поля')
-			return
-		}
-
+	const onSubmit = async (data: LoginFormData) => {
 		try {
 			const result = await loginMutation({
-				email: formData.email,
-				password: formData.password,
+				email: data.email,
+				password: data.password,
 			})
 
+			// Проверяем на ошибки (RTK Query возвращает error для статусов >= 400)
+			if (result.error) {
+				getErrorMessage(result.error)
+				return
+			}
+
+			// Проверяем наличие данных
+			if (!result.data) {
+				toast.error('Ошибка входа. Попробуйте еще раз.')
+				return
+			}
+
 			// Сохраняем токен
-			if (result.data?.access_token) {
+			if (result.data.access_token) {
 				saveToken(result.data.access_token)
 			}
 
 			// Получаем полные данные пользователя по userId
-			const userId = result.data?.user.id
+			const userId = result.data.user?.id
 			if (!userId) {
 				toast.error('Ошибка получения пользователя')
 				return
 			}
+
 			const userResult = await getUser(userId)
+			if (userResult.error) {
+				getErrorMessage(userResult.error)
+				return
+			}
+
 			if (!userResult.data) {
 				toast.error('Ошибка получения пользователя')
 				return
 			}
+
 			const transformedUser = transformUserFromAPI(userResult.data)
 			setUser(transformedUser)
 
@@ -74,17 +117,9 @@ export function LoginForm() {
 			// Перенаправляем на главную
 			setTimeout(() => {
 				globalThis.location.href = '/'
-			}, 500)
+			}, 1000)
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Login error:', error)
-			}
-			const errorMessage =
-				(error as { data?: { message?: string }; message?: string })?.data
-					?.message ||
-				(error as { message?: string })?.message ||
-				'Ошибка входа. Попробуйте еще раз.'
-			toast.error(errorMessage)
+			getErrorMessage(error)
 		}
 	}
 
@@ -97,56 +132,56 @@ export function LoginForm() {
 						<p className='text-slate-600'>Войдите в свой аккаунт</p>
 					</div>
 
-					<form onSubmit={handleSubmit} className='space-y-4'>
-						<div>
-							<label
-								htmlFor='email'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Email *
-							</label>
-							<Input
-								id='email'
-								type='email'
-								value={formData.email}
-								onChange={e =>
-									setFormData(prev => ({ ...prev, email: e.target.value }))
-								}
-								required
-								placeholder='email@example.com'
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+							<FormField
+								control={form.control}
+								name='email'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email *</FormLabel>
+										<FormControl>
+											<Input
+												type='email'
+												placeholder='email@example.com'
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
 
-						<div>
-							<label
-								htmlFor='password'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Пароль *
-							</label>
-							<Input
-								id='password'
-								type='password'
-								value={formData.password}
-								onChange={e =>
-									setFormData(prev => ({ ...prev, password: e.target.value }))
-								}
-								required
-								placeholder='••••••••'
+							<FormField
+								control={form.control}
+								name='password'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Пароль *</FormLabel>
+										<FormControl>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
 
-						<Button type='submit' disabled={isSubmitting} className='w-full'>
-							{isSubmitting ? (
-								<div className='flex items-center gap-2'>
-									<Spinner />
-									<span>Вход...</span>
-								</div>
-							) : (
-								<span>Войти</span>
-							)}
-						</Button>
-					</form>
+							<Button type='submit' disabled={isSubmitting} className='w-full'>
+								{isSubmitting ? (
+									<div className='flex items-center gap-2'>
+										<Spinner />
+										<span>Вход...</span>
+									</div>
+								) : (
+									<span>Войти</span>
+								)}
+							</Button>
+						</form>
+					</Form>
 
 					<div className='mt-6 text-center'>
 						<a
@@ -161,4 +196,3 @@ export function LoginForm() {
 		</div>
 	)
 }
-

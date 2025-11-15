@@ -1,7 +1,7 @@
 export { ActiveQuests } from './ActiveQuests'
+export { ContributionHistory } from './ContributionHistory'
 export { ProfileHeader } from './ProfileHeader'
 export { ProfileLevelProgress } from './ProfileLevelProgress'
 export { ProfileStats } from './ProfileStats'
-export { ProfileImpact } from './ProfileImpact'
 export { ProfileAchievements } from './ProfileAchievements'
 

@@ -1,24 +1,68 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
+import {
+	Button,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	Input,
+	Spinner,
+} from '@/components/ui'
 import { useUser } from '@/hooks/useUser'
-import { useRegisterMutation } from '@/store/entities/auth/model/auth-service'
-import { useEffect, useState } from 'react'
+import { useRegisterMutation } from '@/store/entities'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { z } from 'zod'
+
+const registrationSchema = z
+	.object({
+		firstName: z.string().min(1, 'Имя обязательно для заполнения'),
+		lastName: z.string().min(1, 'Фамилия обязательна для заполнения'),
+		middleName: z.string().min(1, 'Отчество обязательно для заполнения'),
+		email: z
+			.string()
+			.min(1, 'Email обязателен для заполнения')
+			.email('Введите корректный email адрес'),
+		password: z
+			.string()
+			.min(6, 'Пароль должен быть не менее 6 символов')
+			.max(100, 'Пароль слишком длинный'),
+		confirmPassword: z.string().min(1, 'Подтвердите пароль'),
+	})
+	.refine(data => data.password === data.confirmPassword, {
+		message: 'Пароли не совпадают',
+		path: ['confirmPassword'],
+	})
+
+const getErrorMessage = (res: { data?: { message?: string } }) => {
+	if (import.meta.env.DEV) {
+		console.error('Registration error:', res)
+	}
+	return toast.error(
+		res.data?.message || 'Ошибка регистрации. Попробуйте еще раз.'
+	)
+}
+
+type RegistrationFormData = z.infer<typeof registrationSchema>
 
 export function RegistrationForm() {
 	const { user } = useUser()
-	const [formData, setFormData] = useState({
-		firstName: '',
-		lastName: '',
-		middleName: '',
-		email: '',
-		password: '',
-		confirmPassword: '',
-	})
+	const [registerMutation, { isLoading: isRegistering }] = useRegisterMutation()
 
-	const [registerMutation, { isLoading: isRegistering }] =
-		useRegisterMutation()
+	const form = useForm<RegistrationFormData>({
+		resolver: zodResolver(registrationSchema),
+		defaultValues: {
+			firstName: '',
+			lastName: '',
+			middleName: '',
+			email: '',
+			password: '',
+			confirmPassword: '',
+		},
+	})
 
 	const isSubmitting = isRegistering
 
@@ -33,51 +77,19 @@ export function RegistrationForm() {
 		return null
 	}
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-
-		if (
-			!formData.firstName ||
-			!formData.lastName ||
-			!formData.middleName ||
-			!formData.email ||
-			!formData.password
-		) {
-			toast.error('Заполните все обязательные поля')
-			return
-		}
-
-		if (formData.password !== formData.confirmPassword) {
-			toast.error('Пароли не совпадают')
-			return
-		}
-
-		if (formData.password.length < 6) {
-			toast.error('Пароль должен быть не менее 6 символов')
-			return
-		}
-
+	const onSubmit = async (data: RegistrationFormData) => {
 		try {
 			const result = await registerMutation({
-				firstName: formData.firstName,
-				lastName: formData.lastName,
-				middleName: formData.middleName,
-				email: formData.email,
-				password: formData.password,
-				confirmPassword: formData.confirmPassword,
+				firstName: data.firstName,
+				lastName: data.lastName,
+				middleName: data.middleName,
+				email: data.email,
+				password: data.password,
+				confirmPassword: data.confirmPassword,
 			})
 
-			// Проверяем на ошибки (RTK Query возвращает error для статусов >= 400)
 			if (result.error) {
-				if (import.meta.env.DEV) {
-					console.log(result.error)
-				}
-				const errorMessage =
-					(result.error as { data?: { message?: string }; message?: string })
-						?.data?.message ||
-					(result.error as { message?: string })?.message ||
-					'Ошибка регистрации. Попробуйте еще раз.'
-				toast.error(errorMessage)
+				getErrorMessage(result.error as { data?: { message?: string } })
 				return
 			}
 
@@ -92,15 +104,7 @@ export function RegistrationForm() {
 				globalThis.location.href = '/login'
 			}, 1000)
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Registration error:', error)
-			}
-			const errorMessage =
-				(error as { data?: { message?: string }; message?: string })?.data
-					?.message ||
-				(error as { message?: string })?.message ||
-				'Ошибка регистрации. Попробуйте еще раз.'
-			toast.error(errorMessage)
+			getErrorMessage(error as { data?: { message?: string } })
 		}
 	}
 
@@ -115,142 +119,116 @@ export function RegistrationForm() {
 						<p className='text-slate-600'>Создайте новый аккаунт</p>
 					</div>
 
-					<form onSubmit={handleSubmit} className='space-y-4'>
-						<div>
-							<label
-								htmlFor='firstName'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Имя *
-							</label>
-							<Input
-								id='firstName'
-								type='text'
-								value={formData.firstName}
-								onChange={e =>
-									setFormData(prev => ({
-										...prev,
-										firstName: e.target.value,
-									}))
-								}
-								required
-								placeholder='Иван'
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+							<FormField
+								control={form.control}
+								name='firstName'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Имя *</FormLabel>
+										<FormControl>
+											<Input type='text' placeholder='Иван' {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
-						<div>
-							<label
-								htmlFor='lastName'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Фамилия *
-							</label>
-							<Input
-								id='lastName'
-								type='text'
-								value={formData.lastName}
-								onChange={e =>
-									setFormData(prev => ({
-										...prev,
-										lastName: e.target.value,
-									}))
-								}
-								required
-								placeholder='Иванов'
-							/>
-						</div>
-						<div>
-							<label
-								htmlFor='middleName'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Отчество *
-							</label>
-							<Input
-								id='middleName'
-								type='text'
-								value={formData.middleName}
-								onChange={e =>
-									setFormData(prev => ({
-										...prev,
-										middleName: e.target.value,
-									}))
-								}
-								required
-								placeholder='Иванович'
-							/>
-						</div>
 
-						<div>
-							<label
-								htmlFor='email'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Email *
-							</label>
-							<Input
-								id='email'
-								type='email'
-								value={formData.email}
-								onChange={e =>
-									setFormData(prev => ({ ...prev, email: e.target.value }))
-								}
-								required
-								placeholder='email@example.com'
+							<FormField
+								control={form.control}
+								name='lastName'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Фамилия *</FormLabel>
+										<FormControl>
+											<Input type='text' placeholder='Иванов' {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
 
-						<div>
-							<label
-								htmlFor='password'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Пароль *
-							</label>
-							<Input
-								id='password'
-								type='password'
-								value={formData.password}
-								onChange={e =>
-									setFormData(prev => ({ ...prev, password: e.target.value }))
-								}
-								required
-								placeholder='••••••••'
+							<FormField
+								control={form.control}
+								name='middleName'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Отчество *</FormLabel>
+										<FormControl>
+											<Input type='text' placeholder='Иванович' {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
 
-						<div>
-							<label
-								htmlFor='confirmPassword'
-								className='block text-sm font-medium text-slate-700 mb-2'
-							>
-								Подтвердите пароль *
-							</label>
-							<Input
-								id='confirmPassword'
-								type='password'
-								value={formData.confirmPassword}
-								onChange={e =>
-									setFormData(prev => ({
-										...prev,
-										confirmPassword: e.target.value,
-									}))
-								}
-								required
-								placeholder='••••••••'
+							<FormField
+								control={form.control}
+								name='email'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email *</FormLabel>
+										<FormControl>
+											<Input
+												type='email'
+												placeholder='email@example.com'
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
 
-						<Button type='submit' disabled={isSubmitting} className='w-full'>
-							{isSubmitting ? (
-								<div className='flex items-center gap-2'>
-									<Spinner />
-									<span>Регистрация...</span>
-								</div>
-							) : (
-								<span>Зарегистрироваться</span>
-							)}
-						</Button>
-					</form>
+							<FormField
+								control={form.control}
+								name='password'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Пароль *</FormLabel>
+										<FormControl>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name='confirmPassword'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Подтвердите пароль *</FormLabel>
+										<FormControl>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<Button type='submit' disabled={isSubmitting} className='w-full'>
+								{isSubmitting ? (
+									<div className='flex items-center gap-2'>
+										<Spinner />
+										<span>Регистрация...</span>
+									</div>
+								) : (
+									<span>Зарегистрироваться</span>
+								)}
+							</Button>
+						</form>
+					</Form>
 
 					<div className='mt-6 text-center'>
 						<a
@@ -265,4 +243,3 @@ export function RegistrationForm() {
 		</div>
 	)
 }
-

@@ -57,3 +57,8 @@ export type UserFullData = UserShortData & {
 	createdOrganizationId?: string | null
 	createdAt: string
 }
+
+export interface LoginErrorResponse {
+	message: string
+	statusCode: number
+}

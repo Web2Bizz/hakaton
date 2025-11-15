@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { LocationPicker } from './LocationPicker'
-import { OrganizationBasicInfo } from './organization/OrganizationBasicInfo'
-import { OrganizationAssistanceSection } from './organization/OrganizationAssistanceSection'
-import { OrganizationGoalsNeedsSection } from './organization/OrganizationGoalsNeedsSection'
-import { QuestLocationSection } from './quest/QuestLocationSection'
-import { OrganizationContactsSection } from './organization/OrganizationContactsSection'
-import { QuestSocialsSection } from './quest/QuestSocialsSection'
-import { DangerZone } from './shared/DangerZone'
-import { useOrganizationForm } from './organization/hooks/useOrganizationForm'
+import { LocationPicker } from '../shared/LocationPicker'
+import { OrganizationBasicInfo } from './OrganizationBasicInfo'
+import { OrganizationAssistanceSection } from './OrganizationAssistanceSection'
+import { OrganizationGoalsNeedsSection } from './OrganizationGoalsNeedsSection'
+import { QuestLocationSection } from '../quest/QuestLocationSection'
+import { OrganizationContactsSection } from './OrganizationContactsSection'
+import { QuestSocialsSection } from '../quest/QuestSocialsSection'
+import { DangerZone } from '../shared/DangerZone'
+import { useOrganizationForm } from './hooks/useOrganizationForm'
 import { useState } from 'react'
 import type { AssistanceTypeId } from '@/types/common'
 
@@ -223,3 +223,4 @@ export function AddOrganizationForm({ onSuccess }: AddOrganizationFormProps) {
 		</form>
 	)
 }
+

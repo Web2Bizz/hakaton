@@ -1,5 +1,5 @@
 import { MapComponent } from '@/components'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { ProtectedRoute } from '@/provider/ProtectedRoute'
 
 export const MapPage = () => {
 	return (
