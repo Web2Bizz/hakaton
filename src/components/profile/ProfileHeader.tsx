@@ -1,7 +1,11 @@
 import { Button } from '@/components/ui/button'
+import { useUser } from '@/hooks/useUser'
+import { useUpdateUserMutation } from '@/store/entities'
 import type { User } from '@/types/user'
-import { Award, LogOut, Mail, Trophy } from 'lucide-react'
-import { memo } from 'react'
+import { compressImage } from '@/utils/storage'
+import { Award, Camera, LogOut, Mail, Trophy } from 'lucide-react'
+import { memo, useCallback, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 interface ProfileHeaderProps {
 	user: User
@@ -12,9 +16,110 @@ export const ProfileHeader = memo(function ProfileHeader({
 	user,
 	onLogout,
 }: ProfileHeaderProps) {
+	const { setUser } = useUser()
+	const [updateUser, { isLoading: isUpdatingAvatar }] = useUpdateUserMutation()
+	const [isUploading, setIsUploading] = useState(false)
+	const fileInputRef = useRef<HTMLInputElement>(null)
+
 	const unlockedAchievements = user.achievements.filter(
 		a => a.unlockedAt !== undefined
 	).length
+
+	const handleAvatarClick = useCallback(() => {
+		fileInputRef.current?.click()
+	}, [])
+
+	const handleAvatarChange = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
+			const file = e.target.files?.[0]
+			if (!file) return
+
+			// Проверяем тип файла
+			if (!file.type.startsWith('image/')) {
+				toast.error('Пожалуйста, выберите изображение')
+				return
+			}
+
+			// Проверяем размер файла (макс. 5 МБ)
+			const maxSizeMB = 5
+			const fileSizeMB = file.size / (1024 * 1024)
+			if (fileSizeMB > maxSizeMB) {
+				toast.error(`Размер файла превышает ${maxSizeMB} МБ`)
+				return
+			}
+
+			setIsUploading(true)
+
+			try {
+				// Сжимаем изображение
+				const compressedAvatar = await compressImage(file, 400, 400, 0.9)
+
+				// Обновляем аватар через API
+				const result = await updateUser({
+					userId: user.id,
+					data: { avatar: compressedAvatar },
+				}).unwrap()
+
+				// Обновляем пользователя в контексте
+				setUser(prevUser => {
+					if (!prevUser) return prevUser
+					return {
+						...prevUser,
+						avatar: result.avatar || compressedAvatar,
+					}
+				})
+
+				toast.success('Аватар успешно обновлен!')
+			} catch (error) {
+				// Улучшенная обработка ошибок RTK Query
+				let errorMessage = 'Не удалось обновить аватар. Попробуйте еще раз.'
+
+				if (error && typeof error === 'object') {
+					// RTK Query ошибка может быть в формате { status, data, error }
+					if ('data' in error && error.data) {
+						const errorData = error.data as
+							| { message?: string }
+							| { error?: string }
+							| string
+						if (typeof errorData === 'string') {
+							errorMessage = errorData
+						} else if (errorData && typeof errorData === 'object') {
+							if (
+								'message' in errorData &&
+								typeof errorData.message === 'string'
+							) {
+								errorMessage = errorData.message
+							} else if (
+								'error' in errorData &&
+								typeof errorData.error === 'string'
+							) {
+								errorMessage = errorData.error
+							}
+						}
+					} else if ('error' in error && typeof error.error === 'string') {
+						errorMessage = error.error
+					} else if ('message' in error && typeof error.message === 'string') {
+						errorMessage = error.message
+					}
+				} else if (error instanceof Error) {
+					errorMessage = error.message
+				}
+
+				toast.error(errorMessage)
+				if (import.meta.env.DEV) {
+					console.error('Error updating avatar:', error)
+					console.error('Error details:', JSON.stringify(error, null, 2))
+				}
+			} finally {
+				setIsUploading(false)
+				// Сбрасываем значение input, чтобы можно было выбрать тот же файл снова
+				if (fileInputRef.current) {
+					fileInputRef.current.value = ''
+				}
+			}
+		},
+		[updateUser, user.id, setUser]
+	)
 
 	return (
 		<div className='relative overflow-hidden rounded-3xl shadow-2xl bg-linear-to-br from-blue-500 via-blue-400 to-cyan-400'>
@@ -41,12 +146,42 @@ export const ProfileHeader = memo(function ProfileHeader({
 				{/* Основная информация */}
 				<div className='flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8'>
 					{/* Аватар */}
-					<div className='relative shrink-0'>
-						<div className='w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl bg-white/95 backdrop-blur-md border-4 border-white flex items-center justify-center text-blue-600 text-4xl sm:text-5xl md:text-6xl font-bold shadow-xl'>
-							{user.name.charAt(0).toUpperCase()}
-						</div>
+					<div className='relative shrink-0 group'>
+						<button
+							type='button'
+							onClick={handleAvatarClick}
+							disabled={isUploading || isUpdatingAvatar}
+							className='relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl bg-white/95 backdrop-blur-md border-4 border-white flex items-center justify-center text-blue-600 text-4xl sm:text-5xl md:text-6xl font-bold shadow-xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed'
+							title='Нажмите, чтобы изменить аватар'
+						>
+							{user.avatar ? (
+								<img
+									src={user.avatar}
+									alt={user.name}
+									className='w-full h-full object-cover'
+								/>
+							) : (
+								<span>{user.name.charAt(0).toUpperCase()}</span>
+							)}
+							{/* Overlay при наведении */}
+							<div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
+								{isUploading || isUpdatingAvatar ? (
+									<div className='h-6 w-6 sm:h-8 sm:w-8 border-2 border-white border-t-transparent rounded-full animate-spin' />
+								) : (
+									<Camera className='h-6 w-6 sm:h-8 sm:w-8 text-white' />
+								)}
+							</div>
+						</button>
+						<input
+							ref={fileInputRef}
+							type='file'
+							accept='image/*'
+							onChange={handleAvatarChange}
+							className='hidden'
+							disabled={isUploading || isUpdatingAvatar}
+						/>
 						{/* Бейдж уровня */}
-						<div className='absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full px-3 py-1 text-xs sm:text-sm font-bold shadow-lg border-2 border-white'>
+						<div className='absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full px-3 py-1 text-xs sm:text-sm font-bold shadow-lg border-2 border-white z-10'>
 							Lv.{user.level.level}
 						</div>
 					</div>

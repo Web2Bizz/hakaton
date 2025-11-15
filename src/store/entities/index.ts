@@ -5,6 +5,7 @@ export {
 	useLazyGetUserQuery,
 	useLoginMutation,
 	useRegisterMutation,
+	useUpdateUserMutation,
 } from './auth/model/auth-service'
 export type { LoginErrorResponse } from './auth/model/type'
 
