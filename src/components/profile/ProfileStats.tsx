@@ -18,7 +18,7 @@ export const ProfileStats = memo(function ProfileStats({
 					<Trophy className='h-5 w-5 text-blue-600' />
 					<span className='text-sm font-medium text-slate-700'>Квестов</span>
 				</div>
-				<p className='text-2xl font-bold text-slate-900'>{stats.totalQuests}</p>
+				<p className='text-2xl font-bold text-slate-900'>{stats?.totalQuests ?? 0}</p>
 			</div>
 
 			<div className='p-4 rounded-xl bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200'>

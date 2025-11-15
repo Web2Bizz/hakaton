@@ -214,7 +214,7 @@ export const ProfileHeader = memo(function ProfileHeader({
 							</span>
 						</div>
 						<p className='text-xl sm:text-2xl font-bold text-slate-900'>
-							{user.stats.totalQuests}
+							{user.stats?.totalQuests ?? 0}
 						</p>
 					</div>
 

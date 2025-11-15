@@ -36,8 +36,19 @@ export function useQuestActions() {
 					...currentUser,
 					participatingQuests: [...currentUser.participatingQuests, questId],
 					stats: {
-						...currentUser.stats,
-						totalQuests: currentUser.stats.totalQuests + 1,
+						...(currentUser.stats || {
+							totalQuests: 0,
+							completedQuests: 0,
+							totalDonations: 0,
+							totalVolunteerHours: 0,
+							totalImpact: {
+								treesPlanted: 0,
+								animalsHelped: 0,
+								areasCleaned: 0,
+								livesChanged: 0,
+							},
+						}),
+						totalQuests: (currentUser.stats?.totalQuests ?? 0) + 1,
 					},
 				}
 
@@ -155,9 +166,21 @@ export function useQuestActions() {
 				const updatedUser: User = {
 					...currentUser,
 					stats: {
-						...currentUser.stats,
+						...(currentUser.stats || {
+							totalQuests: 0,
+							completedQuests: 0,
+							totalDonations: 0,
+							totalVolunteerHours: 0,
+							totalImpact: {
+								treesPlanted: 0,
+								animalsHelped: 0,
+								areasCleaned: 0,
+								livesChanged: 0,
+							},
+						}),
 						totalDonations:
-							currentUser.stats.totalDonations + (contribution.amount || 0),
+							(currentUser.stats?.totalDonations ?? 0) +
+							(contribution.amount || 0),
 					},
 				}
 

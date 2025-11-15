@@ -33,10 +33,10 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 			title: getLevelTitle(normalized.level),
 		},
 		stats: {
-			totalQuests: apiUser.stats.totalQuests,
-			completedQuests: apiUser.stats.completedQuests,
-			totalDonations: apiUser.stats.totalDonations,
-			totalVolunteerHours: apiUser.stats.totalVolunteerHours,
+			totalQuests: apiUser.stats?.totalQuests ?? 0,
+			completedQuests: apiUser.stats?.completedQuests ?? 0,
+			totalDonations: apiUser.stats?.totalDonations ?? 0,
+			totalVolunteerHours: apiUser.stats?.totalVolunteerHours ?? 0,
 			totalImpact: {
 				treesPlanted: 0,
 				animalsHelped: 0,
