@@ -34,7 +34,7 @@ export function AddressSearchInput({
 	const [showSuggestions, setShowSuggestions] = useState(false)
 	const [selectedIndex, setSelectedIndex] = useState(-1)
 	const { searchAddress, isLoading: isAddressLoading } = useGeocode()
-	const { searchOrganizations } = useOrganizationSearch(organizations)
+	const { searchOrganizations } = useOrganizationSearch(organizations || [])
 	const inputRef = useRef<HTMLInputElement>(null)
 	const suggestionsRef = useRef<HTMLDivElement>(null)
 
@@ -44,9 +44,14 @@ export function AddressSearchInput({
 				const results: SearchResult[] = []
 
 				// Поиск организаций (быстрый, локальный)
-				const orgResults = searchOrganizations(query)
-				for (const org of orgResults) {
-					results.push({ type: 'organization', data: org })
+				if (organizations && organizations.length > 0) {
+					const orgResults = searchOrganizations(query)
+					if (import.meta.env.DEV) {
+						console.log('Search query:', query, 'Found organizations:', orgResults.length)
+					}
+					for (const org of orgResults) {
+						results.push({ type: 'organization', data: org })
+					}
 				}
 
 				// Поиск адресов (медленный, API)
