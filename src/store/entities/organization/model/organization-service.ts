@@ -5,9 +5,9 @@ import type {
 	CreateOrganizationResponse,
 	DeleteOrganizationResponse,
 	HelpTypeResponse,
+	Organization,
 	OrganizationResponse,
 	OrganizationTypeResponse,
-	OrganizationsListResponse,
 	UpdateOrganizationRequest,
 	UpdateOrganizationResponse,
 	UploadImageResponse,
@@ -37,7 +37,7 @@ export const organizationService = createApi({
 	tagTypes: ['Organization', 'OrganizationList'],
 	endpoints: builder => ({
 		// GET /organizations - Получить список всех организаций
-		getOrganizations: builder.query<OrganizationsListResponse, void>({
+		getOrganizations: builder.query<Organization[], void>({
 			query: () => '/organizations',
 			providesTags: ['OrganizationList'],
 		}),

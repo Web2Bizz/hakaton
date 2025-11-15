@@ -1,17 +1,21 @@
 import { ASSISTANCE_OPTIONS } from '@/constants'
-import { getAllQuests, getAllOrganizations } from '@/utils/userData'
+import { useGetOrganizationsQuery } from '@/store/entities/organization'
+import { getAllOrganizations, getAllQuests } from '@/utils/userData'
 import { useMemo, useState } from 'react'
 import {
 	cities as orgCities,
 	organizationTypes,
-	organizations as baseOrganizations,
 } from '../../data/organizations'
-import { questCities, questTypes, quests as baseQuests } from '../../data/quests'
+import {
+	quests as baseQuests,
+	questCities,
+	questTypes,
+} from '../../data/quests'
 import { useFilteredOrganizations } from '../../hooks/useFilteredOrganizations'
 import { useFilteredQuests } from '../../hooks/useFilteredQuests'
-import type { FiltersState } from '../actions/types'
 import type { Quest } from '../../types/quest-types'
 import type { Organization } from '../../types/types'
+import type { FiltersState } from '../actions/types'
 
 const initialFilters: FiltersState = {
 	city: '',
@@ -39,15 +43,39 @@ export function useMapState() {
 	const [isFiltersClosing, setIsFiltersClosing] = useState(false)
 	const [isListClosing, setIsListClosing] = useState(false)
 
+	// Загружаем организации из API
+	const {
+		data: organizationsResponse,
+		isLoading: isLoadingOrganizations,
+		error: organizationsError,
+	} = useGetOrganizationsQuery()
+
+	// Получаем организации из API или пустой массив
+	const apiOrganizations = useMemo(() => {
+		if (organizationsResponse && Array.isArray(organizationsResponse)) {
+			return organizationsResponse
+		}
+		return []
+	}, [organizationsResponse])
+
 	// Объединяем базовые данные с созданными пользователями
 	const allQuests = useMemo(() => getAllQuests(baseQuests), [])
-	const allOrganizations = useMemo(
-		() => getAllOrganizations(baseOrganizations),
-		[]
-	)
+
+	// Используем организации из API вместо mock данных
+	// getAllOrganizations может добавить организации, созданные пользователем локально
+	const allOrganizations = useMemo(() => {
+		const userOrganizations = getAllOrganizations([])
+
+		console.log(userOrganizations, apiOrganizations)
+		// Объединяем API организации с локальными (если есть)
+		return [...apiOrganizations, ...userOrganizations]
+	}, [apiOrganizations])
 
 	const filteredQuests = useFilteredQuests(allQuests, filters)
-	const filteredOrganizations = useFilteredOrganizations(allOrganizations, filters)
+	const filteredOrganizations = useFilteredOrganizations(
+		allOrganizations,
+		filters
+	)
 
 	// Объединяем города и типы из обоих источников
 	const allCities = useMemo(
@@ -95,6 +123,8 @@ export function useMapState() {
 		filteredOrganizations,
 		allCities,
 		allTypes,
+		// Loading states
+		isLoadingOrganizations,
+		organizationsError,
 	}
 }
-

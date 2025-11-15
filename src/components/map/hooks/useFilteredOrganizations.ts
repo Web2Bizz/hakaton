@@ -14,7 +14,7 @@ export function useFilteredOrganizations(
 			}
 
 			// Фильтр по типу
-			if (filters.type && org.organizationTypes[0]?.name !== filters.type) {
+			if (filters.type && org.organizationTypes?.[0]?.name !== filters.type) {
 				return false
 			}
 

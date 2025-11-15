@@ -24,6 +24,5 @@ export type {
 	UpdateOrganizationRequest,
 	UpdateOrganizationResponse,
 	UploadImageResponse,
-	UploadImagesRequest,
 } from './model/type'
 

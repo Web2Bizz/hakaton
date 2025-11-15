@@ -80,19 +80,30 @@ export function MapView({
 					</Marker>
 				)}
 
-				{organizations.map(organization => (
-					<Marker
-						key={organization.id}
-						position={getOrganizationCoordinates(organization)}
-						icon={getMarkerIcon(organization.organizationTypes[0]?.name || '')}
-						eventHandlers={{
-							click: () => {
-								if (onMarkerClick) {
-									onMarkerClick(organization)
-								}
-							},
-						}}
-					>
+				{organizations
+					.filter(organization => {
+						// Фильтруем организации с валидными координатами
+						return (
+							organization &&
+							organization.latitude &&
+							organization.longitude &&
+							!Number.isNaN(Number.parseFloat(organization.latitude)) &&
+							!Number.isNaN(Number.parseFloat(organization.longitude))
+						)
+					})
+					.map(organization => (
+						<Marker
+							key={organization.id}
+							position={getOrganizationCoordinates(organization)}
+							icon={getMarkerIcon(organization.organizationTypes?.[0]?.name || '')}
+							eventHandlers={{
+								click: () => {
+									if (onMarkerClick) {
+										onMarkerClick(organization)
+									}
+								},
+							}}
+						>
 						<Popup>
 							<OrganizationPopup
 								organization={organization}

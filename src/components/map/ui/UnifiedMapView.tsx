@@ -55,7 +55,9 @@ export function UnifiedMapView({
 	// Вычисляем центр карты для всех элементов
 	const mapCenter = useMemo(() => {
 		const questCoords = quests.map(q => q.coordinates)
-		const orgCoords = organizations.map(o => getOrganizationCoordinates(o))
+		const orgCoords = organizations
+			.filter(o => o && o.latitude && o.longitude)
+			.map(o => getOrganizationCoordinates(o))
 		const allItems = [...questCoords, ...orgCoords]
 
 		if (allItems.length === 0) {
@@ -123,19 +125,32 @@ export function UnifiedMapView({
 					</Marker>
 				))}
 
-				{organizations.map(organization => (
-					<Marker
-						key={`org-${organization.id}`}
-						position={getOrganizationCoordinates(organization)}
-						icon={getMarkerIcon(organization.organizationTypes[0]?.name || '')}
-						eventHandlers={{
-							click: () => {
-								if (onMarkerClick) {
-									onMarkerClick(organization)
-								}
-							},
-						}}
-					>
+				{organizations
+					.filter(organization => {
+						// Фильтруем организации с валидными координатами
+						return (
+							organization &&
+							organization.latitude &&
+							organization.longitude &&
+							!Number.isNaN(Number.parseFloat(organization.latitude)) &&
+							!Number.isNaN(Number.parseFloat(organization.longitude))
+						)
+					})
+					.map(organization => (
+						<Marker
+							key={`org-${organization.id}`}
+							position={getOrganizationCoordinates(organization)}
+							icon={getMarkerIcon(
+								organization.organizationTypes?.[0]?.name || ''
+							)}
+							eventHandlers={{
+								click: () => {
+									if (onMarkerClick) {
+										onMarkerClick(organization)
+									}
+								},
+							}}
+						>
 						<Popup>
 							<OrganizationPopup
 								organization={organization}
