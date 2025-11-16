@@ -169,40 +169,88 @@ export function OrganizationDetails({
 								<span className='font-medium text-slate-500'>Адрес</span>
 								<p className='text-slate-700 m-0'>{organization.address || 'Не указан'}</p>
 
-								{organization.contacts && organization.contacts.length > 0 && organization.contacts.map((contact, index) => (
-									<>
-										<span
-											key={`label-${index}`}
-											className='font-medium text-slate-500'
-										>
-											{contact.name}
-										</span>
-										{contact.name === 'Телефон' ? (
-											<a
-												key={`value-${index}`}
-												href={`tel:${contact.value}`}
-												className='text-blue-600 hover:text-blue-700 hover:underline m-0'
+								{organization.contacts && organization.contacts.length > 0 && organization.contacts.map((contact, index) => {
+									// Функция для формирования ссылки в зависимости от типа контакта
+									const getContactUrl = (name: string, value: string): string | null => {
+										const normalizedName = name.toLowerCase().trim()
+										const normalizedValue = value.trim()
+										
+										if (!normalizedValue) return null
+										
+										if (normalizedName === 'телефон') {
+											// Убираем все нецифровые символы для tel: ссылки
+											const phoneNumber = normalizedValue.replace(/\D/g, '')
+											return phoneNumber ? `tel:${phoneNumber}` : null
+										}
+										
+										if (normalizedName === 'email') {
+											return `mailto:${normalizedValue}`
+										}
+										
+										if (normalizedName === 'whatsapp') {
+											// Убираем все нецифровые символы для WhatsApp
+											const phoneNumber = normalizedValue.replace(/\D/g, '')
+											return phoneNumber ? `https://wa.me/${phoneNumber}` : null
+										}
+										
+										if (normalizedName === 'telegram') {
+											// Убираем @ если есть
+											const username = normalizedValue.replace(/^@/, '').replace(/\s/g, '')
+											return username ? `https://t.me/${username}` : null
+										}
+										
+										if (normalizedName === 'instagram' || normalizedName === 'инстаграм') {
+											// Убираем @ если есть
+											const username = normalizedValue.replace(/^@/, '').replace(/\s/g, '')
+											return username ? `https://instagram.com/${username}` : null
+										}
+										
+										if (normalizedName === 'вконтакте' || normalizedName === 'vk' || normalizedName === 'vkontakte') {
+											// Убираем vk.com/ если есть
+											const username = normalizedValue.replace(/^(https?:\/\/)?(www\.)?(vk\.com\/|vkontakte\.ru\/)?/i, '').replace(/\s/g, '')
+											return username ? `https://vk.com/${username}` : null
+										}
+										
+										// Если значение уже является URL, используем его
+										if (normalizedValue.startsWith('http://') || normalizedValue.startsWith('https://')) {
+											return normalizedValue
+										}
+										
+										// Для остальных типов возвращаем null (будет отображаться как текст)
+										return null
+									}
+									
+									const contactUrl = getContactUrl(contact.name, contact.value)
+									
+									return (
+										<>
+											<span
+												key={`label-${index}`}
+												className='font-medium text-slate-500'
 											>
-												{contact.value}
-											</a>
-										) : contact.name === 'Email' ? (
-											<a
-												key={`value-${index}`}
-												href={`mailto:${contact.value}`}
-												className='text-blue-600 hover:text-blue-700 hover:underline m-0'
-											>
-												{contact.value}
-											</a>
-										) : (
-											<p
-												key={`value-${index}`}
-												className='text-slate-700 m-0'
-											>
-												{contact.value}
-											</p>
-										)}
-									</>
-								))}
+												{contact.name}
+											</span>
+											{contactUrl ? (
+												<a
+													key={`value-${index}`}
+													href={contactUrl}
+													target='_blank'
+													rel='noopener noreferrer'
+													className='text-blue-600 hover:text-blue-700 hover:underline m-0'
+												>
+													{contact.value}
+												</a>
+											) : (
+												<p
+													key={`value-${index}`}
+													className='text-slate-700 m-0'
+												>
+													{contact.value}
+												</p>
+											)}
+										</>
+									)
+								})}
 							</div>
 						</div>
 

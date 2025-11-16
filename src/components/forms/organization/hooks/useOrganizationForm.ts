@@ -108,14 +108,29 @@ export function useOrganizationForm(
 	// Загружаем данные существующей организации при редактировании
 	useEffect(() => {
 		if (existingOrg && !form.formState.isDirty && !isLoadingOrganization) {
-			const phoneContact = existingOrg.contacts.find(c => c.name === 'Телефон')
-			const emailContact = existingOrg.contacts.find(c => c.name === 'Email')
-
 			// Получаем organizationTypeId из organizationTypes массива или из type (если есть в ответе API)
 			const organizationTypeId =
 				existingOrg.organizationTypes?.[0]?.id ||
 				(existingOrg as Organization & { type?: { id: number } }).type?.id ||
 				0
+
+			// Загружаем все контакты динамически
+			// Если контактов нет, создаем базовые (телефон и email)
+			let contactsToLoad: Array<{ name: string; value: string }> = []
+
+			if (existingOrg.contacts && existingOrg.contacts.length > 0) {
+				// Загружаем все контакты из API
+				contactsToLoad = existingOrg.contacts.map(contact => ({
+					name: contact.name || '',
+					value: contact.value || '',
+				}))
+			} else {
+				// Если контактов нет, создаем базовые
+				contactsToLoad = [
+					{ name: 'Телефон', value: '' },
+					...(user?.email ? [{ name: 'Email', value: user.email }] : []),
+				]
+			}
 
 			form.reset({
 				name: existingOrg.name || '',
@@ -134,14 +149,7 @@ export function useOrganizationForm(
 						? existingOrg.needs
 						: [''],
 				address: existingOrg.address || '',
-				contacts: [
-					...(phoneContact ? [phoneContact] : [{ name: 'Телефон', value: '' }]),
-					...(emailContact
-						? [emailContact]
-						: user?.email
-						? [{ name: 'Email', value: user.email }]
-						: []),
-				],
+				contacts: contactsToLoad,
 				latitude: existingOrg.latitude.toString() || '',
 				longitude: existingOrg.longitude.toString() || '',
 				gallery: existingOrg.gallery || [],

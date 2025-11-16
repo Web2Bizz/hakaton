@@ -42,7 +42,8 @@ export function OrganizationContactsSection() {
 											<option value='Email'>Email</option>
 											<option value='WhatsApp'>WhatsApp</option>
 											<option value='Telegram'>Telegram</option>
-											<option value='Instagram'>Вконтакте</option>
+											<option value='Вконтакте'>Вконтакте</option>
+											<option value='TicTok'>TicTok</option>
 											<option value='Другое'>Другое</option>
 										</select>
 									</FormControl>
