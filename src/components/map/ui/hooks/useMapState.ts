@@ -159,7 +159,6 @@ export function useMapState() {
 	const allOrganizations = useMemo(() => {
 		const userOrganizations = getAllOrganizations([])
 
-		console.log(userOrganizations, apiOrganizations)
 		// Объединяем API организации с локальными (если есть)
 		return [...apiOrganizations, ...userOrganizations]
 	}, [apiOrganizations])

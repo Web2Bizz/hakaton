@@ -149,9 +149,6 @@ export function MediaUpload({
 							})
 						)
 						const newImages = [...images, ...base64Images]
-						if (import.meta.env.DEV) {
-							console.log('MediaUpload: calling onImagesChange with', newImages.length, 'images')
-						}
 						onImagesChange(newImages)
 						if (imageFiles.length > 0) {
 							toast.success(`Загружено изображений: ${imageFiles.length}`)

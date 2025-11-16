@@ -191,9 +191,6 @@ export function OrganizationBasicInfo({
 							<MediaUpload
 								images={field.value || []}
 								onImagesChange={newImages => {
-									if (import.meta.env.DEV) {
-										console.log('Gallery changed:', newImages.length, 'images')
-									}
 									field.onChange(newImages)
 								}}
 								maxImages={10}

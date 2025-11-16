@@ -69,32 +69,16 @@ export function useQuestActions() {
 			// Начисляем опыт за участие в квесте (50 опыта)
 			const experienceGain = 50
 			try {
-				if (import.meta.env.DEV) {
-					console.log('Adding experience (participate):', {
-						userId: user.id,
-						amount: experienceGain,
-					})
-				}
-
 				const result = await addExperience({
 					userId: user.id,
 					data: { amount: experienceGain },
 				}).unwrap()
 
-				if (import.meta.env.DEV) {
-					console.log('Experience added successfully (participate):', result)
-				}
-
-				// Обновляем данные пользователя с сервера
 				try {
 					const userResult = await getUser(user.id).unwrap()
 					if (userResult) {
 						const transformedUser = transformUserFromAPI(userResult)
 						setUser(transformedUser)
-
-						if (import.meta.env.DEV) {
-							console.log('User data updated from server:', transformedUser)
-						}
 					}
 				} catch (error) {
 					if (import.meta.env.DEV) {
@@ -214,34 +198,17 @@ export function useQuestActions() {
 				return updatedUser
 			})
 
-			// Начисляем опыт через API
 			try {
-				if (import.meta.env.DEV) {
-					console.log('Adding experience (contribute):', {
-						userId: user.id,
-						amount: experienceGain,
-					})
-				}
-
 				const result = await addExperience({
 					userId: user.id,
 					data: { amount: experienceGain },
 				}).unwrap()
 
-				if (import.meta.env.DEV) {
-					console.log('Experience added successfully (contribute):', result)
-				}
-
-				// Обновляем данные пользователя с сервера
 				try {
 					const userResult = await getUser(user.id).unwrap()
 					if (userResult) {
 						const transformedUser = transformUserFromAPI(userResult)
 						setUser(transformedUser)
-
-						if (import.meta.env.DEV) {
-							console.log('User data updated from server:', transformedUser)
-						}
 					}
 				} catch (error) {
 					if (import.meta.env.DEV) {

@@ -46,9 +46,6 @@ export function AddressSearchInput({
 				// Поиск организаций (быстрый, локальный)
 				if (organizations && organizations.length > 0) {
 					const orgResults = searchOrganizations(query)
-					if (import.meta.env.DEV) {
-						console.log('Search query:', query, 'Found organizations:', orgResults.length)
-					}
 					for (const org of orgResults) {
 						results.push({ type: 'organization', data: org })
 					}

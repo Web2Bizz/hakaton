@@ -31,9 +31,6 @@ export const MapSearch = memo(function MapSearch({
 
 	// Преобразуем SearchItem[] в формат для AddressSearchInput
 	const organizationsForSearch = useMemo(() => {
-		if (import.meta.env.DEV) {
-			console.log('MapSearch: searchItems count:', searchItems.length)
-		}
 		
 		return searchItems.map(item => {
 			if ('isQuest' in item && item.isQuest) {

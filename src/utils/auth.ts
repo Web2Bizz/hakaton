@@ -63,8 +63,6 @@ function getAvatarUrl(
  * Преобразует данные пользователя из API в формат для локального состояния
  */
 export function transformUserFromAPI(apiUser: UserFullData): User {
-	console.log(apiUser)
-
 	// Нормализуем уровень из API
 	const normalized = normalizeUserLevel(
 		apiUser.level,

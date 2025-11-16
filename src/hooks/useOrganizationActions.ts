@@ -53,7 +53,6 @@ export function useOrganizationActions() {
 	}, [user])
 
 	const canCreateOrganization = useCallback(() => {
-		console.log(user)
 		return !user?.createdOrganizationId
 	}, [user])
 

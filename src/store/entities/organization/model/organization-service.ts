@@ -85,7 +85,7 @@ export const organizationService = createApi({
 				url: `/organizations/${organizationId}`,
 				method: 'DELETE',
 			}),
-			invalidatesTags: (result, error, organizationId) => [
+			invalidatesTags: (_result, _error, organizationId) => [
 				'OrganizationList',
 				{ type: 'Organization', id: organizationId },
 			],

@@ -2,7 +2,6 @@ import L from 'leaflet'
 import type { QuestProgressColor } from '../types/quest-types'
 
 const typeIcons: Record<string, string> = {
-	// Типы организаций из API
 	'Благотворительный фонд': '💝',
 	'Местное сообщество и развитие территорий': '🏘️',
 	'Социальная защита (помощь людям в трудной ситуации)': '🛡️',
@@ -11,7 +10,6 @@ const typeIcons: Record<string, string> = {
 	'Культура и образование': '🎓',
 	'Защита животных': '🐾',
 	Другое: '📍',
-	// Старые типы (для квестов)
 	'Помощь животным': '🐾',
 	'Помощь пожилым': '🤝',
 	'Помощь детям': '🎈',
@@ -22,13 +20,12 @@ const typeIcons: Record<string, string> = {
 	Образование: '📚',
 }
 
-// Цвета маркеров в зависимости от прогресса квеста
 const progressColors: Record<QuestProgressColor, string> = {
-	red: '#ef4444', // 0-25%
-	orange: '#f97316', // 26-50%
-	yellow: '#eab308', // 51-75%
-	green: '#22c55e', // 76-99%
-	victory: '#10b981', // 100% - победа (цветок)
+	red: '#ef4444',
+	orange: '#f97316',
+	yellow: '#eab308',
+	green: '#22c55e',
+	victory: '#10b981',
 }
 
 export function getMarkerIcon(
@@ -36,11 +33,7 @@ export function getMarkerIcon(
 	progressColor?: QuestProgressColor
 ) {
 	const emoji = typeIcons[type] || '📍'
-	// Для организаций (без progressColor) используем фиолетовый цвет
-	// Для квестов используем цвета прогресса
 	const bgColor = progressColor ? progressColors[progressColor] : '#63a5db'
-
-	// Для завершенных квестов используем эмодзи цветка
 	const displayEmoji = progressColor === 'victory' ? '🌸' : emoji
 
 	return L.divIcon({
