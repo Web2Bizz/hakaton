@@ -14,17 +14,30 @@ export function useFilteredOrganizations(
 			}
 
 			// Фильтр по типу
-			if (filters.type && org.organizationTypes?.[0]?.name !== filters.type) {
-				return false
+			// Проверяем как organizationTypes, так и type (для совместимости)
+			if (filters.type) {
+				const orgTypeName = 
+					org.organizationTypes?.[0]?.name ||
+					(org as Organization & { type?: { name: string } }).type?.name ||
+					''
+				
+				if (orgTypeName !== filters.type) {
+					return false
+				}
 			}
 
 			// Фильтр по поисковому запросу
 			if (filters.search) {
 				const searchLower = filters.search.toLowerCase()
+				const orgTypeName = 
+					org.organizationTypes?.[0]?.name ||
+					(org as Organization & { type?: { name: string } }).type?.name ||
+					''
+				
 				const searchableText = [
 					org.name,
 					org.city.name,
-					org.organizationTypes[0]?.name || '',
+					orgTypeName,
 					org.summary,
 					org.description,
 					org.address,

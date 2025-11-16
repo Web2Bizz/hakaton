@@ -57,11 +57,41 @@ export function useMapState() {
 	const { data: organizationTypesData = [] } = useGetOrganizationTypesQuery()
 
 	// Получаем организации из API или пустой массив
+	// Нормализуем данные: преобразуем type в organizationTypes если нужно
 	const apiOrganizations = useMemo(() => {
-		if (organizationsResponse && Array.isArray(organizationsResponse)) {
-			return organizationsResponse
-		}
-		return []
+		if (!organizationsResponse) return []
+
+		const orgs = Array.isArray(organizationsResponse)
+			? organizationsResponse
+			: []
+
+		// Нормализуем структуру: если есть type, преобразуем в organizationTypes
+		return orgs.map(org => {
+			// Если есть type, но нет organizationTypes, создаем массив
+			if (
+				(org as Organization & { type?: { id: number; name: string } }).type &&
+				(!org.organizationTypes || org.organizationTypes.length === 0)
+			) {
+				const typeObj = (
+					org as Organization & { type: { id: number; name: string } }
+				).type
+				return {
+					...org,
+					organizationTypes: [typeObj],
+				}
+			}
+			// Если organizationTypes пустой массив, но есть type
+			const orgType = (
+				org as Organization & { type?: { id: number; name: string } }
+			).type
+			if (org.organizationTypes?.length === 0 && orgType) {
+				return {
+					...org,
+					organizationTypes: [orgType],
+				}
+			}
+			return org
+		})
 	}, [organizationsResponse])
 
 	// Объединяем базовые данные с созданными пользователями

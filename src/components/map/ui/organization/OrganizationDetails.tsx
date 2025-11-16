@@ -77,7 +77,9 @@ export function OrganizationDetails({
 									{organization.name}
 								</h2>
 								<p className='text-sm text-slate-600 m-0'>
-									{organization.organizationTypes?.[0]?.name || ''}
+									{organization.organizationTypes?.[0]?.name ||
+										(organization as Organization & { type?: { name: string } }).type?.name ||
+										''}
 								</p>
 							</div>
 							{onClose && (
