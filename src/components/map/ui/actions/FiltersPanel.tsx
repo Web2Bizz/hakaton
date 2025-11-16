@@ -1,5 +1,4 @@
 import { Input } from '@/components/ui/input'
-import { ASSISTANCE_OPTIONS } from '@/constants'
 import { X } from 'lucide-react'
 import type { FiltersState } from './types'
 
@@ -7,6 +6,7 @@ interface FiltersPanelProps {
 	readonly filters: FiltersState
 	readonly cities: string[]
 	readonly types: string[]
+	readonly helpTypes: Array<{ id: number; name: string }>
 	readonly onFiltersChange: (filters: FiltersState) => void
 	readonly onClose?: () => void
 	readonly isClosing?: boolean
@@ -17,6 +17,7 @@ export function FiltersPanel({
 	filters,
 	cities,
 	types,
+	helpTypes,
 	onFiltersChange,
 	onClose,
 	isClosing = false,
@@ -52,8 +53,8 @@ export function FiltersPanel({
 		onFiltersChange({
 			city: '',
 			type: '',
-			assistance: ASSISTANCE_OPTIONS.reduce((acc, item) => {
-				acc[item.id] = false
+			assistance: helpTypes.reduce((acc, item) => {
+				acc[item.name] = false
 				return acc
 			}, {} as FiltersState['assistance']),
 			search: '',
@@ -169,19 +170,19 @@ export function FiltersPanel({
 							Вид помощи
 						</span>
 						<div className='space-y-2'>
-							{ASSISTANCE_OPTIONS.map(option => (
+							{helpTypes.map(helpType => (
 								<label
-									key={option.id}
+									key={helpType.id}
 									className='flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-md transition-colors'
 								>
 									<input
 										type='checkbox'
-										checked={Boolean(filters.assistance[option.id])}
-										onChange={() => handleAssistanceToggle(option.id)}
+										checked={Boolean(filters.assistance[helpType.name])}
+										onChange={() => handleAssistanceToggle(helpType.name)}
 										className='w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 focus:ring-2'
 									/>
 									<span className='text-sm text-slate-700 flex-1'>
-										{option.label}
+										{helpType.name}
 									</span>
 								</label>
 							))}

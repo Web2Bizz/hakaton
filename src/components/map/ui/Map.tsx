@@ -35,6 +35,7 @@ export const MapComponent = () => {
 		filteredOrganizations,
 		allCities,
 		allTypes,
+		helpTypes,
 	} = useMapState()
 
 	const {
@@ -155,6 +156,7 @@ export const MapComponent = () => {
 				filters={filters}
 				cities={allCities}
 				types={allTypes}
+				helpTypes={helpTypes}
 				quests={filteredQuests}
 				organizations={filteredOrganizations}
 				activeQuestId={selectedQuest?.id}

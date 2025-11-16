@@ -51,23 +51,14 @@ export function useFilteredOrganizations(
 			}
 
 			// Фильтр по виду помощи
+			// Теперь assistance использует названия helpTypes напрямую
 			const selectedAssistance = Object.entries(filters.assistance)
 				.filter(([, isSelected]) => isSelected)
-				.map(([id]) => id)
+				.map(([name]) => name)
 
 			if (selectedAssistance.length > 0) {
-				// Маппинг старых ID помощи на новые helpTypes
-				const helpTypeMap: Record<string, string> = {
-					volunteers: 'Требуются волонтеры',
-					donations: 'Нужны финансовые пожертвования',
-					things: 'Принимают вещи',
-					mentors: 'Требуются наставники',
-					blood: 'Нужны доноры',
-					experts: 'Требуются эксперты',
-				}
-
-				const hasMatchingAssistance = selectedAssistance.some(id => {
-					const helpTypeName = helpTypeMap[id]
+				// Проверяем, есть ли у организации хотя бы один выбранный вид помощи
+				const hasMatchingAssistance = selectedAssistance.some(helpTypeName => {
 					return org.helpTypes.some(ht => ht.name === helpTypeName)
 				})
 

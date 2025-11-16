@@ -1,5 +1,3 @@
-import type { AssistanceTypeId } from '@/types/common'
-
 export interface FiltersState {
 	readonly city: string
 	readonly type: string
@@ -7,4 +5,5 @@ export interface FiltersState {
 	readonly search: string
 }
 
-export type AssistanceFilters = Record<AssistanceTypeId, boolean>
+// Теперь assistance использует названия helpTypes как ключи
+export type AssistanceFilters = Record<string, boolean>

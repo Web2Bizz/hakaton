@@ -1,11 +1,11 @@
-import { ASSISTANCE_OPTIONS } from '@/constants'
 import {
 	useGetCitiesQuery,
+	useGetHelpTypesQuery,
 	useGetOrganizationTypesQuery,
 	useGetOrganizationsQuery,
 } from '@/store/entities/organization'
 import { getAllOrganizations, getAllQuests } from '@/utils/userData'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
 	quests as baseQuests,
 	questCities,
@@ -17,15 +17,16 @@ import type { Quest } from '../../types/quest-types'
 import type { Organization } from '../../types/types'
 import type { FiltersState } from '../actions/types'
 
-const initialFilters: FiltersState = {
+// Создаем начальные фильтры на основе helpTypes (будет обновлено после загрузки)
+const createInitialFilters = (helpTypes: { name: string }[]): FiltersState => ({
 	city: '',
 	type: '',
-	assistance: ASSISTANCE_OPTIONS.reduce((acc, item) => {
-		acc[item.id] = false
+	assistance: helpTypes.reduce((acc, item) => {
+		acc[item.name] = false
 		return acc
 	}, {} as FiltersState['assistance']),
 	search: '',
-}
+})
 
 export function useMapState() {
 	const [searchCenter, setSearchCenter] = useState<
@@ -37,7 +38,6 @@ export function useMapState() {
 		Organization | undefined
 	>()
 	const [isClosing, setIsClosing] = useState(false)
-	const [filters, setFilters] = useState<FiltersState>(initialFilters)
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 	const [isListOpen, setIsListOpen] = useState(false)
 	const [isFiltersClosing, setIsFiltersClosing] = useState(false)
@@ -55,6 +55,32 @@ export function useMapState() {
 
 	// Загружаем типы организаций с сервера
 	const { data: organizationTypesData = [] } = useGetOrganizationTypesQuery()
+
+	// Загружаем виды помощи с сервера
+	const { data: helpTypesData = [] } = useGetHelpTypesQuery()
+
+	// Создаем начальные фильтры на основе загруженных helpTypes
+	const initialFilters = useMemo(
+		() => createInitialFilters(helpTypesData),
+		[helpTypesData]
+	)
+	const [filters, setFilters] = useState<FiltersState>(initialFilters)
+
+	// Обновляем фильтры, если helpTypes изменились (добавляем новые виды помощи)
+	useEffect(() => {
+		if (helpTypesData.length > 0) {
+			setFilters(prev => {
+				const newAssistance: FiltersState['assistance'] = { ...prev.assistance }
+				// Добавляем новые helpTypes, которых еще нет в фильтрах
+				for (const ht of helpTypesData) {
+					if (!(ht.name in newAssistance)) {
+						newAssistance[ht.name] = false
+					}
+				}
+				return { ...prev, assistance: newAssistance }
+			})
+		}
+	}, [helpTypesData])
 
 	// Получаем организации из API или пустой массив
 	// Нормализуем данные: преобразуем type в organizationTypes если нужно
@@ -160,6 +186,7 @@ export function useMapState() {
 		filteredOrganizations,
 		allCities,
 		allTypes,
+		helpTypes: helpTypesData,
 		// Loading states
 		isLoadingOrganizations,
 		organizationsError,

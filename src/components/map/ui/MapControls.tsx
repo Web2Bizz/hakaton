@@ -13,6 +13,7 @@ interface MapControlsProps {
 	filters: FiltersState
 	cities: string[]
 	types: string[]
+	helpTypes: Array<{ id: number; name: string }>
 	quests: Quest[]
 	organizations: Organization[]
 	activeQuestId?: string
@@ -32,6 +33,7 @@ export function MapControls({
 	filters,
 	cities,
 	types,
+	helpTypes,
 	quests,
 	organizations,
 	activeQuestId,
@@ -56,6 +58,7 @@ export function MapControls({
 					filters={filters}
 					cities={cities}
 					types={types}
+					helpTypes={helpTypes}
 					onFiltersChange={onFiltersChange}
 					onClose={onToggleFilters}
 					isClosing={isFiltersClosing}
