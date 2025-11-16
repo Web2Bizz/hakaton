@@ -7,11 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: hakaton-app
     ports:
-<<<<<<< HEAD
       - "17634:80"
-=======
-      - "8080:80"
->>>>>>> d90719d (update Dockerfile to use Node.js 22-alpine and adjust build command for improved efficiency)
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -21,13 +17,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-<<<<<<< HEAD
     networks:
       - external-hakaton-network
 
 networks:
   external-hakaton-network:
     external: true
-=======
->>>>>>> d90719d (update Dockerfile to use Node.js 22-alpine and adjust build command for improved efficiency)
 
