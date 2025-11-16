@@ -170,8 +170,8 @@ export function transformFormDataToUpdateRequest(
  */
 export function transformApiResponseToFormData(
 	questResponse: QuestResponse,
-	cities: Array<{ id: number; name: string }>,
-	organizationTypes: Array<{ id: number; name: string }>
+	_cities: Array<{ id: number; name: string }>,
+	_organizationTypes: Array<{ id: number; name: string }>
 ): Partial<QuestFormData> {
 	const quest = questResponse.data.quest
 

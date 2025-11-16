@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useFormContext } from 'react-hook-form'
-import { useGetCitiesQuery } from '@/store/entities/organization'
 import type { QuestFormData } from '../schemas/quest-form.schema'
 
 interface QuestLocationSectionProps {
@@ -19,12 +18,7 @@ export function QuestLocationSection({
 	onOpenMap,
 }: QuestLocationSectionProps) {
 	const form = useFormContext<QuestFormData>()
-	const { data: cities = [] } = useGetCitiesQuery()
 	const cityId = form.watch('cityId')
-	const latitude = form.watch('latitude')
-	const longitude = form.watch('longitude')
-	
-	const city = cities.find(c => c.id === cityId)
 
 	return (
 		<div>

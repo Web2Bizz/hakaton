@@ -1,10 +1,10 @@
 import { useUser } from '@/hooks/useUser'
-import { useUpdateUserMutation } from '@/store/entities'
 import {
 	useCreateQuestMutation,
 	useDeleteQuestMutation,
 	useGetQuestQuery,
 	useUpdateQuestMutation,
+	useUpdateUserMutation,
 } from '@/store/entities'
 import {
 	useGetCitiesQuery,
@@ -23,9 +23,9 @@ import {
 	type QuestFormData,
 } from '../schemas/quest-form.schema'
 import {
+	transformApiResponseToFormData,
 	transformFormDataToCreateRequest,
 	transformFormDataToUpdateRequest,
-	transformApiResponseToFormData,
 } from '../utils/questTransformers'
 
 export function useQuestForm(onSuccess?: (questId: string) => void) {
@@ -219,7 +219,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 					const uploadResult = await uploadImagesMutation(formData).unwrap()
 
 					const uploadedUrls = uploadResult.map(img => img.url)
-					
+
 					// Первое изображение - это storyImage, остальные - gallery
 					if (data.storyImage && data.storyImage.startsWith('data:')) {
 						storyImageUrl = uploadedUrls[0]
@@ -285,11 +285,11 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 					throw new Error('Квест не был создан')
 				}
 
-				const createdQuest = result.data?.quest
+				const createdQuest = result
 				if (!createdQuest) {
 					throw new Error('Квест не был создан')
 				}
-
+				// @ts-expect-error - quest id is not defined in the result type
 				const questId = String(createdQuest.id)
 
 				toast.success('Квест успешно создан!')
