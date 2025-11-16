@@ -1,11 +1,11 @@
 import { ASSISTANCE_OPTIONS } from '@/constants'
-import { useGetOrganizationsQuery } from '@/store/entities/organization'
+import {
+	useGetCitiesQuery,
+	useGetOrganizationTypesQuery,
+	useGetOrganizationsQuery,
+} from '@/store/entities/organization'
 import { getAllOrganizations, getAllQuests } from '@/utils/userData'
 import { useMemo, useState } from 'react'
-import {
-	cities as orgCities,
-	organizationTypes,
-} from '../../data/organizations'
 import {
 	quests as baseQuests,
 	questCities,
@@ -43,12 +43,18 @@ export function useMapState() {
 	const [isFiltersClosing, setIsFiltersClosing] = useState(false)
 	const [isListClosing, setIsListClosing] = useState(false)
 
-	// Загружаем организации из API
+	// Загружаем данные из API
 	const {
 		data: organizationsResponse,
 		isLoading: isLoadingOrganizations,
 		error: organizationsError,
 	} = useGetOrganizationsQuery()
+
+	// Загружаем города с сервера
+	const { data: citiesData = [] } = useGetCitiesQuery()
+
+	// Загружаем типы организаций с сервера
+	const { data: organizationTypesData = [] } = useGetOrganizationTypesQuery()
 
 	// Получаем организации из API или пустой массив
 	const apiOrganizations = useMemo(() => {
@@ -77,22 +83,23 @@ export function useMapState() {
 		filters
 	)
 
-	// Объединяем города и типы из обоих источников
-	const allCities = useMemo(
-		() =>
-			Array.from(new Set([...questCities, ...orgCities])).sort((a, b) =>
-				a.localeCompare(b)
-			),
-		[]
-	)
+	// Объединяем города из API и локальных данных квестов
+	const allCities = useMemo(() => {
+		// Получаем названия городов из API
+		const apiCities = citiesData.map(city => city.name)
+		// Объединяем с городами из квестов
+		const allCitiesList = Array.from(new Set([...questCities, ...apiCities]))
+		return allCitiesList.sort((a, b) => a.localeCompare(b))
+	}, [citiesData])
 
-	const allTypes = useMemo(
-		() =>
-			Array.from(new Set([...questTypes, ...organizationTypes])).sort((a, b) =>
-				a.localeCompare(b)
-			),
-		[]
-	)
+	// Объединяем типы организаций из API и локальных данных квестов
+	const allTypes = useMemo(() => {
+		// Получаем названия типов организаций из API
+		const apiTypes = organizationTypesData.map(type => type.name)
+		// Объединяем с типами из квестов
+		const allTypesList = Array.from(new Set([...questTypes, ...apiTypes]))
+		return allTypesList.sort((a, b) => a.localeCompare(b))
+	}, [organizationTypesData])
 
 	return {
 		// State
