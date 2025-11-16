@@ -6,11 +6,7 @@ import {
 } from '@/store/entities/organization'
 import { getAllOrganizations, getAllQuests } from '@/utils/userData'
 import { useEffect, useMemo, useState } from 'react'
-import {
-	quests as baseQuests,
-	questCities,
-	questTypes,
-} from '../../data/quests'
+import { quests as baseQuests, questCities } from '../../data/quests'
 import { useFilteredOrganizations } from '../../hooks/useFilteredOrganizations'
 import { useFilteredQuests } from '../../hooks/useFilteredQuests'
 import type { Quest } from '../../types/quest-types'
@@ -149,13 +145,15 @@ export function useMapState() {
 		return allCitiesList.sort((a, b) => a.localeCompare(b))
 	}, [citiesData])
 
-	// Объединяем типы организаций из API и локальных данных квестов
+	// Получаем типы организаций из API (без объединения с типами квестов)
 	const allTypes = useMemo(() => {
 		// Получаем названия типов организаций из API
-		const apiTypes = organizationTypesData.map(type => type.name)
-		// Объединяем с типами из квестов
-		const allTypesList = Array.from(new Set([...questTypes, ...apiTypes]))
-		return allTypesList.sort((a, b) => a.localeCompare(b))
+		// НЕ объединяем с типами квестов, так как это разные сущности
+		const apiTypes = organizationTypesData
+			.filter(type => type?.name) // Фильтруем валидные типы
+			.map(type => type.name)
+
+		return apiTypes.sort((a, b) => a.localeCompare(b))
 	}, [organizationTypesData])
 
 	return {
