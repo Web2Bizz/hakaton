@@ -36,6 +36,7 @@ export {
 	useLazyGetOrganizationQuery,
 	useLazyGetOrganizationsQuery,
 	useUpdateOrganizationMutation,
+	useUploadImagesMutation,
 } from './organization'
 export type {
 	CreateOrganizationRequest,

@@ -1,11 +1,17 @@
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
-import { useUpdateUserMutation } from '@/store/entities'
+import {
+	useLazyGetUserQuery,
+	useUpdateUserMutation,
+	useUploadImagesMutation,
+} from '@/store/entities'
 import type { User } from '@/types/user'
 import { transformUserFromAPI } from '@/utils/auth'
 import { compressImage } from '@/utils/storage'
 import { Award, Camera, LogOut, Mail, Trophy } from 'lucide-react'
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 interface ProfileHeaderProps {
@@ -19,12 +25,24 @@ export const ProfileHeader = memo(function ProfileHeader({
 }: ProfileHeaderProps) {
 	const { setUser } = useUser()
 	const [updateUser, { isLoading: isUpdatingAvatar }] = useUpdateUserMutation()
+	const [uploadImagesMutation] = useUploadImagesMutation()
+	const [getUser] = useLazyGetUserQuery()
 	const [isUploading, setIsUploading] = useState(false)
+	const [isAvatarLoading, setIsAvatarLoading] = useState(true)
+	const [hasAvatarError, setHasAvatarError] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	const unlockedAchievements = user.achievements.filter(
 		a => a.unlockedAt !== undefined
 	).length
+
+	// Сбрасываем состояние загрузки при изменении аватара
+	useEffect(() => {
+		if (user.avatar) {
+			setIsAvatarLoading(true)
+			setHasAvatarError(false)
+		}
+	}, [user.avatar])
 
 	const handleAvatarClick = useCallback(() => {
 		fileInputRef.current?.click()
@@ -55,14 +73,78 @@ export const ProfileHeader = memo(function ProfileHeader({
 				// Сжимаем изображение
 				const compressedAvatar = await compressImage(file, 400, 400, 0.9)
 
-				// Обновляем аватар через API
+				// Конвертируем base64 в Blob для загрузки
+				const base64String = compressedAvatar
+				const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+				if (!matches || matches.length !== 3) {
+					throw new Error('Неверный формат base64 изображения')
+				}
+
+				const mimeType = matches[1]
+				const base64Data = matches[2]
+
+				// Конвертируем base64 в бинарные данные
+				const byteCharacters = atob(base64Data)
+				const byteNumbers = new Array(byteCharacters.length)
+				for (let j = 0; j < byteCharacters.length; j++) {
+					byteNumbers[j] = byteCharacters.charCodeAt(j)
+				}
+				const byteArray = new Uint8Array(byteNumbers)
+				const blob = new Blob([byteArray], { type: mimeType })
+
+				// Определяем расширение файла из MIME type
+				const extension = mimeType.split('/')[1] || 'jpg'
+				const fileName = `avatar.${extension}`
+
+				// Создаем FormData и загружаем изображение
+				const formData = new FormData()
+				formData.append('images', blob, fileName)
+
+				const uploadResult = await uploadImagesMutation(formData).unwrap()
+				if (!uploadResult || uploadResult.length === 0) {
+					throw new Error('Не удалось загрузить изображение')
+				}
+
+				// Получаем URL из ответа
+				const imageUrl = uploadResult[0].url
+
+				// Получаем текущие данные пользователя с сервера для получения avatarUrls
+				let currentAvatarUrls: Record<number, string> = {}
+				try {
+					const currentUserData = await getUser(user.id).unwrap()
+					currentAvatarUrls = currentUserData.avatarUrls || {}
+				} catch (error) {
+					console.warn('Не удалось получить текущие данные пользователя:', error)
+					// Продолжаем с пустым объектом
+				}
+
+				// Определяем следующий ID для avatarUrls
+				// Используем максимальный ID из существующих + 1, или 1 если нет существующих
+				const existingIds = Object.keys(currentAvatarUrls)
+					.map(Number)
+					.filter(id => !isNaN(id) && id > 0)
+
+				// Используем максимальный ID + 1, или 1 если нет существующих
+				const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1
+
+				// Создаем новый объект avatarUrls с новым изображением
+				const newAvatarUrls: Record<number, string> = {
+					...currentAvatarUrls,
+					[nextId]: imageUrl,
+				}
+
+				// Обновляем пользователя через API с avatarUrls
 				const result = await updateUser({
 					userId: user.id,
-					data: { avatar: compressedAvatar },
+					data: { avatarUrls: newAvatarUrls },
 				}).unwrap()
 
 				// Преобразуем ответ API в формат User с правильной обработкой avatarUrls
 				const updatedUser = transformUserFromAPI(result)
+
+				// Сбрасываем состояние загрузки для нового аватара
+				setIsAvatarLoading(true)
+				setHasAvatarError(false)
 
 				// Обновляем пользователя в контексте
 				setUser(prevUser => {
@@ -122,7 +204,7 @@ export const ProfileHeader = memo(function ProfileHeader({
 				}
 			}
 		},
-		[updateUser, user.id, setUser]
+		[updateUser, user.id, setUser, uploadImagesMutation, getUser]
 	)
 
 	return (
@@ -158,23 +240,41 @@ export const ProfileHeader = memo(function ProfileHeader({
 							className='relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl bg-white/95 backdrop-blur-md border-4 border-white flex items-center justify-center text-blue-600 text-4xl sm:text-5xl md:text-6xl font-bold shadow-xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed'
 							title='Нажмите, чтобы изменить аватар'
 						>
+							{/* Skeleton loader пока изображение загружается */}
+							{isAvatarLoading && user.avatar && !hasAvatarError && (
+								<Skeleton className='absolute inset-0 w-full h-full rounded-2xl' />
+							)}
 							{user.avatar ? (
 								<img
 									src={user.avatar}
 									alt={user.name}
-									className='w-full h-full object-cover'
+									className={`w-full h-full object-cover transition-opacity ${
+										isAvatarLoading ? 'opacity-0' : 'opacity-100'
+									}`}
+									onLoad={() => {
+										setIsAvatarLoading(false)
+										setHasAvatarError(false)
+									}}
+									onError={() => {
+										setIsAvatarLoading(false)
+										setHasAvatarError(true)
+									}}
 								/>
 							) : (
 								<span>{user.name.charAt(0).toUpperCase()}</span>
 							)}
-							{/* Overlay при наведении */}
-							<div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center'>
-								{isUploading || isUpdatingAvatar ? (
-									<div className='h-6 w-6 sm:h-8 sm:w-8 border-2 border-white border-t-transparent rounded-full animate-spin' />
-								) : (
+							{/* Loader overlay - виден всегда во время загрузки */}
+							{(isUploading || isUpdatingAvatar) && (
+								<div className='absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-2xl z-10'>
+									<Spinner />
+								</div>
+							)}
+							{/* Overlay при наведении - скрыт во время загрузки */}
+							{!isUploading && !isUpdatingAvatar && !isAvatarLoading && (
+								<div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl'>
 									<Camera className='h-6 w-6 sm:h-8 sm:w-8 text-white' />
-								)}
-							</div>
+								</div>
+							)}
 						</button>
 						<input
 							ref={fileInputRef}

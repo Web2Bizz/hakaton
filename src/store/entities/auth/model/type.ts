@@ -14,8 +14,13 @@ export interface LoginRequest {
 }
 
 export interface UpdateUserRequest {
-	name?: string
+	firstName?: string
+	lastName?: string
+	middleName?: string
+	email?: string
 	avatar?: string
+	avatarUrls?: Record<number, string>
+	questId?: number
 	organisationId?: number | string | null
 }
 

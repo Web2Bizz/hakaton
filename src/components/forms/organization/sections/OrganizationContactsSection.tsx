@@ -7,8 +7,8 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Trash2 } from 'lucide-react'
+import { useFieldArray, useFormContext } from 'react-hook-form'
 import type { OrganizationFormData } from '../schemas/organization-form.schema'
 
 export function OrganizationContactsSection() {
@@ -23,7 +23,10 @@ export function OrganizationContactsSection() {
 		<div className='space-y-4'>
 			<FormLabel>Контакты *</FormLabel>
 			{fields.map((field, index) => (
-				<div key={field.id} className='grid grid-cols-[1fr_auto] gap-2 items-end'>
+				<div
+					key={field.id}
+					className='grid grid-cols-[1fr_auto] gap-2 items-end'
+				>
 					<div className='grid grid-cols-2 gap-2'>
 						<FormField
 							control={form.control}
@@ -37,6 +40,9 @@ export function OrganizationContactsSection() {
 										>
 											<option value='Телефон'>Телефон</option>
 											<option value='Email'>Email</option>
+											<option value='WhatsApp'>WhatsApp</option>
+											<option value='Telegram'>Telegram</option>
+											<option value='Instagram'>Вконтакте</option>
 											<option value='Другое'>Другое</option>
 										</select>
 									</FormControl>
@@ -55,15 +61,15 @@ export function OrganizationContactsSection() {
 												form.watch(`contacts.${index}.name`) === 'Телефон'
 													? '+7 (XXX) XXX-XX-XX'
 													: form.watch(`contacts.${index}.name`) === 'Email'
-														? 'email@example.com'
-														: 'Значение'
+													? 'email@example.com'
+													: 'Значение'
 											}
 											type={
 												form.watch(`contacts.${index}.name`) === 'Email'
 													? 'email'
 													: form.watch(`contacts.${index}.name`) === 'Телефон'
-														? 'tel'
-														: 'text'
+													? 'tel'
+													: 'text'
 											}
 											{...valueField}
 										/>
