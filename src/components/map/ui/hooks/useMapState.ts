@@ -61,11 +61,43 @@ export function useMapState() {
 		() => createInitialFilters(helpTypesData),
 		[helpTypesData]
 	)
-	const [filters, setFilters] = useState<FiltersState>(initialFilters)
 
-	// Обновляем фильтры, если helpTypes изменились (добавляем новые виды помощи)
+	// Вычисляем обновленные фильтры с учетом новых helpTypes
+	const computedFilters = useMemo(() => {
+		if (helpTypesData.length === 0) {
+			return initialFilters
+		}
+
+		const newAssistance: FiltersState['assistance'] = {
+			...initialFilters.assistance,
+		}
+		// Добавляем новые helpTypes, которых еще нет в фильтрах
+		for (const ht of helpTypesData) {
+			if (!(ht.name in newAssistance)) {
+				newAssistance[ht.name] = false
+			}
+		}
+
+		return {
+			...initialFilters,
+			assistance: newAssistance,
+		}
+	}, [initialFilters, helpTypesData])
+
+	const [filters, setFilters] = useState<FiltersState>(computedFilters)
+
+	// Синхронизируем фильтры с вычисленными значениями при изменении helpTypes
+	// Используем setTimeout для избежания синхронного обновления в эффекте
 	useEffect(() => {
-		if (helpTypesData.length > 0) {
+		const hasNewTypes = helpTypesData.some(
+			ht => !(ht.name in filters.assistance)
+		)
+		if (!hasNewTypes) {
+			return
+		}
+
+		// Используем setTimeout для асинхронного обновления
+		const timeoutId = setTimeout(() => {
 			setFilters(prev => {
 				const newAssistance: FiltersState['assistance'] = { ...prev.assistance }
 				// Добавляем новые helpTypes, которых еще нет в фильтрах
@@ -76,8 +108,10 @@ export function useMapState() {
 				}
 				return { ...prev, assistance: newAssistance }
 			})
-		}
-	}, [helpTypesData])
+		}, 0)
+
+		return () => clearTimeout(timeoutId)
+	}, [helpTypesData, filters.assistance])
 
 	// Получаем организации из API или пустой массив
 	// Нормализуем данные: преобразуем type в organizationTypes если нужно

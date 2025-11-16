@@ -72,7 +72,7 @@ export function AddressSearchInput({
 		}, 300) // Debounce 300ms
 
 		return () => clearTimeout(timeoutId)
-	}, [query, searchAddress, searchOrganizations])
+	}, [query, searchAddress, searchOrganizations, organizations])
 
 	const handleSelect = (result: SearchResult) => {
 		if (result.type === 'address') {

@@ -211,6 +211,12 @@ export function OrganizationDetails({
 											return username ? `https://vk.com/${username}` : null
 										}
 										
+										if (normalizedName === 'tiktok' || normalizedName === 'тикток') {
+											// Убираем @ если есть и tiktok.com/ если есть
+											const username = normalizedValue.replace(/^@/, '').replace(/^(https?:\/\/)?(www\.)?(tiktok\.com\/@?)?/i, '').replace(/\s/g, '')
+											return username ? `https://www.tiktok.com/@${username}` : null
+										}
+										
 										// Если значение уже является URL, используем его
 										if (normalizedValue.startsWith('http://') || normalizedValue.startsWith('https://')) {
 											return normalizedValue
