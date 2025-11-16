@@ -15,7 +15,7 @@ import {
 import { transformUserFromAPI } from '@/utils/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type React from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import {
@@ -37,6 +37,10 @@ export function useOrganizationForm(
 
 	const existingOrgId = getUserOrgId()
 
+	// Локальное состояние для отслеживания режима редактирования
+	// Это нужно, чтобы принудительно выйти из режима редактирования после удаления
+	const [forceEditMode, setForceEditMode] = useState<boolean | null>(null)
+
 	// Загружаем организацию из API если есть ID
 	const { data: organizationResponse, isLoading: isLoadingOrganization } =
 		useGetOrganizationQuery(existingOrgId || '', {
@@ -46,7 +50,25 @@ export function useOrganizationForm(
 	// RTK Query может возвращать данные напрямую как Organization, а не как OrganizationResponse
 	// Используем type assertion для корректной типизации
 	const existingOrg = (organizationResponse as unknown as Organization) || null
-	const isEditMode = !!existingOrg
+
+	// Определяем режим редактирования: если forceEditMode установлен явно, используем его,
+	// иначе проверяем наличие организации (проверяем и existingOrgId, и existingOrg)
+	const isEditMode = forceEditMode ?? !!(existingOrgId && existingOrg)
+
+	// Синхронизируем forceEditMode с фактическим состоянием организации
+	useEffect(() => {
+		// Если forceEditMode не установлен явно, синхронизируем с наличием организации
+		// Проверяем и existingOrgId, и existingOrg для надежности
+		if (forceEditMode === null) {
+			const shouldBeEditMode = !!(existingOrgId && existingOrg)
+			setForceEditMode(shouldBeEditMode)
+		} else if (forceEditMode === false && existingOrgId && existingOrg) {
+			// Если forceEditMode был принудительно установлен в false, но организация все еще существует,
+			// это означает, что удаление не завершилось или произошла ошибка
+			// В этом случае возвращаемся к автоматической синхронизации
+			setForceEditMode(null)
+		}
+	}, [existingOrg, existingOrgId, forceEditMode])
 
 	const [createOrgMutation, { isLoading: isCreating }] =
 		useCreateOrganizationMutation()
@@ -475,6 +497,9 @@ export function useOrganizationForm(
 				// Сохраняем ID организации в контексте пользователя (для обратной совместимости)
 				setUserOrganizationId(organizationIdString)
 
+				// Сбрасываем forceEditMode, чтобы он снова синхронизировался с фактическим состоянием
+				setForceEditMode(null)
+
 				// Сохраняем координаты для зума на карте
 				if (data.latitude && data.longitude) {
 					localStorage.setItem(
@@ -522,13 +547,73 @@ export function useOrganizationForm(
 		if (!existingOrgId) return
 
 		try {
-			await deleteOrgMutation(String(existingOrgId)).unwrap()
+			const orgIdToDelete = String(existingOrgId)
 
-			// Удаляем ID организации из контекста пользователя
-			removeUserOrganizationId(String(existingOrgId))
+			// Удаляем организацию через API
+			await deleteOrgMutation(orgIdToDelete).unwrap()
+
+			// Сначала удаляем ID организации из контекста пользователя и localStorage
+			// Это нужно сделать до обновления пользователя на сервере, чтобы isEditMode стал false
+			removeUserOrganizationId(orgIdToDelete)
+
+			// Принудительно выходим из режима редактирования
+			// После удаления existingOrgId станет undefined, и блок удаления исчезнет
+			setForceEditMode(false)
+
+			// Сбрасываем форму с дефолтными значениями
+			form.reset({
+				name: '',
+				cityId: 0,
+				organizationTypeId: 0,
+				helpTypeIds: [],
+				summary: '',
+				description: '',
+				mission: '',
+				goals: [''],
+				needs: [''],
+				address: '',
+				contacts: [
+					{ name: 'Телефон', value: '' },
+					...(user?.email ? [{ name: 'Email', value: user.email }] : []),
+				],
+				latitude: '',
+				longitude: '',
+				gallery: [],
+			})
+
+			// Обновляем пользователя на сервере, устанавливая organisationId в null
+			if (user?.id) {
+				try {
+					const updateResult = await updateUserMutation({
+						userId: String(user.id),
+						data: { organisationId: null },
+					}).unwrap()
+
+					// Обновляем локальное состояние пользователя с данными из API
+					if (updateResult && setUser) {
+						const updatedUser = transformUserFromAPI(updateResult)
+						setUser(updatedUser)
+
+						if (import.meta.env.DEV) {
+							console.log(
+								'User updated after organization deletion. organisationId:',
+								updatedUser.createdOrganizationId
+							)
+						}
+					}
+				} catch (updateError) {
+					if (import.meta.env.DEV) {
+						console.error(
+							'Error updating user after organization deletion:',
+							updateError
+						)
+					}
+					// Не блокируем процесс, если обновление пользователя не удалось
+					// Все равно удаляем из локального состояния
+				}
+			}
 
 			toast.success('Организация успешно удалена.')
-			form.reset()
 		} catch (error: unknown) {
 			if (import.meta.env.DEV) {
 				console.error('Error deleting organization:', error)

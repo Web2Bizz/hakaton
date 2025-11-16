@@ -32,6 +32,7 @@ export type UserShortData = {
 	middleName: string
 	email: string
 	avatar?: string
+	avatarUrls?: Record<number, string>
 }
 // Тип пользователя (соответствует API)
 export type UserFullData = UserShortData & {

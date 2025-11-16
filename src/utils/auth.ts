@@ -8,6 +8,57 @@ import {
 	normalizeUserLevel,
 } from '@/utils/level'
 
+const API_BASE_URL = 'http://82.202.140.37:3000/api/v1'
+
+/**
+ * Получает URL аватара из avatarUrls или avatar
+ */
+function getAvatarUrl(
+	avatar?: string | number,
+	avatarUrls?: Record<number, string>
+): string | undefined {
+	// Если есть avatarUrls, берем последний ID (самый новый)
+	if (avatarUrls && Object.keys(avatarUrls).length > 0) {
+		const avatarIds = Object.keys(avatarUrls)
+			.map(Number)
+			.sort((a, b) => b - a) // Сортируем по убыванию, чтобы взять последний
+		const lastId = avatarIds[0]
+		if (lastId) {
+			const urlValue = avatarUrls[lastId]
+			// Если значение уже является URL, используем его
+			if (urlValue && (urlValue.startsWith('http://') || urlValue.startsWith('https://'))) {
+				return urlValue
+			}
+			// Иначе формируем URL по ID
+			return `${API_BASE_URL}/upload/images/${lastId}`
+		}
+	}
+
+	// Если avatar - это число (ID), формируем URL
+	if (avatar !== undefined && avatar !== null) {
+		if (typeof avatar === 'number') {
+			return `${API_BASE_URL}/upload/images/${avatar}`
+		}
+		// Если avatar - это строка и это число (ID), формируем URL
+		if (typeof avatar === 'string') {
+			const avatarId = Number(avatar)
+			if (!isNaN(avatarId) && avatarId > 0) {
+				// Проверяем, не является ли это уже URL
+				if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+					return avatar
+				}
+				return `${API_BASE_URL}/upload/images/${avatarId}`
+			}
+			// Если это уже URL, возвращаем как есть
+			if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+				return avatar
+			}
+		}
+	}
+
+	return undefined
+}
+
 /**
  * Преобразует данные пользователя из API в формат для локального состояния
  */
@@ -21,11 +72,13 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 		calculateExperienceToNext(apiUser.level)
 	)
 
+	const avatarUrl = getAvatarUrl(apiUser.avatar, apiUser.avatarUrls)
+
 	return {
 		id: apiUser.id,
 		name: `${apiUser.firstName} ${apiUser.lastName}`.trim() || apiUser.email,
 		email: apiUser.email,
-		avatar: apiUser.avatar || undefined,
+		avatar: avatarUrl,
 		level: {
 			level: normalized.level,
 			experience: normalized.experience,
@@ -47,7 +100,10 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 		achievements: apiUser.achievements || [],
 		participatingQuests: apiUser.participatingQuests || [],
 		createdQuestId: apiUser.questId || undefined, // Преобразуем questId -> createdQuestId
-		createdOrganizationId: apiUser.organisationId || undefined, // Преобразуем organisationId -> createdOrganizationId
+		createdOrganizationId:
+			apiUser.organisationId !== null && apiUser.organisationId !== undefined
+				? String(apiUser.organisationId)
+				: undefined, // Преобразуем organisationId -> createdOrganizationId, обрабатываем null
 		createdAt: apiUser.createdAt,
 	}
 }

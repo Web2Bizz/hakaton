@@ -1,13 +1,39 @@
 import { AddOrganizationForm, AddQuestForm } from '@/components/forms'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
-import { useState } from 'react'
+import { useGetOrganizationQuery } from '@/store/entities/organization'
+import { useState, useMemo } from 'react'
 
 type FormType = 'quest' | 'organization'
 
 export default function AddOrganizationPage() {
-	const { canCreateQuest, canCreateOrganization } = useUser()
+	const { canCreateQuest, canCreateOrganization, getUserOrganization } = useUser()
 	const [formType, setFormType] = useState<FormType>('organization')
+	
+	// Получаем ID организации пользователя
+	const userOrgId = getUserOrganization()
+	
+	// Проверяем существование организации через API
+	const { data: organizationData } = useGetOrganizationQuery(userOrgId || '', {
+		skip: !userOrgId,
+	})
+	
+	// Определяем, действительно ли организация существует
+	const hasOrganization = useMemo(() => {
+		if (!userOrgId) return false
+		// Если организация не найдена в API, значит она была удалена
+		return !!organizationData
+	}, [userOrgId, organizationData])
+	
+	// Используем проверку через API, если есть ID, иначе через локальное состояние
+	const canCreateOrg = useMemo(() => {
+		if (!userOrgId) {
+			// Если нет ID, используем стандартную проверку
+			return canCreateOrganization()
+		}
+		// Если есть ID, проверяем через API
+		return !hasOrganization
+	}, [userOrgId, hasOrganization, canCreateOrganization])
 
 	const handleSuccess = () => {
 		// Перенаправляем на карту после успешного создания
@@ -42,7 +68,7 @@ export default function AddOrganizationPage() {
 							}`}
 						>
 							Организация
-							{!canCreateOrganization() && (
+							{!canCreateOrg && (
 								<span className='ml-2 text-xs opacity-75'>(создана)</span>
 							)}
 						</button>

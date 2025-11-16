@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/useUser'
 import { useUpdateUserMutation } from '@/store/entities'
 import type { User } from '@/types/user'
+import { transformUserFromAPI } from '@/utils/auth'
 import { compressImage } from '@/utils/storage'
 import { Award, Camera, LogOut, Mail, Trophy } from 'lucide-react'
 import { memo, useCallback, useRef, useState } from 'react'
@@ -60,12 +61,15 @@ export const ProfileHeader = memo(function ProfileHeader({
 					data: { avatar: compressedAvatar },
 				}).unwrap()
 
+				// Преобразуем ответ API в формат User с правильной обработкой avatarUrls
+				const updatedUser = transformUserFromAPI(result)
+
 				// Обновляем пользователя в контексте
 				setUser(prevUser => {
 					if (!prevUser) return prevUser
 					return {
 						...prevUser,
-						avatar: result.avatar || compressedAvatar,
+						avatar: updatedUser.avatar,
 					}
 				})
 
