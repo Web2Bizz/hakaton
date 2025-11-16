@@ -210,6 +210,48 @@ leaflet-control {
 	animation: slideOutLeft 0.3s ease-out;
 }
 
+/* Анимации для Spinner */
+@keyframes spin-spinner {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes wobble-1 {
+	0%,
+	100% {
+		transform: scaleY(0.1);
+	}
+	50% {
+		transform: scaleY(1);
+	}
+}
+
+@keyframes wobble-2 {
+	0%,
+	100% {
+		transform: scaleY(0.1);
+	}
+	50% {
+		transform: scaleY(1);
+	}
+}
+
+.animate-spin-spinner {
+	animation: spin-spinner 0.8s linear infinite;
+}
+
+.animate-wobble-1 {
+	animation: wobble-1 0.8s ease-in-out infinite;
+}
+
+.animate-wobble-2 {
+	animation: wobble-2 0.8s ease-in-out infinite;
+}
+
 /* Ограничение размера выпадающего списка для выбора города */
 select[id*='city'],
 select[id*='filter-city'] {

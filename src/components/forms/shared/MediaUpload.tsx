@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { compressImage } from '@/utils/storage'
 import { Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -15,6 +16,54 @@ interface MediaUploadProps {
 // Константы для ограничений размера
 const DEFAULT_MAX_IMAGE_SIZE_MB = 10
 const BYTES_PER_MB = 1024 * 1024
+
+// Компонент для предпросмотра изображения со скелетоном
+function ImagePreview({
+	image,
+	index,
+	onRemove,
+}: {
+	image: string
+	index: number
+	onRemove: () => void
+}) {
+	const [isLoading, setIsLoading] = useState(true)
+	const [hasError, setHasError] = useState(false)
+
+	return (
+		<div className='relative group aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100'>
+			{isLoading && !hasError && (
+				<Skeleton className='absolute inset-0 w-full h-full' />
+			)}
+			{!hasError && (
+				<img
+					src={image}
+					alt={`Preview ${index + 1}`}
+					className={`w-full h-full object-cover transition-opacity ${
+						isLoading ? 'opacity-0' : 'opacity-100'
+					}`}
+					onLoad={() => setIsLoading(false)}
+					onError={() => {
+						setIsLoading(false)
+						setHasError(true)
+					}}
+				/>
+			)}
+			{hasError && (
+				<div className='w-full h-full flex items-center justify-center bg-slate-200 text-slate-400'>
+					<Upload className='h-6 w-6' />
+				</div>
+			)}
+			<button
+				type='button'
+				onClick={onRemove}
+				className='absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10'
+			>
+				<X className='h-3 w-3' />
+			</button>
+		</div>
+	)
+}
 
 export function MediaUpload({
 	images = [],
@@ -206,23 +255,12 @@ export function MediaUpload({
 					</p>
 					<div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
 						{images.map((image, index) => (
-							<div
+							<ImagePreview
 								key={index}
-								className='relative group aspect-square rounded-lg overflow-hidden border border-slate-200'
-							>
-								<img
-									src={image}
-									alt={`Preview ${index + 1}`}
-									className='w-full h-full object-cover'
-								/>
-								<button
-									type='button'
-									onClick={() => removeImage(index)}
-									className='absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
-								>
-									<X className='h-3 w-3' />
-								</button>
-							</div>
+								image={image}
+								index={index}
+								onRemove={() => removeImage(index)}
+							/>
 						))}
 					</div>
 				</div>

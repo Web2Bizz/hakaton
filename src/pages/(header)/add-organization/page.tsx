@@ -1,30 +1,33 @@
 import { AddOrganizationForm, AddQuestForm } from '@/components/forms'
+import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
 import { useGetOrganizationQuery } from '@/store/entities/organization'
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 type FormType = 'quest' | 'organization'
 
 export default function AddOrganizationPage() {
-	const { canCreateQuest, canCreateOrganization, getUserOrganization } = useUser()
+	const { canCreateQuest, canCreateOrganization, getUserOrganization } =
+		useUser()
 	const [formType, setFormType] = useState<FormType>('organization')
-	
+	const [isRedirecting, setIsRedirecting] = useState(false)
+
 	// Получаем ID организации пользователя
 	const userOrgId = getUserOrganization()
-	
+
 	// Проверяем существование организации через API
 	const { data: organizationData } = useGetOrganizationQuery(userOrgId || '', {
 		skip: !userOrgId,
 	})
-	
+
 	// Определяем, действительно ли организация существует
 	const hasOrganization = useMemo(() => {
 		if (!userOrgId) return false
 		// Если организация не найдена в API, значит она была удалена
 		return !!organizationData
 	}, [userOrgId, organizationData])
-	
+
 	// Используем проверку через API, если есть ID, иначе через локальное состояние
 	const canCreateOrg = useMemo(() => {
 		if (!userOrgId) {
@@ -36,10 +39,27 @@ export default function AddOrganizationPage() {
 	}, [userOrgId, hasOrganization, canCreateOrganization])
 
 	const handleSuccess = () => {
-		// Перенаправляем на карту после успешного создания
+		// Показываем loader и перенаправляем на карту после успешного создания
+		setIsRedirecting(true)
 		setTimeout(() => {
-			window.location.href = '/map'
+			globalThis.location.href = '/map'
 		}, 2000)
+	}
+
+	// Показываем loader при перенаправлении
+	if (isRedirecting) {
+		return (
+			<div
+				className='fixed inset-0 z-50 bg-slate-50'
+				style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+			>
+				<div className='w-full h-full flex items-center justify-center'>
+					<div className='flex flex-col items-center gap-4'>
+						<Spinner />
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	return (
