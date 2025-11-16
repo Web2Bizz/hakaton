@@ -2,24 +2,29 @@ import { Header } from '@/components'
 import { Toaster } from '@/components/ui/sonner'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import { UserProvider } from '@/contexts/UserContext'
-import { ReduxProvider } from '@/provider/Redux-provider'
+import { setupStore } from '@/store/store'
+import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react'
 
 interface LayoutProps {
 	children: React.ReactNode
 }
 
 export default function Layout({ children }: Readonly<LayoutProps>) {
+	const { store, persistor } = setupStore()
 	return (
-		<ReduxProvider>
-			<UserProvider>
-				<NotificationProvider>
-					<div>
-						<Header />
-						<main>{children}</main>
-						<Toaster />
-					</div>
-				</NotificationProvider>
-			</UserProvider>
-		</ReduxProvider>
+		<Provider store={store}>
+			<PersistGate loading={null} persistor={persistor}>
+				<UserProvider>
+					<NotificationProvider>
+						<div>
+							<Header />
+							<main>{children}</main>
+							<Toaster />
+						</div>
+					</NotificationProvider>
+				</UserProvider>
+			</PersistGate>
+		</Provider>
 	)
 }
