@@ -14,7 +14,7 @@ const sharePlatforms = [
 	{
 		id: 'vk',
 		name: 'ВКонтакте',
-		icon: '/vk.png',
+		icon: '/social/vk.png',
 		color: 'bg-blue-500 hover:bg-blue-600',
 		url: (text: string, url: string) =>
 			`https://vk.com/share.php?url=${encodeURIComponent(
@@ -24,7 +24,7 @@ const sharePlatforms = [
 	{
 		id: 'telegram',
 		name: 'Telegram',
-		icon: '/telegram.png',
+		icon: '/social/telegram.png',
 		color: 'bg-cyan-500 hover:bg-cyan-600',
 		url: (text: string, url: string) =>
 			`https://t.me/share/url?url=${encodeURIComponent(
@@ -34,7 +34,7 @@ const sharePlatforms = [
 	{
 		id: 'whatsapp',
 		name: 'WhatsApp',
-		icon: '/whatsapp.png',
+		icon: '/social/whatsapp.png',
 		color: 'bg-green-500 hover:bg-green-600',
 		url: (text: string, url: string) =>
 			`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,

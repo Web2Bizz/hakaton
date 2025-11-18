@@ -59,7 +59,7 @@ function HeroContent() {
 
 function HeroFigure() {
 	return (
-		<div className='relative mx-auto flex w-full max-w-[360px] aspect-square items-center justify-center md:w-[360px] overflow-visible'>
+		<div className='relative mx-auto flex w-full max-w-[240px] aspect-square items-center justify-center md:max-w-[360px] md:w-[360px] overflow-hidden md:overflow-visible'>
 			<div
 				className='absolute inset-0 rounded-full blur-lg z-0'
 				style={{

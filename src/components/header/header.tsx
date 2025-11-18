@@ -1,11 +1,13 @@
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/useUser'
-import { Menu, X } from 'lucide-react'
+import { usePWAInstall } from '@/pwa/usePWAInstall'
+import { Download, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export const Header = () => {
 	const { user } = useUser()
+	const { canInstall, install } = usePWAInstall()
 	const [currentPath, setCurrentPath] = useState(
 		globalThis.location?.pathname || '/'
 	)
@@ -57,6 +59,13 @@ export const Header = () => {
 		return currentPath.startsWith(href)
 	}
 
+	const handleInstallClick = async (): Promise<void> => {
+		const installed = await install()
+		if (installed) {
+			console.log('Приложение установлено!')
+		}
+	}
+
 	return (
 		<>
 			<nav className='fixed top-0 left-0 right-0 h-[72px] border-b border-black/8 bg-white/98 backdrop-blur-xl shadow-sm z-40'>
@@ -89,13 +98,26 @@ export const Header = () => {
 								)
 							})}
 						</div>
-						{user ? (
-							<NotificationBell />
-						) : (
-							<Button asChild variant='outline' size='sm'>
-								<a href='/login'>Войти</a>
-							</Button>
-						)}
+						<div className='flex items-center gap-2'>
+							{canInstall && (
+								<Button
+									onClick={handleInstallClick}
+									variant='outline'
+									size='sm'
+									className='gap-2'
+								>
+									<Download className='h-4 w-4' />
+									Установить
+								</Button>
+							)}
+							{user ? (
+								<NotificationBell />
+							) : (
+								<Button asChild variant='outline' size='sm'>
+									<a href='/login'>Войти</a>
+								</Button>
+							)}
+						</div>
 					</div>
 
 					{/* Мобильная кнопка меню и уведомления */}
@@ -138,6 +160,16 @@ export const Header = () => {
 									</a>
 								)
 							})}
+							{canInstall && (
+								<Button
+									onClick={handleInstallClick}
+									variant='outline'
+									className='w-full gap-2'
+								>
+									<Download className='h-4 w-4' />
+									Установить приложение
+								</Button>
+							)}
 							{!user && (
 								<div className='pt-2 border-t border-slate-200 mt-2'>
 									<Button asChild variant='outline' className='w-full'>
