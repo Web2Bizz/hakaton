@@ -1,8 +1,8 @@
 import type {
 	CreateQuestRequest,
+	Quest,
 	QuestAchievement,
 	QuestContact,
-	QuestResponse,
 	QuestStep,
 	UpdateQuestRequest,
 } from '@/store/entities/quest/model/type'
@@ -169,14 +169,14 @@ export function transformFormDataToUpdateRequest(
  * Преобразует данные из API в формат формы
  */
 export function transformApiResponseToFormData(
-	questResponse: QuestResponse
+	quest: Quest
 ): Partial<QuestFormData> {
-	const quest = questResponse.data.quest
+	console.log(quest)
 
 	// Находим категорию по первому categoryId
 	// Если categoryIds есть, используем маппинг ID -> строка
 	// Если нет, используем значение по умолчанию
-	const categoryId = quest.categoryIds?.[0] || 5
+	const categoryId = quest.categories[0].id || 5
 	const category = ID_TO_CATEGORY_MAP[categoryId] || 'other'
 
 	// Преобразуем contacts в curator

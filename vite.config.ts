@@ -18,6 +18,9 @@ export default defineConfig({
 			},
 			includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
 			manifest: false, // Отключаем автоматическую генерацию manifest
+			devOptions: {
+				enabled: false, // Отключаем dev service worker, чтобы убрать сообщения в консоли
+			},
 		}),
 	],
 	resolve: {

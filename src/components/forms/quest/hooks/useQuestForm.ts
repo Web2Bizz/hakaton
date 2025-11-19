@@ -52,7 +52,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 	const { data: cities = [] } = useGetCitiesQuery()
 	const { data: organizationTypes = [] } = useGetOrganizationTypesQuery()
 
-	const existingQuest = questResponse?.data?.quest || null
+	const existingQuest = questResponse || null
 
 	const isEditMode = forceEditMode ?? !!(existingQuestId && existingQuest)
 

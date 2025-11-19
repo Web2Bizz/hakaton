@@ -7,11 +7,11 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
+import { useGetCategoriesQuery } from '@/store/entities/category'
 import {
 	useGetCitiesQuery,
 	useGetOrganizationTypesQuery,
 } from '@/store/entities/organization'
-import { useGetCategoriesQuery } from '@/store/entities/quest'
 import { compressImage } from '@/utils/image'
 import { X } from 'lucide-react'
 import { useMemo } from 'react'

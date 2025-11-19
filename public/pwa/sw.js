@@ -1,8 +1,5 @@
 const CACHE_NAME = 'atom-dobro-cache-v1.0.0'
-const urlsToCache = [
-	'/',
-	'/pwa/manifest.json',
-]
+const urlsToCache = ['/', '/pwa/manifest.json']
 
 self.addEventListener('install', event => {
 	console.log('Service Worker installing...')
@@ -18,10 +15,10 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
 	event.respondWith(
 		caches.match(event.request).then(response => {
-			if (response) {
-				return response
-			}
-			return fetch(event.request)
+			// if (response) {
+			// 	return response
+			// }
+			// return fetch(event.request)
 		})
 	)
 })

@@ -15,7 +15,6 @@ export type { AddExperienceRequest, AddExperienceResponse } from './experience'
 export {
 	useCreateQuestMutation,
 	useDeleteQuestMutation,
-	useGetCategoriesQuery,
 	useGetQuestQuery,
 	useGetQuestsQuery,
 	useJoinQuestMutation,
@@ -24,7 +23,6 @@ export {
 	useUpdateQuestMutation,
 } from './quest'
 export type {
-	CategoryResponse,
 	CreateQuestRequest,
 	CreateQuestResponse,
 	DeleteQuestResponse,
@@ -33,12 +31,14 @@ export type {
 	Quest,
 	QuestAchievement,
 	QuestContact,
-	QuestResponse,
-	QuestStep,
 	QuestsListResponse,
+	QuestStep,
 	UpdateQuestRequest,
 	UpdateQuestResponse,
 } from './quest'
+
+export { useGetCategoriesQuery, useLazyGetCategoriesQuery } from './category'
+export type { CategoriesResponse, CategoryResponse } from './category'
 
 export {
 	organizationService,

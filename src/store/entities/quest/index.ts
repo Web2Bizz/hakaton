@@ -8,7 +8,6 @@ export {
 	useUpdateQuestMutation,
 	useDeleteQuestMutation,
 	useJoinQuestMutation,
-	useGetCategoriesQuery,
 } from './model/quest-service'
 export type * from './model/type'
 

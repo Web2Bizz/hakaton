@@ -1,12 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type {
-	CategoryResponse,
 	CreateQuestRequest,
 	CreateQuestResponse,
 	DeleteQuestResponse,
 	GetQuestsParams,
 	JoinQuestResponse,
-	QuestResponse,
+	Quest,
 	QuestsListResponse,
 	UpdateQuestRequest,
 	UpdateQuestResponse,
@@ -75,9 +74,11 @@ export const questService = createApi({
 		}),
 
 		// GET /quests/:id - Получить детальную информацию о квесте
-		getQuest: builder.query<QuestResponse, number | string>({
+		getQuest: builder.query<Quest, number | string>({
 			query: id => `/quests/${id}`,
-			providesTags: (_result, _error, id) => [{ type: 'Quest', id: String(id) }],
+			providesTags: (_result, _error, id) => [
+				{ type: 'Quest', id: String(id) },
+			],
 		}),
 
 		// POST /quests - Создать новый квест
@@ -132,11 +133,6 @@ export const questService = createApi({
 				{ type: 'Quest', id: String(id) },
 			],
 		}),
-
-		// GET /categories - Получить список категорий квестов
-		getCategories: builder.query<CategoryResponse[], void>({
-			query: () => '/categories',
-		}),
 	}),
 })
 
@@ -149,5 +145,4 @@ export const {
 	useUpdateQuestMutation,
 	useDeleteQuestMutation,
 	useJoinQuestMutation,
-	useGetCategoriesQuery,
 } = questService

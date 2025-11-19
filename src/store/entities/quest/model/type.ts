@@ -95,9 +95,16 @@ export interface Quest {
 	coverImage?: string
 	gallery?: string[]
 	steps: QuestStep[]
-	categoryIds: number[]
+	categories: Category[]
 	createdAt?: string
 	updatedAt?: string
+}
+
+export interface Category {
+	id: number
+	name: string
+	createdAt: string
+	updatedAt: string
 }
 
 // Типы для ответов API
@@ -110,12 +117,6 @@ export interface QuestsListResponse {
 			total: number
 			totalPages: number
 		}
-	}
-}
-
-export interface QuestResponse {
-	data: {
-		quest: Quest
 	}
 }
 
@@ -142,12 +143,4 @@ export interface JoinQuestResponse {
 		message: string
 		quest: Quest
 	}
-}
-
-// Тип для категории квеста
-export interface CategoryResponse {
-	id: number
-	name: string
-	createdAt: string
-	updatedAt: string
 }
