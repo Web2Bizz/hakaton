@@ -7,6 +7,8 @@ import {
 	TileLayer,
 	ZoomControl,
 } from 'react-leaflet'
+// @ts-expect-error - react-leaflet-cluster может иметь несовместимость версий, но работает
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants'
 import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
 import { getMarkerIcon } from '../lib/markerIcon'
@@ -106,59 +108,61 @@ export function UnifiedMapView({
 					</Marker>
 				)}
 
-				{quests.map(quest => (
-					<Marker
-						key={`quest-${quest.id}`}
-						position={quest.coordinates}
-						icon={getMarkerIcon(quest.type, quest.progressColor)}
-						eventHandlers={{
-							click: () => {
-								if (onMarkerClick) {
-									onMarkerClick(quest)
-								}
-							},
-						}}
-					>
-						<Popup>
-							<QuestPopup quest={quest} onSelect={onSelectQuest} />
-						</Popup>
-					</Marker>
-				))}
-
-				{organizations
-					.filter(organization => {
-						// Фильтруем организации с валидными координатами
-						return (
-							organization &&
-							organization.latitude &&
-							organization.longitude &&
-							!Number.isNaN(Number.parseFloat(organization.latitude)) &&
-							!Number.isNaN(Number.parseFloat(organization.longitude))
-						)
-					})
-					.map(organization => (
+				<MarkerClusterGroup>
+					{quests.map(quest => (
 						<Marker
-							key={`org-${organization.id}`}
-							position={getOrganizationCoordinates(organization)}
-							icon={getMarkerIcon(
-								organization.organizationTypes?.[0]?.name || ''
-							)}
+							key={`quest-${quest.id}`}
+							position={quest.coordinates}
+							icon={getMarkerIcon(quest.type, quest.progressColor)}
 							eventHandlers={{
 								click: () => {
 									if (onMarkerClick) {
-										onMarkerClick(organization)
+										onMarkerClick(quest)
 									}
 								},
 							}}
 						>
-						<Popup>
-							<OrganizationPopup
-								organization={organization}
-								onSelect={onSelectOrganization}
-							/>
-						</Popup>
-					</Marker>
-				))}
+							<Popup>
+								<QuestPopup quest={quest} onSelect={onSelectQuest} />
+							</Popup>
+						</Marker>
+					))}
+
+					{organizations
+						.filter(organization => {
+							// Фильтруем организации с валидными координатами
+							return (
+								organization &&
+								organization.latitude &&
+								organization.longitude &&
+								!Number.isNaN(Number.parseFloat(organization.latitude)) &&
+								!Number.isNaN(Number.parseFloat(organization.longitude))
+							)
+						})
+						.map(organization => (
+							<Marker
+								key={`org-${organization.id}`}
+								position={getOrganizationCoordinates(organization)}
+								icon={getMarkerIcon(
+									organization.organizationTypes?.[0]?.name || ''
+								)}
+								eventHandlers={{
+									click: () => {
+										if (onMarkerClick) {
+											onMarkerClick(organization)
+										}
+									},
+								}}
+							>
+								<Popup>
+									<OrganizationPopup
+										organization={organization}
+										onSelect={onSelectOrganization}
+									/>
+								</Popup>
+							</Marker>
+						))}
+				</MarkerClusterGroup>
 			</MapContainer>
 		</div>
 	)

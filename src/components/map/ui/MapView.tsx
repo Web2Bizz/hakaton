@@ -6,6 +6,8 @@ import {
 	TileLayer,
 	ZoomControl,
 } from 'react-leaflet'
+// @ts-expect-error - react-leaflet-cluster может иметь несовместимость версий, но работает
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
 import { useMapCenter } from '../hooks/useMapCenter'
 import { getMarkerIcon } from '../lib/markerIcon'
@@ -80,38 +82,40 @@ export function MapView({
 					</Marker>
 				)}
 
-				{organizations
-					.filter(organization => {
-						// Фильтруем организации с валидными координатами
-						return (
-							organization &&
-							organization.latitude &&
-							organization.longitude &&
-							!Number.isNaN(Number.parseFloat(organization.latitude)) &&
-							!Number.isNaN(Number.parseFloat(organization.longitude))
-						)
-					})
-					.map(organization => (
-						<Marker
-							key={organization.id}
-							position={getOrganizationCoordinates(organization)}
-							icon={getMarkerIcon(organization.organizationTypes?.[0]?.name || '')}
-							eventHandlers={{
-								click: () => {
-									if (onMarkerClick) {
-										onMarkerClick(organization)
-									}
-								},
-							}}
-						>
-						<Popup>
-							<OrganizationPopup
-								organization={organization}
-								onSelect={onSelect}
-							/>
-						</Popup>
-					</Marker>
-				))}
+				<MarkerClusterGroup>
+					{organizations
+						.filter(organization => {
+							// Фильтруем организации с валидными координатами
+							return (
+								organization &&
+								organization.latitude &&
+								organization.longitude &&
+								!Number.isNaN(Number.parseFloat(organization.latitude)) &&
+								!Number.isNaN(Number.parseFloat(organization.longitude))
+							)
+						})
+						.map(organization => (
+							<Marker
+								key={organization.id}
+								position={getOrganizationCoordinates(organization)}
+								icon={getMarkerIcon(organization.organizationTypes?.[0]?.name || '')}
+								eventHandlers={{
+									click: () => {
+										if (onMarkerClick) {
+											onMarkerClick(organization)
+										}
+									},
+								}}
+							>
+								<Popup>
+									<OrganizationPopup
+										organization={organization}
+										onSelect={onSelect}
+									/>
+								</Popup>
+							</Marker>
+						))}
+				</MarkerClusterGroup>
 			</MapContainer>
 		</div>
 	)

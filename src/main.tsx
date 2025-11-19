@@ -8,6 +8,12 @@ import './index.css'
 import 'leaflet-defaulticon-compatibility'
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+// @ts-expect-error - react-leaflet-cluster может иметь несовместимость версий
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.css'
+// @ts-expect-error - react-leaflet-cluster может иметь несовместимость версий
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>

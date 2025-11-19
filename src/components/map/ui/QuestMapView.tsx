@@ -7,6 +7,8 @@ import {
 	TileLayer,
 	ZoomControl,
 } from 'react-leaflet'
+// @ts-expect-error - react-leaflet-cluster может иметь несовместимость версий, но работает
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants'
 import { getMarkerIcon } from '../lib/markerIcon'
 import type { Quest } from '../types/quest-types'
@@ -92,24 +94,26 @@ export function QuestMapView({
 					</Marker>
 				)}
 
-				{quests.map(quest => (
-					<Marker
-						key={quest.id}
-						position={quest.coordinates}
-						icon={getMarkerIcon(quest.type, quest.progressColor)}
-						eventHandlers={{
-							click: () => {
-								if (onMarkerClick) {
-									onMarkerClick(quest)
-								}
-							},
-						}}
-					>
-						<Popup>
-							<QuestPopup quest={quest} onSelect={onSelect} />
-						</Popup>
-					</Marker>
-				))}
+				<MarkerClusterGroup>
+					{quests.map(quest => (
+						<Marker
+							key={quest.id}
+							position={quest.coordinates}
+							icon={getMarkerIcon(quest.type, quest.progressColor)}
+							eventHandlers={{
+								click: () => {
+									if (onMarkerClick) {
+										onMarkerClick(quest)
+									}
+								},
+							}}
+						>
+							<Popup>
+								<QuestPopup quest={quest} onSelect={onSelect} />
+							</Popup>
+						</Marker>
+					))}
+				</MarkerClusterGroup>
 			</MapContainer>
 		</div>
 	)
