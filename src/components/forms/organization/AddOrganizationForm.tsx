@@ -39,16 +39,16 @@ export function AddOrganizationForm({
 
 	const { data: cities = [] } = useGetCitiesQuery()
 	const cityId = form.watch('cityId')
-	const cityName = cityId
-		? cities.find(c => c.id === cityId)?.name
-		: undefined
+	const cityName = cityId ? cities.find(c => c.id === cityId)?.name : undefined
 
 	if (isLoadingOrganization) {
 		return (
 			<div className='flex items-center justify-center py-12'>
 				<div className='flex flex-col items-center gap-4'>
 					<Spinner />
-					<p className='text-sm text-slate-600'>Загрузка данных организации...</p>
+					<p className='text-sm text-slate-600'>
+						Загрузка данных организации...
+					</p>
 				</div>
 			</div>
 		)

@@ -144,7 +144,7 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 					</Button>
 				</div>
 
-				{isEditMode && currentStep === 'updates' && (
+				{isEditMode && (
 					<div className='mt-6'>
 						<DangerZone
 							title='Опасная зона'
