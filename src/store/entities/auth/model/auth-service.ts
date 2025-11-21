@@ -2,8 +2,10 @@ import { API_BASE_URL } from '@/constants'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type {
 	AuthResponse,
+	ForgotPasswordRequest,
 	LoginRequest,
 	RegisterRequest,
+	ResetPasswordRequest,
 	UpdateUserRequest,
 	UserFullData,
 } from './type'
@@ -51,6 +53,27 @@ export const authService = createApi({
 			invalidatesTags: ['Auth'],
 		}),
 
+		// POST /auth/forgot-password - Запрос на восстановление пароля
+		forgotPassword: builder.mutation<
+			{ message: string },
+			ForgotPasswordRequest
+		>({
+			query: data => ({
+				url: '/auth/forgot-password',
+				method: 'POST',
+				body: data,
+			}),
+		}),
+
+		// POST /auth/reset-password - Сброс пароля
+		resetPassword: builder.mutation<{ message: string }, ResetPasswordRequest>({
+			query: data => ({
+				url: '/auth/reset-password',
+				method: 'POST',
+				body: data,
+			}),
+		}),
+
 		// POST /auth/logout - Выход из системы
 
 		// GET /users/:userId - Получить информацию о пользователе
@@ -81,6 +104,8 @@ export const authService = createApi({
 export const {
 	useRegisterMutation,
 	useLoginMutation,
+	useForgotPasswordMutation,
+	useResetPasswordMutation,
 	useGetUserQuery,
 	useLazyGetUserQuery,
 	useUpdateUserMutation,

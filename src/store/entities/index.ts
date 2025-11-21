@@ -2,9 +2,11 @@ export { achievementService } from './achievement/model/achievement-service'
 export type { Achievement } from './achievement/model/type'
 
 export {
+	useForgotPasswordMutation,
 	useLazyGetUserQuery,
 	useLoginMutation,
 	useRegisterMutation,
+	useResetPasswordMutation,
 	useUpdateUserMutation,
 } from './auth/model/auth-service'
 export type { LoginErrorResponse } from './auth/model/type'

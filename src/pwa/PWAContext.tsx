@@ -49,7 +49,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 				try {
 					const reg = await navigator.serviceWorker.register('/pwa/sw.js')
 					setRegistration(reg)
-					console.log('Service Worker registered: ', reg)
+					if (import.meta.env.DEV) {
+						console.log('Service Worker registered: ', reg)
+					}
 
 					// Проверка обновлений
 					reg.addEventListener('updatefound', () => {

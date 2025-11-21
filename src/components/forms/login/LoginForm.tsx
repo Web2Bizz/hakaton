@@ -13,7 +13,8 @@ import { useUser } from '@/hooks/useUser'
 import { useLazyGetUserQuery, useLoginMutation } from '@/store/entities'
 import { saveToken, transformUserFromAPI } from '@/utils/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -42,6 +43,7 @@ export function LoginForm() {
 	const { user, setUser } = useUser()
 	const [loginMutation, { isLoading: isLoggingIn }] = useLoginMutation()
 	const [getUser, { isLoading: isFetchingUser }] = useLazyGetUserQuery()
+	const [showPassword, setShowPassword] = useState(false)
 
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -139,7 +141,7 @@ export function LoginForm() {
 								name='email'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Email *</FormLabel>
+										<FormLabel>Email</FormLabel>
 										<FormControl>
 											<Input
 												type='email'
@@ -157,15 +159,40 @@ export function LoginForm() {
 								name='password'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Пароль *</FormLabel>
+										<FormLabel>Пароль</FormLabel>
 										<FormControl>
-											<Input
-												type='password'
-												placeholder='••••••••'
-												{...field}
-											/>
+											<div className='relative'>
+												<Input
+													type={showPassword ? 'text' : 'password'}
+													placeholder='••••••••'
+													className='pr-10'
+													{...field}
+												/>
+												<button
+													type='button'
+													onClick={() => setShowPassword(!showPassword)}
+													className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 transition-colors'
+													aria-label={
+														showPassword ? 'Скрыть пароль' : 'Показать пароль'
+													}
+												>
+													{showPassword ? (
+														<EyeOff className='h-4 w-4' />
+													) : (
+														<Eye className='h-4 w-4' />
+													)}
+												</button>
+											</div>
 										</FormControl>
-										<FormMessage />
+										<div className='flex items-center justify-between'>
+											<FormMessage />
+											<a
+												href='/forgot-password'
+												className='text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer ml-auto'
+											>
+												Забыли пароль?
+											</a>
+										</div>
 									</FormItem>
 								)}
 							/>

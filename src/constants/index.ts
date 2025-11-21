@@ -1,7 +1,7 @@
 // Общие константы приложения
 
 export const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL || 'http://82.202.140.37:3000/api/v1'
+	import.meta.env.VITE_API_BASE_URL || 'https://82.202.140.37:3000/api/v1'
 
 export const DEFAULT_MAP_CENTER: [number, number] = [55.751244, 37.618423]
 export const DEFAULT_MAP_ZOOM = 4

@@ -13,6 +13,16 @@ export interface LoginRequest {
 	password: string
 }
 
+export interface ForgotPasswordRequest {
+	email: string
+}
+
+export interface ResetPasswordRequest {
+	token: string
+	password: string
+	confirmPassword: string
+}
+
 export interface UpdateUserRequest {
 	firstName?: string
 	lastName?: string
