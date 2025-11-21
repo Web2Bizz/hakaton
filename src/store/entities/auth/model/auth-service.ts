@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/constants'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type {
 	AuthResponse,
@@ -19,7 +20,7 @@ export const authService = createApi({
 	reducerPath: 'authApi',
 
 	baseQuery: fetchBaseQuery({
-		baseUrl: 'http://82.202.140.37:3000/api/v1',
+		baseUrl: API_BASE_URL,
 		prepareHeaders: headers => {
 			const token = getToken()
 			if (token) {

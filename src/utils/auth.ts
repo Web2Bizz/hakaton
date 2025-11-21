@@ -1,5 +1,6 @@
 // Утилиты для работы с авторизацией
 
+import { API_BASE_URL } from '@/constants'
 import type { UserFullData } from '@/store/entities/auth/model/type'
 import type { User } from '@/types/user'
 import {
@@ -7,8 +8,6 @@ import {
 	getLevelTitle,
 	normalizeUserLevel,
 } from '@/utils/level'
-
-const API_BASE_URL = 'http://82.202.140.37:3000/api/v1'
 
 /**
  * Получает URL аватара из avatarUrls или avatar

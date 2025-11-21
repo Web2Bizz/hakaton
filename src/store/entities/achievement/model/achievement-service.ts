@@ -1,8 +1,6 @@
+import { API_BASE_URL } from '@/constants'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type {
-	AchievementsListResponse,
-	UserAchievementsResponse,
-} from './type'
+import type { AchievementsListResponse, UserAchievementsResponse } from './type'
 
 // Функция для получения токена из localStorage
 const getToken = () => {
@@ -15,7 +13,7 @@ const getToken = () => {
 export const achievementService = createApi({
 	reducerPath: 'achievementApi',
 	baseQuery: fetchBaseQuery({
-		baseUrl: 'http://82.202.140.37:3000/api/v1',
+		baseUrl: API_BASE_URL,
 		prepareHeaders: headers => {
 			const token = getToken()
 			if (token) {
@@ -48,4 +46,3 @@ export const {
 	useGetUserAchievementsQuery,
 	useLazyGetUserAchievementsQuery,
 } = achievementService
-
