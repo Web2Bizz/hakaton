@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { loadLeafletStyles } from '../lib/loadLeafletStyles'
 import { MapControls } from './MapControls'
 import { MapDetails } from './MapDetails'
@@ -68,26 +68,60 @@ export const MapComponent = () => {
 		setIsListClosing,
 	})
 
+	// Флаг для отслеживания, был ли уже обработан URL параметр
+	const urlProcessedRef = useRef(false)
+
 	// Обработка URL параметров для открытия квеста или организации
 	useEffect(() => {
+		// Пропускаем, если URL уже был обработан
+		if (urlProcessedRef.current) {
+			return
+		}
+
+		// Пропускаем, если данные еще не загружены
+		if (allQuests.length === 0 && allOrganizations.length === 0) {
+			return
+		}
+
 		const params = new URLSearchParams(window.location.search)
 		const questId = params.get('quest')
 		const orgId = params.get('organization')
 
-		if (questId) {
-			const quest = allQuests.find(q => q.id === questId)
+		if (questId && allQuests.length > 0) {
+			// Нормализуем сравнение ID (приводим оба к строке)
+			const quest = allQuests.find(q => {
+				const qId = typeof q.id === 'string' ? q.id : String(q.id)
+				return qId === questId
+			})
 			if (quest) {
+				urlProcessedRef.current = true
 				handleSelectQuest(quest)
+				// Устанавливаем зум на координаты квеста
+				if (quest.coordinates && quest.coordinates.length === 2) {
+					setSearchCenter([quest.coordinates[0], quest.coordinates[1]])
+					setSearchZoom(15)
+				}
 			}
-		} else if (orgId) {
-			const org = allOrganizations.find(o => o.id === orgId)
+		} else if (orgId && allOrganizations.length > 0) {
+			// Нормализуем сравнение ID (приводим оба к строке)
+			const org = allOrganizations.find(o => {
+				const oId = typeof o.id === 'string' ? o.id : String(o.id)
+				return oId === orgId
+			})
 			if (org) {
+				urlProcessedRef.current = true
 				handleSelectOrganization(org)
+				// Устанавливаем зум на координаты организации
+				if (org.coordinates && org.coordinates.length === 2) {
+					setSearchCenter([org.coordinates[0], org.coordinates[1]])
+					setSearchZoom(15)
+				}
 			}
+		} else if (!questId && !orgId) {
+			// Если нет параметров в URL, помечаем как обработанное
+			urlProcessedRef.current = true
 		}
-		// Запускаем только при монтировании, handlers стабильны благодаря useCallback
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
+	}, [allQuests, allOrganizations, handleSelectQuest, handleSelectOrganization, setSearchCenter, setSearchZoom])
 
 	// Обработка зума на созданную точку
 	useEffect(() => {
