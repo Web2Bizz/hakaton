@@ -101,12 +101,26 @@ export default function QuestManagePage() {
 		)
 	}
 
+	const isArchived = quest.status === 'archived'
+
 	return (
 		<ProtectedRoute>
-			<div className='min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 mt-16'>
+			<div
+				className={`min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 mt-16 ${
+					isArchived
+						? 'bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100'
+						: 'bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50'
+				}`}
+			>
 				<div className='max-w-7xl mx-auto'>
 					{/* Header с градиентом */}
-					<div className='bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 rounded-2xl shadow-2xl p-8 mb-6 text-white relative overflow-hidden'>
+					<div
+						className={`rounded-2xl shadow-2xl p-8 mb-6 text-white relative overflow-hidden ${
+							isArchived
+								? 'bg-gradient-to-r from-slate-500 via-slate-600 to-slate-700 opacity-90'
+								: 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700'
+						}`}
+					>
 						{/* Декоративные элементы */}
 						<div className='absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32' />
 						<div className='absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -ml-24 -mb-24' />
@@ -132,18 +146,42 @@ export default function QuestManagePage() {
 					</div>
 
 					{/* Вкладки */}
-					<div className='bg-white rounded-2xl shadow-xl border border-slate-200/50 overflow-hidden mb-6'>
-						<div className='flex gap-1 p-2 bg-slate-50/50 border-b border-slate-200'>
+					<div
+						className={`rounded-2xl shadow-xl border overflow-hidden mb-6 ${
+							isArchived
+								? 'bg-slate-50 border-slate-300 opacity-90'
+								: 'bg-white border-slate-200/50'
+						}`}
+					>
+						<div
+							className={`flex gap-1 p-2 border-b ${
+								isArchived
+									? 'bg-slate-100/80 border-slate-300'
+									: 'bg-slate-50/50 border-slate-200'
+							}`}
+						>
 							<button
 								type='button'
 								onClick={() => setActiveTab('basic')}
 								className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-all duration-200 ${
 									activeTab === 'basic'
-										? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										? isArchived
+											? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-500/30 transform scale-[1.02]'
+											: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										: isArchived
+										? 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
 										: 'text-slate-600 hover:text-slate-900 hover:bg-white'
 								}`}
 							>
-								<FileText className={`h-5 w-5 ${activeTab === 'basic' ? 'text-white' : 'text-blue-600'}`} />
+								<FileText
+									className={`h-5 w-5 ${
+										activeTab === 'basic'
+											? 'text-white'
+											: isArchived
+											? 'text-slate-500'
+											: 'text-blue-600'
+									}`}
+								/>
 								<span>Основная информация</span>
 							</button>
 							<button
@@ -151,11 +189,23 @@ export default function QuestManagePage() {
 								onClick={() => setActiveTab('updates')}
 								className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-all duration-200 ${
 									activeTab === 'updates'
-										? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										? isArchived
+											? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-500/30 transform scale-[1.02]'
+											: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										: isArchived
+										? 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
 										: 'text-slate-600 hover:text-slate-900 hover:bg-white'
 								}`}
 							>
-								<Bell className={`h-5 w-5 ${activeTab === 'updates' ? 'text-white' : 'text-blue-600'}`} />
+								<Bell
+									className={`h-5 w-5 ${
+										activeTab === 'updates'
+											? 'text-white'
+											: isArchived
+											? 'text-slate-500'
+											: 'text-blue-600'
+									}`}
+								/>
 								<span>Обновления</span>
 							</button>
 							<button
@@ -163,11 +213,23 @@ export default function QuestManagePage() {
 								onClick={() => setActiveTab('management')}
 								className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm rounded-xl transition-all duration-200 ${
 									activeTab === 'management'
-										? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										? isArchived
+											? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-lg shadow-slate-500/30 transform scale-[1.02]'
+											: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 transform scale-[1.02]'
+										: isArchived
+										? 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
 										: 'text-slate-600 hover:text-slate-900 hover:bg-white'
 								}`}
 							>
-								<Settings className={`h-5 w-5 ${activeTab === 'management' ? 'text-white' : 'text-blue-600'}`} />
+								<Settings
+									className={`h-5 w-5 ${
+										activeTab === 'management'
+											? 'text-white'
+											: isArchived
+											? 'text-slate-500'
+											: 'text-blue-600'
+									}`}
+								/>
 								<span>Менеджмент</span>
 							</button>
 						</div>

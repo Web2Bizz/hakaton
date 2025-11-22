@@ -36,6 +36,7 @@ export function QuestManagement({
 	// Используем актуальные данные квеста или начальные
 	const currentQuest = quest || initialQuest
 	const questStatus = quest?.status || initialQuest?.status
+	const isArchived = currentQuest?.status === 'archived'
 
 	// Проверяем, можно ли архивировать квест (должен быть завершен)
 	const canArchive = useMemo(() => {
@@ -176,8 +177,12 @@ export function QuestManagement({
 	}
 
 	return (
-		<div className='space-y-6'>
-			<h3 className='text-lg font-semibold text-slate-900 mb-4'>
+		<div className={`space-y-6 ${isArchived ? 'opacity-75' : ''}`}>
+			<h3
+				className={`text-lg font-semibold mb-4 ${
+					isArchived ? 'text-slate-600' : 'text-slate-900'
+				}`}
+			>
 				Управление требованиями выполнения
 			</h3>
 
@@ -188,12 +193,24 @@ export function QuestManagement({
 							return (
 								<div
 									key={stepIndex}
-									className='border border-slate-200 rounded-lg p-4 bg-slate-50'
+									className={`border rounded-lg p-4 ${
+										isArchived
+											? 'border-slate-300 bg-slate-100'
+											: 'border-slate-200 bg-slate-50'
+									}`}
 								>
-									<h4 className='font-semibold text-slate-900 mb-2'>
+									<h4
+										className={`font-semibold mb-2 ${
+											isArchived ? 'text-slate-600' : 'text-slate-900'
+										}`}
+									>
 										{step.title}
 									</h4>
-									<p className='text-sm text-slate-600'>
+									<p
+										className={`text-sm ${
+											isArchived ? 'text-slate-500' : 'text-slate-600'
+										}`}
+									>
 										У этого этапа нет требований выполнения
 									</p>
 								</div>
@@ -214,8 +231,14 @@ export function QuestManagement({
 					})}
 				</div>
 			) : (
-				<div className='bg-slate-50 border border-slate-200 rounded-lg p-8 text-center'>
-					<p className='text-slate-600'>
+				<div
+					className={`border rounded-lg p-8 text-center ${
+						isArchived
+							? 'bg-slate-100 border-slate-300'
+							: 'bg-slate-50 border-slate-200'
+					}`}
+				>
+					<p className={isArchived ? 'text-slate-500' : 'text-slate-600'}>
 						У этого квеста пока нет этапов с требованиями выполнения
 					</p>
 				</div>
