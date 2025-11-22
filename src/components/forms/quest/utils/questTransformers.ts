@@ -5,16 +5,15 @@ import type {
 	QuestStep,
 	UpdateQuestRequest,
 } from '@/store/entities/quest/model/type'
+import { logger } from '@/utils/logger'
 import type { QuestFormData } from '../schemas/quest-form.schema'
 
-// Маппинг категорий в ID на основе API
-// Эти значения должны соответствовать ID категорий из API
 const CATEGORY_TO_ID_MAP: Record<string, number> = {
-	environment: 1, // Экология
-	animals: 2, // Животные
-	people: 3, // Люди
-	education: 4, // Образование
-	other: 5, // Другое
+	environment: 1,
+	animals: 2,
+	people: 3,
+	education: 4,
+	other: 5,
 }
 
 const ID_TO_CATEGORY_MAP: Record<number, string> = {
@@ -25,13 +24,9 @@ const ID_TO_CATEGORY_MAP: Record<number, string> = {
 	5: 'other',
 }
 
-/**
- * Преобразует данные формы в формат API для создания квеста
- */
 export function transformFormDataToCreateRequest(
 	data: QuestFormData
 ): CreateQuestRequest {
-	// Преобразуем stages в steps
 	const steps: QuestStep[] = data.stages
 		.filter(stage => stage.title.trim() !== '')
 		.map(stage => {
@@ -66,15 +61,11 @@ export function transformFormDataToCreateRequest(
 		.filter(c => c.value.trim() !== '')
 		.map(c => ({ name: c.name, value: c.value.trim() }))
 
-	// Преобразуем category в categoryIds
 	const categoryId = CATEGORY_TO_ID_MAP[data.category] || 5
 
-	// Убеждаемся, что latitude и longitude - числа
 	const latitude = Number.parseFloat(data.latitude)
 	const longitude = Number.parseFloat(data.longitude)
 
-	// Убеждаемся, что cityId и organizationTypeId - числа
-	// Если это объект, извлекаем ID
 	const cityId =
 		typeof data.cityId === 'object' &&
 		data.cityId !== null &&
@@ -90,12 +81,11 @@ export function transformFormDataToCreateRequest(
 			? Number((data.organizationTypeId as { id: number }).id)
 			: Number(data.organizationTypeId)
 
-	// Создаем чистый объект только с нужными полями
 	const request: CreateQuestRequest = {
 		title: data.title,
 		description: data.story,
 		status: 'active',
-		experienceReward: 100, // Можно сделать настраиваемым
+		experienceReward: 100,
 		cityId,
 		organizationTypeId,
 		latitude,
@@ -108,20 +98,16 @@ export function transformFormDataToCreateRequest(
 		categoryIds: [categoryId],
 	}
 
-	// Добавляем achievementId только если он есть
 	if (data.achievementId !== undefined && data.achievementId !== null) {
 		request.achievementId = data.achievementId
-		console.log('Adding achievementId to create request:', data.achievementId)
+		logger.debug('Adding achievementId to create request:', data.achievementId)
 	} else {
-		console.log('No achievementId in data:', data.achievementId)
+		logger.debug('No achievementId in data:', data.achievementId)
 	}
 
 	return request
 }
 
-/**
- * Преобразует данные формы в формат API для обновления квеста
- */
 export function transformFormDataToUpdateRequest(
 	data: QuestFormData
 ): UpdateQuestRequest {
@@ -161,12 +147,9 @@ export function transformFormDataToUpdateRequest(
 
 	const categoryId = CATEGORY_TO_ID_MAP[data.category] || 5
 
-	// Убеждаемся, что latitude и longitude - числа
 	const latitude = Number.parseFloat(data.latitude)
 	const longitude = Number.parseFloat(data.longitude)
 
-	// Убеждаемся, что cityId и organizationTypeId - числа
-	// Если это объект, извлекаем ID
 	const cityId =
 		typeof data.cityId === 'object' &&
 		data.cityId !== null &&
@@ -182,7 +165,6 @@ export function transformFormDataToUpdateRequest(
 			? Number((data.organizationTypeId as { id: number }).id)
 			: Number(data.organizationTypeId)
 
-	// Создаем чистый объект только с нужными полями
 	const request: UpdateQuestRequest = {
 		title: data.title,
 		description: data.story,
@@ -198,7 +180,6 @@ export function transformFormDataToUpdateRequest(
 		categoryIds: [categoryId],
 	}
 
-	// Добавляем achievementId (null для удаления, undefined если не менялось)
 	if (data.achievementId !== undefined) {
 		request.achievementId = data.achievementId || null
 	}
@@ -206,21 +187,14 @@ export function transformFormDataToUpdateRequest(
 	return request
 }
 
-/**
- * Преобразует данные из API в формат формы
- */
 export function transformApiResponseToFormData(
 	quest: Quest
 ): Partial<QuestFormData> {
-	console.log(quest)
+	logger.debug('Transforming quest to form data:', quest)
 
-	// Находим категорию по первому categoryId
-	// Если categoryIds есть, используем маппинг ID -> строка
-	// Если нет, используем значение по умолчанию
 	const categoryId = quest.categories[0].id || 5
 	const category = ID_TO_CATEGORY_MAP[categoryId] || 'other'
 
-	// Преобразуем contacts из API в формат формы
 	const contacts =
 		quest.contacts
 			?.filter(c => c.value && c.value.trim() !== '')
@@ -229,7 +203,6 @@ export function transformApiResponseToFormData(
 				value: c.value.trim(),
 			})) || []
 
-	// Извлекаем данные куратора из contacts
 	const curatorContact = contacts.find(
 		c => c.name === 'Куратор' || c.name.toLowerCase() === 'куратор'
 	)
@@ -240,21 +213,19 @@ export function transformApiResponseToFormData(
 		c => c.name === 'Email' || c.name.toLowerCase() === 'email'
 	)
 
-	// Преобразуем steps в stages
 	const stages = quest.steps.map(step => ({
 		title: step.title,
 		description: step.description,
 		status: step.status,
 		progress: step.progress,
 		requirementType: step.requirement
-			? ('financial' as const) // По умолчанию financial, так как API не возвращает тип
+			? ('financial' as const)
 			: ('none' as const),
 		requirementValue: step.requirement?.targetValue,
 		itemName: undefined,
 		deadline: step.deadline || undefined,
 	}))
 
-	// Преобразуем achievement в customAchievement
 	const customAchievement =
 		quest.achievement?.icon &&
 		quest.achievement.title &&
@@ -285,10 +256,10 @@ export function transformApiResponseToFormData(
 		longitude: quest.longitude.toString(),
 		stages,
 		customAchievement,
-		achievementId: quest.achievementId || undefined, // Сохраняем ID достижения
+		achievementId: quest.achievementId || undefined,
 		curatorName: curatorContact?.value || '',
 		curatorPhone: phoneContact?.value || '',
 		curatorEmail: emailContact?.value || '',
-		socials: [], // API не возвращает socials
+		socials: [],
 	}
 }

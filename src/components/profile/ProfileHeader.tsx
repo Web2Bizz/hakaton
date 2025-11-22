@@ -8,6 +8,7 @@ import {
 	useUploadImagesMutation,
 } from '@/store/entities'
 import type { User } from '@/types/user'
+import { logger } from '@/utils'
 import { transformUserFromAPI } from '@/utils/auth'
 import { compressImage } from '@/utils/image'
 import { Award, Camera, LogOut, Mail, Trophy } from 'lucide-react'
@@ -114,8 +115,7 @@ export const ProfileHeader = memo(function ProfileHeader({
 					const currentUserData = await getUser(user.id).unwrap()
 					currentAvatarUrls = currentUserData.avatarUrls || {}
 				} catch (error) {
-					console.warn('Не удалось получить текущие данные пользователя:', error)
-					// Продолжаем с пустым объектом
+					logger.warn('Не удалось получить текущие данные пользователя:', error)
 				}
 
 				// Определяем следующий ID для avatarUrls
@@ -192,10 +192,8 @@ export const ProfileHeader = memo(function ProfileHeader({
 				}
 
 				toast.error(errorMessage)
-				if (import.meta.env.DEV) {
-					console.error('Error updating avatar:', error)
-					console.error('Error details:', JSON.stringify(error, null, 2))
-				}
+				logger.error('Error updating avatar:', error)
+				logger.error('Error details:', JSON.stringify(error, null, 2))
 			} finally {
 				setIsUploading(false)
 				// Сбрасываем значение input, чтобы можно было выбрать тот же файл снова

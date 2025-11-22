@@ -10,6 +10,7 @@ import {
 	Spinner,
 } from '@/components/ui'
 import { useForgotPasswordMutation } from '@/store/entities'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -58,10 +59,8 @@ export function ForgotPasswordForm() {
 				globalThis.location.href = '/login'
 			}, 2000)
 		} catch (error: unknown) {
+			logger.error('Forgot password error:', error)
 			toast.error('Ошибка отправки запроса. Попробуйте еще раз.')
-			if (import.meta.env.DEV) {
-				console.error('Forgot password error:', error)
-			}
 		}
 	}
 

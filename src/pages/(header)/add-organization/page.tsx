@@ -22,28 +22,30 @@ export default function AddOrganizationPage() {
 
 	// Подсчитываем количество созданных квестов пользователем (исключая архивированные)
 	const createdQuestsCount = useMemo(() => {
-		if (!user?.id || !questsResponse?.data?.quests) return 0
-		const userId = Number.parseInt(user.id, 10)
+		const userId = user?.id
+		if (!userId || !questsResponse?.data?.quests) return 0
+		const userIdNum = Number.parseInt(userId, 10)
 		return questsResponse.data.quests.filter(
-			quest => quest.ownerId === userId && quest.status !== 'archived'
+			quest => quest.ownerId === userIdNum && quest.status !== 'archived'
 		).length
-	}, [questsResponse, user?.id])
+	}, [questsResponse, user])
 
 	// Подсчитываем количество созданных организаций пользователем
 	const createdOrganizationsCount = useMemo(() => {
-		if (!user?.createdOrganizationId || !organizations.length) return 0
+		const createdOrgId = user?.createdOrganizationId
+		if (!createdOrgId || !organizations.length) return 0
 		// Используем createdOrganizationId для определения созданной организации
 		// Если MAX_ORGANIZATIONS_PER_USER > 1, потребуется изменить структуру User
 		const orgId =
-			typeof user.createdOrganizationId === 'string'
-				? Number.parseInt(user.createdOrganizationId, 10)
-				: Number.parseInt(String(user.createdOrganizationId), 10)
+			typeof createdOrgId === 'string'
+				? Number.parseInt(createdOrgId, 10)
+				: Number.parseInt(String(createdOrgId), 10)
 		return organizations.filter(org => {
 			const orgIdNum =
 				typeof org.id === 'string' ? Number.parseInt(org.id, 10) : org.id
 			return orgIdNum === orgId
 		}).length
-	}, [organizations, user?.createdOrganizationId])
+	}, [organizations, user])
 
 	const handleSuccess = () => {
 		// Показываем loader и перенаправляем на карту после успешного создания

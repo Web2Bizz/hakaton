@@ -5,12 +5,17 @@ import type { Quest as ApiQuest } from '@/store/entities/quest/model/type'
 
 export function calculateQuestProgress(quest: Quest): number {
 	if (quest.stages.length === 0) return 0
-	
-	const totalProgress = quest.stages.reduce((sum, stage) => sum + stage.progress, 0)
+
+	const totalProgress = quest.stages.reduce(
+		(sum, stage) => sum + stage.progress,
+		0
+	)
 	return Math.round(totalProgress / quest.stages.length)
 }
 
-export function getQuestProgressColor(progress: number): Quest['progressColor'] {
+export function getQuestProgressColor(
+	progress: number
+): Quest['progressColor'] {
 	if (progress === 100) return 'victory'
 	if (progress >= 76) return 'green'
 	if (progress >= 51) return 'yellow'
@@ -18,7 +23,10 @@ export function getQuestProgressColor(progress: number): Quest['progressColor'] 
 	return 'red'
 }
 
-export function findStageById(quest: Quest, stageId: string): QuestStage | undefined {
+export function findStageById(
+	quest: Quest,
+	stageId: string
+): QuestStage | undefined {
 	return quest.stages.find(stage => stage.id === stageId)
 }
 
@@ -30,8 +38,25 @@ export function getCompletedStages(quest: Quest): QuestStage[] {
 	return quest.stages.filter(stage => stage.status === 'completed')
 }
 
+/**
+ * Определяет тип требования на основе targetValue
+ * >= 1000 = финансовые средства, < 1000 = волонтеры или материалы
+ */
+export function getRequirementType(
+	targetValue: number
+): 'financial' | 'volunteers' | 'items' {
+	if (targetValue >= 1000) {
+		return 'financial'
+	}
+	// По умолчанию считаем волонтерами, можно расширить логику для определения материалов
+	return 'volunteers'
+}
+
 // Маппинг ID категорий в строковые значения
-const ID_TO_CATEGORY_MAP: Record<number, 'environment' | 'animals' | 'people' | 'education' | 'other'> = {
+const ID_TO_CATEGORY_MAP: Record<
+	number,
+	'environment' | 'animals' | 'people' | 'education' | 'other'
+> = {
 	1: 'environment',
 	2: 'animals',
 	3: 'people',
@@ -45,11 +70,14 @@ const ID_TO_CATEGORY_MAP: Record<number, 'environment' | 'animals' | 'people' | 
 export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 	// Проверяем наличие steps, если их нет - используем пустой массив
 	const steps = apiQuest.steps || []
-	
+
 	// Вычисляем общий прогресс на основе шагов
-	const overallProgress = steps.length > 0
-		? Math.round(steps.reduce((sum, step) => sum + step.progress, 0) / steps.length)
-		: 0
+	const overallProgress =
+		steps.length > 0
+			? Math.round(
+					steps.reduce((sum, step) => sum + step.progress, 0) / steps.length
+			  )
+			: 0
 
 	// Преобразуем steps в stages
 	const stages: QuestStage[] = steps.map((step, index) => {
@@ -92,9 +120,10 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 	})
 
 	// Получаем категорию из первой категории квеста
-	const category = apiQuest.categories && apiQuest.categories.length > 0
-		? (ID_TO_CATEGORY_MAP[apiQuest.categories[0].id] || 'other')
-		: 'other'
+	const category =
+		apiQuest.categories && apiQuest.categories.length > 0
+			? ID_TO_CATEGORY_MAP[apiQuest.categories[0].id] || 'other'
+			: 'other'
 
 	// Извлекаем контакты куратора (проверяем наличие contacts)
 	const contacts = apiQuest.contacts || []
@@ -109,8 +138,9 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 	)
 
 	// Формируем имя куратора
-	const curatorName = curatorContact?.value || 
-		(apiQuest.owner 
+	const curatorName =
+		curatorContact?.value ||
+		(apiQuest.owner
 			? `${apiQuest.owner.firstName} ${apiQuest.owner.lastName}`.trim()
 			: 'Не указан')
 
@@ -171,6 +201,8 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 /**
  * Преобразует массив квестов с сервера в формат для компонентов
  */
-export function transformApiQuestsToComponentQuests(apiQuests: ApiQuest[]): Quest[] {
+export function transformApiQuestsToComponentQuests(
+	apiQuests: ApiQuest[]
+): Quest[] {
 	return apiQuests.map(transformApiQuestToComponentQuest)
 }

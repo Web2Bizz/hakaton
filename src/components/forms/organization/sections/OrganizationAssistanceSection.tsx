@@ -5,7 +5,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from '@/components/ui/form'
-import { useGetHelpTypesQuery } from '@/store/entities/organization'
+import { useGetHelpTypesQuery } from '@/store/entities/help-type'
 import { Spinner } from '@/components/ui/spinner'
 import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'

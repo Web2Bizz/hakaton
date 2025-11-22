@@ -1,9 +1,7 @@
-import {
-	useGetCitiesQuery,
-	useGetHelpTypesQuery,
-	useGetOrganizationTypesQuery,
-	useGetOrganizationsQuery,
-} from '@/store/entities/organization'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import { useGetHelpTypesQuery } from '@/store/entities/help-type'
+import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
+import { useGetOrganizationsQuery } from '@/store/entities/organization'
 import { useGetQuestsQuery } from '@/store/entities/quest'
 import { getAllOrganizations, getAllQuests } from '@/utils/userData'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'

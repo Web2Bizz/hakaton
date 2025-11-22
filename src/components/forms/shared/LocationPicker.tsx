@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { useGetCitiesQuery } from '@/store/entities/city'
 import { getCityCoordinates } from '@/utils/cityCoordinates'
 import L from 'leaflet'
 import { X } from 'lucide-react'
@@ -47,23 +48,22 @@ export function LocationPicker({
 	onSelect,
 	onClose,
 }: LocationPickerProps) {
+	const { data: cities = [] } = useGetCitiesQuery()
 	const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(
 		initialCoordinates || null
 	)
 
-	// Устанавливаем начальные координаты на основе города
 	useEffect(() => {
-		if (city && !selectedCoords) {
-			const cityCoords = getCityCoordinates(city)
+		if (city && !selectedCoords && cities.length > 0) {
+			const cityCoords = getCityCoordinates(city, { apiCities: cities })
 			if (cityCoords) {
-				// Используем setTimeout для избежания синхронного setState в эффекте
 				const timeoutId = setTimeout(() => {
 					setSelectedCoords(cityCoords)
 				}, 0)
 				return () => clearTimeout(timeoutId)
 			}
 		}
-	}, [city, selectedCoords])
+	}, [city, selectedCoords, cities])
 
 	const handleMapClick = (coords: [number, number]) => {
 		setSelectedCoords(coords)
@@ -76,16 +76,15 @@ export function LocationPicker({
 		}
 	}
 
-	// Определяем центр карты
 	const getMapCenter = (): [number, number] => {
 		if (selectedCoords) {
 			return selectedCoords
 		}
-		if (city) {
-			const cityCoords = getCityCoordinates(city)
-			return cityCoords || [55.751244, 37.618423] // Москва по умолчанию
+		if (city && cities.length > 0) {
+			const cityCoords = getCityCoordinates(city, { apiCities: cities })
+			return cityCoords || [55.751244, 37.618423]
 		}
-		return [55.751244, 37.618423] // Москва по умолчанию
+		return [55.751244, 37.618423]
 	}
 
 	const mapCenter = getMapCenter()
@@ -150,4 +149,3 @@ export function LocationPicker({
 		</div>
 	)
 }
-

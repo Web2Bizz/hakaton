@@ -1,17 +1,13 @@
 import { API_BASE_URL } from '@/constants'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type {
-	CityResponse,
 	CreateOrganizationRequest,
 	CreateOrganizationResponse,
 	DeleteOrganizationResponse,
-	HelpTypeResponse,
 	Organization,
 	OrganizationResponse,
-	OrganizationTypeResponse,
 	UpdateOrganizationRequest,
 	UpdateOrganizationResponse,
-	UploadImageResponse,
 } from './type'
 
 // Функция для получения токена из localStorage
@@ -91,30 +87,6 @@ export const organizationService = createApi({
 				{ type: 'Organization', id: organizationId },
 			],
 		}),
-
-		// GET /organization-types - Получить список типов организаций
-		getOrganizationTypes: builder.query<OrganizationTypeResponse[], void>({
-			query: () => '/organization-types',
-		}),
-
-		// GET /help-types - Получить список видов помощи
-		getHelpTypes: builder.query<HelpTypeResponse[], void>({
-			query: () => '/help-types',
-		}),
-
-		// GET /cities - Получить список городов
-		getCities: builder.query<CityResponse[], void>({
-			query: () => '/cities',
-		}),
-
-		// POST /upload/images - Загрузить изображения
-		uploadImages: builder.mutation<UploadImageResponse[], FormData>({
-			query: formData => ({
-				url: '/upload/images',
-				method: 'POST',
-				body: formData,
-			}),
-		}),
 	}),
 })
 
@@ -126,8 +98,4 @@ export const {
 	useCreateOrganizationMutation,
 	useUpdateOrganizationMutation,
 	useDeleteOrganizationMutation,
-	useGetOrganizationTypesQuery,
-	useGetHelpTypesQuery,
-	useGetCitiesQuery,
-	useUploadImagesMutation,
 } = organizationService

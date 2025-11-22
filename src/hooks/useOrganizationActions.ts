@@ -1,5 +1,6 @@
 import { MAX_ORGANIZATIONS_PER_USER } from '@/constants'
 import { UserContext } from '@/contexts/UserContext'
+import { logger } from '@/utils/logger'
 import { useCallback, useContext } from 'react'
 
 export function useOrganizationActions() {
@@ -50,23 +51,13 @@ export function useOrganizationActions() {
 	)
 
 	const canCreateQuest = useCallback(() => {
-		// Проверяем, не превышен ли лимит на создание квестов
-		// Сейчас используется createdQuestId (один квест), но можно расширить до массива
-		// Если MAX_QUESTS_PER_USER > 1, потребуется изменить структуру User на массив createdQuestIds
-		// Для поддержки нескольких квестов нужно будет изменить структуру User
-		// и подсчитывать количество созданных квестов
 		return !user?.createdQuestId
 	}, [user])
 
 	const canCreateOrganization = useCallback(() => {
-		// Проверяем, не превышен ли лимит на создание организаций
-		// Сейчас используется createdOrganizationId (одна организация), но можно расширить до массива
-		// Если MAX_ORGANIZATIONS_PER_USER > 1, потребуется изменить структуру User на массив createdOrganizationIds
 		if (MAX_ORGANIZATIONS_PER_USER === 1) {
 			return !user?.createdOrganizationId
 		}
-		// Для поддержки нескольких организаций нужно будет изменить структуру User
-		// и подсчитывать количество созданных организаций
 		return !user?.createdOrganizationId
 	}, [user])
 
@@ -76,7 +67,6 @@ export function useOrganizationActions() {
 				if (!currentUser) return currentUser
 				if (currentUser.createdQuestId !== questId) return currentUser
 
-				// Удаляем квест из localStorage
 				try {
 					const existingQuests = JSON.parse(
 						localStorage.getItem('user_created_quests') || '[]'
@@ -89,10 +79,7 @@ export function useOrganizationActions() {
 						JSON.stringify(updatedQuests)
 					)
 				} catch (error) {
-					// В production логируем в систему мониторинга
-					if (import.meta.env.DEV) {
-						console.error('Error deleting quest:', error)
-					}
+					logger.error('Error deleting quest:', error)
 				}
 
 				return {
@@ -111,7 +98,6 @@ export function useOrganizationActions() {
 				if (currentUser.createdOrganizationId !== organizationId)
 					return currentUser
 
-				// Удаляем организацию из localStorage
 				try {
 					const existingOrganizations = JSON.parse(
 						localStorage.getItem('user_created_organizations') || '[]'
@@ -124,10 +110,7 @@ export function useOrganizationActions() {
 						JSON.stringify(updatedOrganizations)
 					)
 				} catch (error) {
-					// В production логируем в систему мониторинга
-					if (import.meta.env.DEV) {
-						console.error('Error deleting organization:', error)
-					}
+					logger.error('Error deleting organization:', error)
 				}
 
 				return {

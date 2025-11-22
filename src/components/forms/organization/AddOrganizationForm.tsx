@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { Spinner } from '@/components/ui/spinner'
-import { useGetCitiesQuery } from '@/store/entities/organization'
+import { useGetCitiesQuery } from '@/store/entities/city'
 import { useState } from 'react'
 import { LocationPicker } from '../shared/LocationPicker'
 import { useOrganizationForm } from './hooks/useOrganizationForm'

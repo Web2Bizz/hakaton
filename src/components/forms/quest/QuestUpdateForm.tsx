@@ -9,21 +9,26 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { MediaUpload } from '../shared/MediaUpload'
 import {
 	useCreateQuestUpdateMutation,
 	useGetQuestUpdateQuery,
 	useUpdateQuestUpdateMutation,
 } from '@/store/entities/quest'
+import { getErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { MediaUpload } from '../shared/MediaUpload'
 
 const questUpdateSchema = z.object({
 	title: z.string().min(1, 'Заголовок обязателен').min(3, 'Минимум 3 символа'),
-	text: z.string().min(1, 'Текст обновления обязателен').min(10, 'Минимум 10 символов'),
+	text: z
+		.string()
+		.min(1, 'Текст обновления обязателен')
+		.min(10, 'Минимум 10 символов'),
 	photos: z.array(z.string()).default([]),
 })
 
@@ -99,12 +104,14 @@ export function QuestUpdateForm({
 			}
 			onSuccess?.()
 		} catch (error) {
-			toast.error(
+			logger.error('Error saving update:', error)
+			const errorMessage = getErrorMessage(
+				error,
 				isEditMode
 					? 'Ошибка при изменении обновления'
 					: 'Ошибка при создании обновления'
 			)
-			console.error('Error saving update:', error)
+			toast.error(errorMessage)
 		}
 	}
 
@@ -195,16 +202,20 @@ export function QuestUpdateForm({
 							Отмена
 						</Button>
 					)}
-					<Button type='submit' disabled={isSubmitting} className='min-w-[200px]'>
+					<Button
+						type='submit'
+						disabled={isSubmitting}
+						className='min-w-[200px]'
+					>
 						{isSubmitting ? (
 							<div className='flex items-center gap-2'>
 								<Spinner />
-								<span>
-									{isEditMode ? 'Сохранение...' : 'Создание...'}
-								</span>
+								<span>{isEditMode ? 'Сохранение...' : 'Создание...'}</span>
 							</div>
 						) : (
-							<span>{isEditMode ? 'Сохранить изменения' : 'Создать обновление'}</span>
+							<span>
+								{isEditMode ? 'Сохранить изменения' : 'Создать обновление'}
+							</span>
 						)}
 					</Button>
 				</div>
@@ -212,4 +223,3 @@ export function QuestUpdateForm({
 		</Form>
 	)
 }
-

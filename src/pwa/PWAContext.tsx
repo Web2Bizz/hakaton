@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React, {
 	createContext,
 	useContext,
@@ -80,16 +81,12 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 									error.name === 'AbortError' &&
 									error.message.includes('self-update limit exceeded')
 								) {
-									if (import.meta.env.DEV) {
-										console.warn(
-											'[PWA] Update check skipped: self-update limit exceeded'
-										)
-									}
+									logger.warn(
+										'[PWA] Update check skipped: self-update limit exceeded'
+									)
 									return
 								}
-								if (import.meta.env.DEV) {
-									console.error('[PWA] Update check failed:', error)
-								}
+								logger.error('[PWA] Update check failed:', error)
 							}
 						}
 					}
@@ -130,36 +127,29 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 						}
 					}
 
-					// Проверка обновлений при установке
 					registration.addEventListener('updatefound', handleUpdateFound)
 
-					// Периодическая проверка обновлений (каждые 10 минут)
-					// Увеличен интервал, чтобы избежать превышения лимита обновлений
 					updateInterval = setInterval(checkForUpdates, 10 * 60 * 1000)
 
-					// Проверка обновлений при фокусе на окне
 					handleFocus = () => {
 						checkForUpdates()
 					}
 					window.addEventListener('focus', handleFocus)
 
-					// Проверка обновлений при возвращении в онлайн
 					handleOnlineForUpdate = () => {
 						checkForUpdates()
 					}
 					window.addEventListener('online', handleOnlineForUpdate)
 
-					// Первоначальная проверка
 					checkForUpdates()
 				} catch (error) {
-					console.error('[PWA] SW registration failed: ', error)
+					logger.error('[PWA] SW registration failed: ', error)
 				}
 			}
 		}
 
 		registerSW()
 
-		// Очистка при размонтировании
 		return () => {
 			if (updateInterval) {
 				clearInterval(updateInterval)
@@ -176,7 +166,6 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 		}
 	}, [])
 
-	// Отслеживание установки приложения
 	useEffect(() => {
 		const checkInstalled = (): void => {
 			if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -210,14 +199,11 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 		}
 	}, [])
 
-	// Отслеживание изменений статуса сети и показ уведомлений
 	useEffect(() => {
-		// Пропускаем первый рендер, чтобы не показывать уведомление при загрузке
 		if (prevIsOfflineRef.current === isOffline) {
 			return
 		}
 
-		// Если перешли в офлайн
 		if (isOffline && !prevIsOfflineRef.current) {
 			toast.warning('Вы в офлайн-режиме', {
 				description: 'Некоторые функции могут быть недоступны',
@@ -225,7 +211,6 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 			})
 		}
 
-		// Если вернулись в онлайн (только в этом случае показываем уведомление)
 		if (!isOffline && prevIsOfflineRef.current) {
 			toast.success('Соединение восстановлено', {
 				description: 'Вы снова в сети',
@@ -233,7 +218,6 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 			})
 		}
 
-		// Обновляем предыдущее значение
 		prevIsOfflineRef.current = isOffline
 	}, [isOffline])
 

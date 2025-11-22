@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { useGetUserQuestsQuery } from '@/store/entities/quest'
+import { logger } from '@/utils/logger'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
 import { ArrowRight, Map, MapPin, Target, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
@@ -12,23 +13,19 @@ export function MyQuests() {
 	const { user } = useUser()
 	const navigate = useNavigate()
 
-	// Получаем квесты пользователя через новый endpoint
 	const { data: questsResponse, isLoading } = useGetUserQuestsQuery(
 		user?.id || '',
 		{
-			skip: !user?.id, // Пропускаем запрос, если нет userId
+			skip: !user?.id,
 		}
 	)
 
-	// Преобразуем квесты с сервера в формат компонентов
-	// Исключаем архивированные квесты из списка в профиле
 	const myQuests = useMemo(() => {
-		console.log('questsResponse', questsResponse)
+		logger.debug('questsResponse', questsResponse)
 		if (!questsResponse?.data?.quests) return []
 		const allQuests = transformApiQuestsToComponentQuests(
 			questsResponse.data.quests
 		)
-		// Фильтруем архивированные квесты - они должны быть только во вкладке "Архив"
 		return allQuests.filter(quest => quest.status !== 'archived')
 	}, [questsResponse])
 
@@ -72,7 +69,6 @@ export function MyQuests() {
 		)
 	}
 
-	// Показываем только первый квест (или максимум 1)
 	const displayedQuest = myQuests[0]
 
 	return (
@@ -231,7 +227,6 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 								const questId =
 									typeof quest.id === 'string' ? quest.id : String(quest.id)
 
-								// Сохраняем координаты для зума на карте
 								if (quest.coordinates && quest.coordinates.length === 2) {
 									localStorage.setItem(
 										'zoomToCoordinates',

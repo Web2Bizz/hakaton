@@ -13,7 +13,3 @@ export { useQuestSearch } from './hooks/useQuestSearch'
 export type * from './types/types'
 export type * from './types/quest-types'
 
-// Data
-export { quests, questCities, questTypes, questCategories } from './data/quests'
-export { organizations, cities, organizationTypes } from './data/organizations'
-

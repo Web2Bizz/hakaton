@@ -6,7 +6,8 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useGetCitiesQuery, useGetOrganizationTypesQuery } from '@/store/entities/organization'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
 import { Spinner } from '@/components/ui/spinner'
 import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'

@@ -2,6 +2,7 @@ import type { Quest } from '@/components/map/types/quest-types'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { useGetUserQuestsQuery } from '@/store/entities/quest'
+import { logger } from '@/utils/logger'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
 import {
 	Archive,
@@ -32,11 +33,11 @@ export function MyQuestsList() {
 	// Преобразуем квесты с сервера в формат компонентов
 	const allQuests = useMemo(() => {
 		if (!questsResponse?.data?.quests) return []
-		console.log(questsResponse.data.quests)
+		logger.debug('Quests response:', questsResponse.data.quests)
 		return transformApiQuestsToComponentQuests(questsResponse.data.quests)
 	}, [questsResponse])
 
-	console.log(allQuests)
+	logger.debug('All quests:', allQuests)
 	// Фильтруем квесты по выбранному фильтру
 	const myQuests = useMemo(() => {
 		return allQuests.filter(quest => {
@@ -169,7 +170,7 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 	const isArchived = quest.status === 'archived'
 	const isCompleted = quest.status === 'completed'
 
-	console.log(quest)
+	logger.debug('Quest card:', quest)
 	const progressColor = isArchived
 		? 'from-slate-400 to-slate-500'
 		: isCompleted

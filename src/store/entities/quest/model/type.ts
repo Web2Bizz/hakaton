@@ -208,3 +208,14 @@ export interface QuestUpdateResponse {
 export interface DeleteQuestUpdateResponse {
 	message: string
 }
+
+// Тип для ответа getUserQuests
+export interface UserQuestItem {
+	id: number
+	questId: number
+	userId: number
+	status: 'pending' | 'in_progress' | 'completed'
+	quest: Quest
+	achievement?: QuestAchievement | null
+	city?: QuestCity | null
+}

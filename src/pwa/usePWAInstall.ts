@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import { usePWA } from './PWAContext'
 
 interface UsePWAInstallReturn {
@@ -22,7 +23,7 @@ export const usePWAInstall = (): UsePWAInstallReturn => {
 			}
 			return false
 		} catch (error) {
-			console.error('Installation error:', error)
+			logger.error('Installation error:', error)
 			return false
 		}
 	}

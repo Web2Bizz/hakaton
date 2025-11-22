@@ -15,12 +15,11 @@ export default function ManagePage() {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const tabParam = searchParams.get('tab')
 
-	// Определяем начальную вкладку из URL параметра
-	const initialTab = (
+	// Определяем текущую вкладку из URL параметра
+	const currentTab: 'quests' | 'organizations' =
 		tabParam === 'organizations' ? 'organizations' : 'quests'
-	) as 'quests' | 'organizations'
 	const [activeTab, setActiveTab] = useState<'quests' | 'organizations'>(
-		initialTab
+		currentTab
 	)
 
 	// Загружаем данные для статистики
@@ -44,25 +43,25 @@ export default function ManagePage() {
 
 	// Статистика организаций
 	const orgsStats = useMemo(() => {
-		if (!user?.createdOrganizationId) return { total: 0 }
+		const createdOrgId = user?.createdOrganizationId
+		if (!createdOrgId) return { total: 0 }
 		const myOrgs = organizations.filter(org => {
 			const orgId = typeof org.id === 'string' ? org.id : String(org.id)
-			return (
-				orgId === user.createdOrganizationId ||
-				org.id === user.createdOrganizationId
-			)
+			return orgId === createdOrgId || org.id === createdOrgId
 		})
 		return { total: myOrgs.length }
-	}, [organizations, user?.createdOrganizationId])
+	}, [organizations, user])
 
 	// Обновляем вкладку при изменении URL параметра
 	useEffect(() => {
-		if (tabParam === 'organizations') {
-			setActiveTab('organizations')
-		} else if (tabParam === 'quests' || !tabParam) {
-			setActiveTab('quests')
+		if (currentTab !== activeTab) {
+			// Используем setTimeout для асинхронного обновления
+			const timeoutId = setTimeout(() => {
+				setActiveTab(currentTab)
+			}, 0)
+			return () => clearTimeout(timeoutId)
 		}
-	}, [tabParam])
+	}, [currentTab, activeTab])
 
 	// Обновляем URL при изменении вкладки
 	const handleTabChange = (tab: 'quests' | 'organizations') => {

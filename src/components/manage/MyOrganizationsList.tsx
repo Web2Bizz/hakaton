@@ -3,6 +3,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { useGetOrganizationsQuery } from '@/store/entities/organization'
 import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
+import { logger } from '@/utils/logger'
 import { ArrowRight, Building2, Heart, Map, MapPin } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -130,29 +131,29 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 					{/* Виды помощи */}
 					{organization.helpTypes && organization.helpTypes.length > 0 && (
 						<div className='mb-4'>
-						<div className='flex items-center gap-1.5 mb-2'>
-							<Heart className='h-3.5 w-3.5 text-blue-500' />
-							<span className='text-xs font-medium text-slate-600'>
-								Виды помощи
-							</span>
-						</div>
-						<div className='flex flex-wrap gap-1.5'>
-							{organization.helpTypes.slice(0, 3).map((helpType, index) => (
-								<span
-									key={helpType.id || index}
-									className='inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200'
-								>
-									{helpType.name}
+							<div className='flex items-center gap-1.5 mb-2'>
+								<Heart className='h-3.5 w-3.5 text-blue-500' />
+								<span className='text-xs font-medium text-slate-600'>
+									Виды помощи
 								</span>
-							))}
-							{organization.helpTypes.length > 3 && (
-								<span className='inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
-									+{organization.helpTypes.length - 3}
-								</span>
-							)}
+							</div>
+							<div className='flex flex-wrap gap-1.5'>
+								{organization.helpTypes.slice(0, 3).map((helpType, index) => (
+									<span
+										key={helpType.id || index}
+										className='inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200'
+									>
+										{helpType.name}
+									</span>
+								))}
+								{organization.helpTypes.length > 3 && (
+									<span className='inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200'>
+										+{organization.helpTypes.length - 3}
+									</span>
+								)}
+							</div>
 						</div>
-					</div>
-				)}
+					)}
 				</div>
 
 				{/* Footer */}
@@ -186,12 +187,7 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 									)
 								}
 							} catch (error) {
-								if (import.meta.env.DEV) {
-									console.error(
-										'Error getting organization coordinates:',
-										error
-									)
-								}
+								logger.error('Error getting organization coordinates:', error)
 							}
 
 							globalThis.location.href = `/map?organization=${orgId}`

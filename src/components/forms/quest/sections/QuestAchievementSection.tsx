@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useDeleteAchievementMutation } from '@/store/entities/achievement'
+import { logger } from '@/utils/logger'
 import { Trophy, X } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -29,9 +30,8 @@ export function QuestAchievementSection() {
 					await deleteAchievementMutation(achievementId).unwrap()
 					toast.success('Достижение удалено')
 				} catch (error) {
-					console.error('Error deleting achievement:', error)
+					logger.error('Error deleting achievement:', error)
 					toast.error('Не удалось удалить достижение')
-					// Продолжаем удаление из формы даже если API вызов не удался
 				}
 			}
 			// Удаляем из формы

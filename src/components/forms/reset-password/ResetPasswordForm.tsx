@@ -10,6 +10,7 @@ import {
 	Spinner,
 } from '@/components/ui'
 import { useResetPasswordMutation } from '@/store/entities'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
@@ -52,7 +53,9 @@ export function ResetPasswordForm() {
 
 	const onSubmit = async (data: ResetPasswordFormData) => {
 		if (!token) {
-			toast.error('Отсутствует токен восстановления. Проверьте ссылку из письма.')
+			toast.error(
+				'Отсутствует токен восстановления. Проверьте ссылку из письма.'
+			)
 			return
 		}
 
@@ -81,10 +84,8 @@ export function ResetPasswordForm() {
 				globalThis.location.href = '/login'
 			}, 1500)
 		} catch (error: unknown) {
+			logger.error('Reset password error:', error)
 			toast.error('Ошибка сброса пароля. Попробуйте еще раз.')
-			if (import.meta.env.DEV) {
-				console.error('Reset password error:', error)
-			}
 		}
 	}
 
@@ -229,4 +230,3 @@ export function ResetPasswordForm() {
 		</div>
 	)
 }
-

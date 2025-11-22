@@ -1,12 +1,10 @@
-// Хук для работы с localStorage
-
+import { logger } from '@/utils/logger'
 import { useState, useCallback, useEffect } from 'react'
 
 export function useLocalStorage<T>(
 	key: string,
 	initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void] {
-	// Состояние для хранения значения
 	const [storedValue, setStoredValue] = useState<T>(() => {
 		if (typeof window === 'undefined') {
 			return initialValue
@@ -15,14 +13,11 @@ export function useLocalStorage<T>(
 			const item = window.localStorage.getItem(key)
 			return item ? JSON.parse(item) : initialValue
 		} catch (error) {
-			if (import.meta.env.DEV) {
-				console.error(`Error reading localStorage key "${key}":`, error)
-			}
+			logger.error(`Error reading localStorage key "${key}":`, error)
 			return initialValue
 		}
 	})
 
-	// Функция для обновления значения
 	const setValue = useCallback(
 		(value: T | ((val: T) => T)) => {
 			try {
@@ -37,24 +32,19 @@ export function useLocalStorage<T>(
 					return valueToStore
 				})
 			} catch (error) {
-				if (import.meta.env.DEV) {
-					console.error(`Error setting localStorage key "${key}":`, error)
-				}
+				logger.error(`Error setting localStorage key "${key}":`, error)
 			}
 		},
 		[key]
 	)
 
-	// Синхронизация с изменениями в других вкладках
 	useEffect(() => {
 		const handleStorageChange = (e: StorageEvent) => {
 			if (e.key === key && e.newValue) {
 				try {
 					setStoredValue(JSON.parse(e.newValue))
 				} catch (error) {
-					if (import.meta.env.DEV) {
-						console.error(`Error parsing storage event for key "${key}":`, error)
-					}
+					logger.error(`Error parsing storage event for key "${key}":`, error)
 				}
 			}
 		}

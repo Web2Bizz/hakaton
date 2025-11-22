@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { logger } from '@/utils/logger'
 import { Spinner } from '@/components/ui/spinner'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -27,9 +28,7 @@ export function DangerZone({
 			await onDelete()
 			setShowConfirm(false)
 		} catch (error) {
-			if (import.meta.env.DEV) {
-				console.error('Error deleting:', error)
-			}
+			logger.error('Error deleting:', error)
 		} finally {
 			setIsDeleting(false)
 		}

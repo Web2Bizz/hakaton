@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { compressImage } from '@/utils/image'
+import { logger } from '@/utils/logger'
 import { Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -154,17 +155,12 @@ export function MediaUpload({
 							toast.success(`Загружено изображений: ${imageFiles.length}`)
 						}
 					} catch (error) {
-						// Ошибки уже обработаны для каждого файла
-						if (import.meta.env.DEV) {
-							console.error('Error uploading images:', error)
-						}
+						logger.error('Error uploading images:', error)
 					}
 				}
 			} catch (error) {
+				logger.error('Unexpected error uploading files:', error)
 				toast.error('Неожиданная ошибка при загрузке файлов')
-				if (import.meta.env.DEV) {
-					console.error('Unexpected error uploading files:', error)
-				}
 			} finally {
 				setIsUploading(false)
 			}

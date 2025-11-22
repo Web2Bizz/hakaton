@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -10,16 +8,20 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import {
 	useDeleteQuestUpdateMutation,
 	useGetQuestUpdatesQuery,
 } from '@/store/entities/quest'
+import type { QuestUpdate } from '@/store/entities/quest/model/type'
+import { getErrorMessage } from '@/utils/error'
 import { formatDate } from '@/utils/format'
+import { logger } from '@/utils/logger'
 import { Edit2, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { QuestUpdateForm } from '../QuestUpdateForm'
-import type { QuestUpdate } from '@/store/entities/quest/model/type'
 
 interface QuestUpdatesManagementProps {
 	questId: number
@@ -31,9 +33,11 @@ export function QuestUpdatesManagement({
 	const [showCreateForm, setShowCreateForm] = useState(false)
 	const [editingUpdateId, setEditingUpdateId] = useState<number | null>(null)
 
-	const { data: updates = [], isLoading, refetch } = useGetQuestUpdatesQuery(
-		questId
-	)
+	const {
+		data: updates = [],
+		isLoading,
+		refetch,
+	} = useGetQuestUpdatesQuery(questId)
 
 	const handleSuccess = () => {
 		setShowCreateForm(false)
@@ -181,14 +185,11 @@ function UpdateCard({
 			setShowDeleteDialog(false)
 			onDelete()
 		} catch (error) {
-			if (import.meta.env.DEV) {
-				console.error('Error deleting quest update:', error)
-			}
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось удалить обновление'
-					: 'Не удалось удалить обновление. Попробуйте еще раз.'
+			logger.error('Error deleting quest update:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось удалить обновление. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 		}
 	}
@@ -207,12 +208,7 @@ function UpdateCard({
 					)}
 				</div>
 				<div className='flex items-center gap-2'>
-					<Button
-						type='button'
-						variant='outline'
-						size='sm'
-						onClick={onEdit}
-					>
+					<Button type='button' variant='outline' size='sm' onClick={onEdit}>
 						<Edit2 className='h-4 w-4 mr-1' />
 						Редактировать
 					</Button>
@@ -276,4 +272,3 @@ function UpdateCard({
 		</div>
 	)
 }
-

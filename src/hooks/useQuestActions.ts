@@ -3,6 +3,7 @@ import { UserContext } from '@/contexts/UserContext'
 import { allAchievements } from '@/data/achievements'
 import { useAddExperienceMutation, useLazyGetUserQuery } from '@/store/entities'
 import type { Achievement, QuestContribution, User } from '@/types/user'
+import { logger } from '@/utils'
 import { transformUserFromAPI } from '@/utils/auth'
 import {
 	calculateExperienceToNext,
@@ -81,9 +82,7 @@ export function useQuestActions() {
 						setUser(transformedUser)
 					}
 				} catch (error) {
-					if (import.meta.env.DEV) {
-						console.error('Error fetching updated user data:', error)
-					}
+					logger.error('Error fetching updated user data:', error)
 					// Если не удалось получить данные с сервера, обновляем локально
 					setUser(currentUser => {
 						if (!currentUser) return currentUser
@@ -126,9 +125,7 @@ export function useQuestActions() {
 						? error.message
 						: 'Не удалось начислить опыт. Попробуйте еще раз.'
 				toast.error(errorMessage)
-				if (import.meta.env.DEV) {
-					console.error('Error adding experience on participate:', error)
-				}
+				logger.error('Error adding experience on participate:', error)
 			}
 		},
 		[setUser, user, addExperience, getUser]
@@ -211,9 +208,7 @@ export function useQuestActions() {
 						setUser(transformedUser)
 					}
 				} catch (error) {
-					if (import.meta.env.DEV) {
-						console.error('Error fetching updated user data:', error)
-					}
+					logger.error('Error fetching updated user data:', error)
 					// Если не удалось получить данные с сервера, обновляем локально
 					setUser(currentUser => {
 						if (!currentUser) return currentUser
@@ -256,9 +251,7 @@ export function useQuestActions() {
 						? error.message
 						: 'Не удалось начислить опыт. Попробуйте еще раз.'
 				toast.error(errorMessage)
-				if (import.meta.env.DEV) {
-					console.error('Error adding experience:', error)
-				}
+				logger.error('Error adding experience:', error)
 			}
 		},
 		[setUser, user, addExperience, getUser]

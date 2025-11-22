@@ -37,10 +37,11 @@ const registrationSchema = z
 		path: ['confirmPassword'],
 	})
 
-const getErrorMessage = (res: { data?: { message?: string } }) => {
-	if (import.meta.env.DEV) {
-		console.error('Registration error:', res)
-	}
+import { getErrorMessage } from '@/utils'
+import { logger } from '@/utils/logger'
+
+const getRegistrationErrorMessage = (res: { data?: { message?: string } }) => {
+	logger.error('Registration error:', res)
 	return toast.error(
 		res.data?.message || 'Ошибка регистрации. Попробуйте еще раз.'
 	)
@@ -89,7 +90,9 @@ export function RegistrationForm() {
 			})
 
 			if (result.error) {
-				getErrorMessage(result.error as { data?: { message?: string } })
+				getRegistrationErrorMessage(
+					result.error as { data?: { message?: string } }
+				)
 				return
 			}
 
@@ -104,7 +107,11 @@ export function RegistrationForm() {
 				globalThis.location.href = '/login'
 			}, 1000)
 		} catch (error: unknown) {
-			getErrorMessage(error as { data?: { message?: string } })
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось зарегистрироваться. Попробуйте еще раз.'
+			)
+			toast.error(errorMessage)
 		}
 	}
 

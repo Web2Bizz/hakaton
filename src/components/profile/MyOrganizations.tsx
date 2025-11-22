@@ -1,12 +1,13 @@
+import type { Organization } from '@/components/map/types/types'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { useGetOrganizationsQuery } from '@/store/entities/organization'
+import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
+import { logger } from '@/utils/logger'
+import { ArrowRight, Building2, Heart, Map, MapPin } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Spinner } from '@/components/ui/spinner'
-import { Button } from '@/components/ui/button'
-import type { Organization } from '@/components/map/types/types'
-import { Building2, ArrowRight, MapPin, Heart, Map } from 'lucide-react'
-import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
 
 export function MyOrganizations() {
 	const { user } = useUser()
@@ -18,7 +19,10 @@ export function MyOrganizations() {
 		if (!user?.createdOrganizationId) return []
 		return organizations.filter(org => {
 			const orgId = typeof org.id === 'string' ? org.id : String(org.id)
-			return orgId === user.createdOrganizationId || org.id === user.createdOrganizationId
+			return (
+				orgId === user.createdOrganizationId ||
+				org.id === user.createdOrganizationId
+			)
 		})
 	}, [organizations, user?.createdOrganizationId])
 
@@ -48,7 +52,10 @@ export function MyOrganizations() {
 					<p className='text-sm sm:text-base text-slate-500 mb-4'>
 						У вас пока нет созданных организаций
 					</p>
-					<Button asChild className='bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'>
+					<Button
+						asChild
+						className='bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
+					>
 						<a href='/add-organization'>
 							Создать организацию
 							<ArrowRight className='h-4 w-4 ml-2' />
@@ -128,7 +135,9 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 						<div className='mb-4'>
 							<div className='flex items-center gap-1.5 mb-2'>
 								<Heart className='h-3.5 w-3.5 text-blue-500' />
-								<span className='text-xs font-medium text-slate-600'>Виды помощи</span>
+								<span className='text-xs font-medium text-slate-600'>
+									Виды помощи
+								</span>
 							</div>
 							<div className='flex flex-wrap gap-1.5'>
 								{organization.helpTypes.slice(0, 3).map((helpType, index) => (
@@ -154,10 +163,11 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 							size='sm'
 							onClick={e => {
 								e.stopPropagation()
-								const orgId = typeof organization.id === 'string' 
-									? organization.id 
-									: String(organization.id)
-								
+								const orgId =
+									typeof organization.id === 'string'
+										? organization.id
+										: String(organization.id)
+
 								// Сохраняем координаты для зума на карте
 								try {
 									const coordinates = getOrganizationCoordinates(organization)
@@ -172,11 +182,9 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 										)
 									}
 								} catch (error) {
-									if (import.meta.env.DEV) {
-										console.error('Error getting organization coordinates:', error)
-									}
+									logger.error('Error getting organization coordinates:', error)
 								}
-								
+
 								window.location.href = `/map?organization=${orgId}`
 							}}
 							className='flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50'
@@ -198,4 +206,3 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 		</article>
 	)
 }
-

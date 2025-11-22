@@ -2,6 +2,7 @@ import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/useUser'
 import { usePWAInstall } from '@/pwa/usePWAInstall'
+import { logger } from '@/utils/logger'
 import { Download, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -66,7 +67,7 @@ export const Header = () => {
 	const handleInstallClick = async (): Promise<void> => {
 		const installed = await install()
 		if (installed) {
-			console.log('Приложение установлено!')
+			logger.info('Приложение установлено!')
 		}
 	}
 

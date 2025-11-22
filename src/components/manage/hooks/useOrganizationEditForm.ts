@@ -4,14 +4,16 @@ import {
 } from '@/components/forms/organization/schemas/organization-form.schema'
 import type { Organization } from '@/components/map/types/types'
 import { useUser } from '@/hooks/useUser'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import type { CityResponse } from '@/store/entities/city'
 import {
 	useDeleteOrganizationMutation,
-	useGetCitiesQuery,
 	useGetOrganizationQuery,
 	useUpdateOrganizationMutation,
-	useUploadImagesMutation,
-	type CityResponse,
 } from '@/store/entities/organization'
+import { useUploadImagesMutation } from '@/store/entities/upload'
+import { getErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -131,7 +133,7 @@ export function useOrganizationEditForm(
 					const image = data.gallery[i]
 
 					if (typeof image !== 'string') {
-						console.warn(`Image ${i + 1} is not a string:`, typeof image)
+						logger.warn(`Image ${i + 1} is not a string:`, typeof image)
 						continue
 					}
 
@@ -143,7 +145,6 @@ export function useOrganizationEditForm(
 				}
 			}
 
-			// Загружаем новые изображения
 			if (newImages.length > 0) {
 				try {
 					const formData = new FormData()
@@ -155,7 +156,7 @@ export function useOrganizationEditForm(
 							/^data:([A-Za-z-+/]+);base64,(.+)$/
 						)
 						if (!matches || matches.length !== 3) {
-							console.error(`Invalid base64 format for image ${i + 1}`)
+							logger.error(`Invalid base64 format for image ${i + 1}`)
 							throw new Error(`Неверный формат base64 изображения ${i + 1}`)
 						}
 
@@ -181,16 +182,11 @@ export function useOrganizationEditForm(
 					const uploadedUrls = uploadResult.map(img => img.url)
 					galleryUrls = [...galleryUrls, ...uploadedUrls]
 				} catch (uploadError) {
-					console.error('Error uploading images:', uploadError)
-
-					const errorMessage =
-						uploadError &&
-						typeof uploadError === 'object' &&
-						'data' in uploadError
-							? (uploadError.data as { message?: string })?.message ||
-							  'Не удалось загрузить изображения'
-							: 'Не удалось загрузить изображения. Попробуйте еще раз.'
-
+					logger.error('Error uploading images:', uploadError)
+					const errorMessage = getErrorMessage(
+						uploadError,
+						'Не удалось загрузить изображения. Попробуйте еще раз.'
+					)
 					toast.error(errorMessage)
 					return
 				}
@@ -239,15 +235,11 @@ export function useOrganizationEditForm(
 				}
 			}
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error saving organization:', error)
-			}
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось сохранить организацию'
-					: 'Не удалось сохранить организацию. Попробуйте еще раз.'
-
+			logger.error('Error saving organization:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось сохранить организацию. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 		}
 	}
@@ -289,16 +281,11 @@ export function useOrganizationEditForm(
 				gallery: [],
 			})
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error deleting organization:', error)
-			}
-
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось удалить организацию'
-					: 'Не удалось удалить организацию. Попробуйте еще раз.'
-
+			logger.error('Error deleting organization:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось удалить организацию. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 			throw error
 		}
@@ -306,9 +293,7 @@ export function useOrganizationEditForm(
 
 	const handleSubmit = (e?: React.BaseSyntheticEvent) => {
 		return form.handleSubmit(onSubmit, errors => {
-			if (import.meta.env.DEV) {
-				console.error('Form validation errors:', errors)
-			}
+			logger.error('Form validation errors:', errors)
 			const firstError = Object.values(errors)[0]
 			if (firstError && 'message' in firstError) {
 				toast.error(String(firstError.message))

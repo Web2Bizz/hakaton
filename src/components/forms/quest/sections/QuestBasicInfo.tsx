@@ -8,11 +8,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { useGetCategoriesQuery } from '@/store/entities/category'
-import {
-	useGetCitiesQuery,
-	useGetOrganizationTypesQuery,
-} from '@/store/entities/organization'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
 import { compressImage } from '@/utils/image'
+import { logger } from '@/utils/logger'
 import { X } from 'lucide-react'
 import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -293,12 +292,10 @@ export function QuestBasicInfo({ onCityChange }: QuestBasicInfoProps) {
 													id: 'compress-image',
 												})
 											} catch (error) {
+												logger.error('Error compressing image:', error)
 												toast.error('Ошибка при загрузке изображения', {
 													id: 'compress-image',
 												})
-												if (import.meta.env.DEV) {
-													console.error('Error compressing image:', error)
-												}
 											}
 										}
 									}}

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { Spinner } from '@/components/ui/spinner'
-import { useGetCitiesQuery } from '@/store/entities/organization'
+import { useGetCitiesQuery } from '@/store/entities/city'
 import { useState } from 'react'
 import { LocationPicker } from '../shared/LocationPicker'
 import { useQuestForm } from './hooks/useQuestForm'
@@ -114,7 +114,7 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 							city={city?.name || ''}
 							initialCoordinates={
 								latitude && longitude
-									? [parseFloat(latitude), parseFloat(longitude)]
+									? [Number.parseFloat(latitude), Number.parseFloat(longitude)]
 									: undefined
 							}
 							onSelect={handleLocationSelect}

@@ -54,7 +54,6 @@ export {
 	useLazyGetOrganizationQuery,
 	useLazyGetOrganizationsQuery,
 	useUpdateOrganizationMutation,
-	useUploadImagesMutation,
 } from './organization'
 export type {
 	CreateOrganizationRequest,
@@ -65,3 +64,23 @@ export type {
 	UpdateOrganizationRequest,
 	UpdateOrganizationResponse,
 } from './organization'
+
+export { cityService, useGetCitiesQuery, useLazyGetCitiesQuery } from './city'
+export type { CityResponse } from './city'
+
+export {
+	organizationTypeService,
+	useGetOrganizationTypesQuery,
+	useLazyGetOrganizationTypesQuery,
+} from './organization-type'
+export type { OrganizationTypeResponse } from './organization-type'
+
+export {
+	helpTypeService,
+	useGetHelpTypesQuery,
+	useLazyGetHelpTypesQuery,
+} from './help-type'
+export type { HelpTypeResponse } from './help-type'
+
+export { uploadService, useUploadImagesMutation } from './upload'
+export type { UploadImageResponse } from './upload'

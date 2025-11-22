@@ -15,6 +15,7 @@ import type {
 	UpdateQuestRequest,
 	UpdateQuestResponse,
 	UpdateQuestUpdateRequest,
+	UserQuestItem,
 } from './type'
 
 // Функция для получения токена из localStorage
@@ -120,13 +121,15 @@ export const questService = createApi({
 		// GET /quests/user/:userId - Получить квесты пользователя
 		getUserQuests: builder.query<QuestsListResponse, number | string>({
 			query: userId => `/quests/user/${userId}`,
-			transformResponse: (response: any): QuestsListResponse => {
+			transformResponse: (
+				response: UserQuestItem[] | QuestsListResponse
+			): QuestsListResponse => {
 				// Новый endpoint возвращает массив объектов с полем quest
 				// Структура: [{ id, questId, userId, status, quest: {...}, achievement: {...}, city: {...} }, ...]
 				if (Array.isArray(response)) {
 					// Извлекаем квесты из поля quest каждого элемента
-					const quests: Quest[] = response
-						.map((item: any) => {
+					const quests = response
+						.map((item: UserQuestItem) => {
 							if (!item.quest) return null
 
 							const quest: Quest = { ...item.quest }
@@ -165,7 +168,7 @@ export const questService = createApi({
 
 							return quest
 						})
-						.filter((quest: Quest | null) => quest !== null) as Quest[]
+						.filter((quest): quest is Quest => quest !== null)
 
 					return {
 						data: {
@@ -175,12 +178,21 @@ export const questService = createApi({
 				}
 
 				// Если ответ уже в формате QuestsListResponse
-				if (response.data && Array.isArray(response.data.quests)) {
+				if (
+					!Array.isArray(response) &&
+					'data' in response &&
+					response.data &&
+					Array.isArray(response.data.quests)
+				) {
 					return response
 				}
 
 				// Если ответ в формате { data: Quest[] }
-				if (response.data && Array.isArray(response.data)) {
+				if (
+					!Array.isArray(response) &&
+					response.data &&
+					Array.isArray(response.data)
+				) {
 					return {
 						data: {
 							quests: response.data as Quest[],

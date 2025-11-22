@@ -1,27 +1,3 @@
-import { useUser } from '@/hooks/useUser'
-import {
-	useCreateAchievementMutation,
-	useDeleteAchievementMutation,
-	useUpdateAchievementMutation,
-} from '@/store/entities/achievement'
-import {
-	useDeleteQuestMutation,
-	useGetQuestQuery,
-	useUpdateQuestMutation,
-	useUpdateUserMutation,
-} from '@/store/entities'
-import {
-	useGetCitiesQuery,
-	useGetOrganizationTypesQuery,
-	useUploadImagesMutation,
-	type CityResponse,
-} from '@/store/entities/organization'
-import { transformUserFromAPI } from '@/utils/auth'
-import { zodResolver } from '@hookform/resolvers/zod'
-import type React from 'react'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import {
 	questFormSchema,
 	type QuestFormData,
@@ -30,11 +6,32 @@ import {
 	transformApiResponseToFormData,
 	transformFormDataToUpdateRequest,
 } from '@/components/forms/quest/utils/questTransformers'
+import { useUser } from '@/hooks/useUser'
+import {
+	useDeleteQuestMutation,
+	useGetQuestQuery,
+	useUpdateQuestMutation,
+	useUpdateUserMutation,
+} from '@/store/entities'
+import {
+	useCreateAchievementMutation,
+	useDeleteAchievementMutation,
+	useUpdateAchievementMutation,
+} from '@/store/entities/achievement'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import type { CityResponse } from '@/store/entities/city'
+import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
+import { useUploadImagesMutation } from '@/store/entities/upload'
+import { transformUserFromAPI } from '@/utils/auth'
+import { getErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type React from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
-export function useQuestEditForm(
-	questId: number,
-	onSuccess?: () => void
-) {
+export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 	const { user, setUser, deleteQuest: removeUserQuestId } = useUser()
 
 	const { data: questResponse, isLoading: isLoadingQuest } = useGetQuestQuery(
@@ -97,20 +94,17 @@ export function useQuestEditForm(
 		mode: 'onChange',
 	})
 
-	// Загружаем данные существующего квеста для редактирования
 	useEffect(() => {
 		if (questResponse && !form.formState.isDirty && !isLoadingQuest) {
 			const formData = transformApiResponseToFormData(questResponse)
 			form.reset(formData as QuestFormData)
 
-			// Синхронизируем поля куратора после загрузки данных
 			const contacts = formData.contacts || []
 			const curatorContact = contacts.find(
 				c => c && (c.name === 'Куратор' || c.name?.toLowerCase() === 'куратор')
 			)
 			const phoneContact = contacts.find(
-				c =>
-					c && (c.name === 'Телефон' || c.name?.toLowerCase() === 'телефон')
+				c => c && (c.name === 'Телефон' || c.name?.toLowerCase() === 'телефон')
 			)
 			const emailContact = contacts.find(
 				c => c && (c.name === 'Email' || c.name?.toLowerCase() === 'email')
@@ -134,12 +128,10 @@ export function useQuestEditForm(
 		}
 	}, [questResponse, cities, organizationTypes, form, isLoadingQuest])
 
-	// Синхронизация между контактами и полями куратора
 	useEffect(() => {
 		const subscription = form.watch((value, { name }) => {
 			const contacts = value.contacts || []
 
-			// Синхронизация из контактов в поля куратора
 			if (name?.startsWith('contacts.')) {
 				const curatorContact = contacts.find(
 					c =>
@@ -170,7 +162,6 @@ export function useQuestEditForm(
 				}
 			}
 
-			// Синхронизация из полей куратора в контакты
 			if (
 				name === 'curatorName' ||
 				name === 'curatorPhone' ||
@@ -227,7 +218,6 @@ export function useQuestEditForm(
 			return
 		}
 
-		// Валидация пользовательского достижения
 		if (data.customAchievement) {
 			if (!data.customAchievement.icon?.trim()) {
 				toast.error('Укажите эмодзи для достижения.')
@@ -248,7 +238,6 @@ export function useQuestEditForm(
 			let galleryUrls: string[] = []
 			const newImages: string[] = []
 
-			// Обрабатываем storyImage
 			if (data.storyImage) {
 				if (
 					data.storyImage.startsWith('http://') ||
@@ -260,13 +249,12 @@ export function useQuestEditForm(
 				}
 			}
 
-			// Обрабатываем gallery
 			if (data.gallery && data.gallery.length > 0) {
 				for (let i = 0; i < data.gallery.length; i++) {
 					const image = data.gallery[i]
 
 					if (typeof image !== 'string') {
-						console.warn(`Image ${i + 1} is not a string:`, typeof image)
+						logger.warn(`Image ${i + 1} is not a string:`, typeof image)
 						continue
 					}
 
@@ -278,7 +266,6 @@ export function useQuestEditForm(
 				}
 			}
 
-			// Загружаем новые изображения
 			if (newImages.length > 0) {
 				try {
 					const formData = new FormData()
@@ -290,7 +277,7 @@ export function useQuestEditForm(
 							/^data:([A-Za-z-+/]+);base64,(.+)$/
 						)
 						if (!matches || matches.length !== 3) {
-							console.error(`Invalid base64 format for image ${i + 1}`)
+							logger.error(`Invalid base64 format for image ${i + 1}`)
 							throw new Error(`Неверный формат base64 изображения ${i + 1}`)
 						}
 
@@ -315,7 +302,6 @@ export function useQuestEditForm(
 
 					const uploadedUrls = uploadResult.map(img => img.url)
 
-					// Первое изображение - это storyImage, остальные - gallery
 					if (data.storyImage && data.storyImage.startsWith('data:')) {
 						storyImageUrl = uploadedUrls[0]
 						galleryUrls = [...galleryUrls, ...uploadedUrls.slice(1)]
@@ -323,28 +309,20 @@ export function useQuestEditForm(
 						galleryUrls = [...galleryUrls, ...uploadedUrls]
 					}
 				} catch (uploadError) {
-					console.error('Error uploading images:', uploadError)
-
-					const errorMessage =
-						uploadError &&
-						typeof uploadError === 'object' &&
-						'data' in uploadError
-							? (uploadError.data as { message?: string })?.message ||
-							  'Не удалось загрузить изображения'
-							: 'Не удалось загрузить изображения. Попробуйте еще раз.'
-
+					logger.error('Error uploading images:', uploadError)
+					const errorMessage = getErrorMessage(
+						uploadError,
+						'Не удалось загрузить изображения. Попробуйте еще раз.'
+					)
 					toast.error(errorMessage)
 					return
 				}
 			}
 
-			// Обрабатываем achievement
 			let achievementId: number | undefined = data.achievementId || undefined
-			
+
 			if (data.customAchievement) {
-				// Если есть customAchievement
 				if (data.achievementId) {
-					// Обновляем существующее achievement
 					try {
 						const updateResult = await updateAchievementMutation({
 							id: data.achievementId,
@@ -352,18 +330,17 @@ export function useQuestEditForm(
 								title: data.customAchievement.title,
 								description: data.customAchievement.description,
 								icon: data.customAchievement.icon,
-								rarity: 'common', // По умолчанию common для пользовательских достижений
+								rarity: 'common',
 							},
 						}).unwrap()
 						achievementId = updateResult.id
-						console.log('Achievement updated:', updateResult)
+						logger.debug('Achievement updated:', updateResult)
 					} catch (error) {
-						console.error('Error updating achievement:', error)
+						logger.error('Error updating achievement:', error)
 						toast.error('Не удалось обновить достижение')
 						return
 					}
 				} else {
-					// Создаем новое achievement
 					try {
 						const createResult = await createAchievementMutation({
 							title: data.customAchievement.title,
@@ -371,41 +348,38 @@ export function useQuestEditForm(
 							icon: data.customAchievement.icon,
 							rarity: 'common', // По умолчанию common для пользовательских достижений
 						}).unwrap()
-						console.log('Achievement created:', createResult)
+						logger.debug('Achievement created:', createResult)
 						achievementId = createResult.id
-						console.log('Achievement ID:', achievementId)
+						logger.debug('Achievement ID:', achievementId)
 					} catch (error) {
-						console.error('Error creating achievement:', error)
-						if (import.meta.env.DEV) {
-							console.error('Full error:', error)
-						}
+						logger.error('Error creating achievement:', error)
 						toast.error('Не удалось создать достижение')
 						return
 					}
 				}
 			} else if (data.achievementId && !data.customAchievement) {
-				// Если achievementId есть, но customAchievement удалено - удаляем achievement
 				try {
 					await deleteAchievementMutation(data.achievementId).unwrap()
 					achievementId = undefined
 				} catch (error) {
-					console.error('Error deleting achievement:', error)
-					// Не прерываем процесс, просто логируем ошибку
+					logger.error('Error deleting achievement:', error)
 				}
 			}
 
-			// Обновляем данные формы с загруженными URL и achievementId
 			const updatedData = {
 				...data,
 				storyImage: storyImageUrl,
 				gallery: galleryUrls,
 				achievementId,
 			}
-			
-			console.log('Updated data with achievementId:', updatedData.achievementId)
+
+			logger.debug(
+				'Updated data with achievementId:',
+				updatedData.achievementId
+			)
 
 			const requestData = transformFormDataToUpdateRequest(updatedData)
-			console.log('Update request data:', requestData)
+			logger.debug('Update request data:', requestData)
 
 			const result = await updateQuestMutation({
 				id: String(questId),
@@ -431,15 +405,11 @@ export function useQuestEditForm(
 				}
 			}
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error saving quest:', error)
-			}
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось сохранить квест'
-					: 'Не удалось сохранить квест. Попробуйте еще раз.'
-
+			logger.error('Error saving quest:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось сохранить квест. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 		}
 	}
@@ -510,25 +480,15 @@ export function useQuestEditForm(
 						setUser(updatedUser)
 					}
 				} catch (updateError) {
-					if (import.meta.env.DEV) {
-						console.error(
-							'Error updating user after quest deletion:',
-							updateError
-						)
-					}
+					logger.error('Error updating user after quest deletion:', updateError)
 				}
 			}
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error deleting quest:', error)
-			}
-
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось удалить квест'
-					: 'Не удалось удалить квест. Попробуйте еще раз.'
-
+			logger.error('Error deleting quest:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось удалить квест. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 			throw error
 		}
@@ -536,9 +496,7 @@ export function useQuestEditForm(
 
 	const handleSubmit = (e?: React.BaseSyntheticEvent) => {
 		return form.handleSubmit(onSubmit, errors => {
-			if (import.meta.env.DEV) {
-				console.error('Form validation errors:', errors)
-			}
+			logger.error('Form validation errors:', errors)
 			const firstError = Object.values(errors)[0]
 			if (firstError && 'message' in firstError) {
 				toast.error(String(firstError.message))
@@ -549,10 +507,7 @@ export function useQuestEditForm(
 	}
 
 	const isSubmitting =
-		isUpdating ||
-		isDeleting ||
-		isUploadingImages ||
-		form.formState.isSubmitting
+		isUpdating || isDeleting || isUploadingImages || form.formState.isSubmitting
 
 	return {
 		form,
@@ -563,4 +518,3 @@ export function useQuestEditForm(
 		handleDelete,
 	}
 }
-

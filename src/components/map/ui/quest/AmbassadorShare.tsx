@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { logger } from '@/utils/logger'
 import { useNotifications } from '@/hooks/useNotifications'
 import { Check, Copy, Share2, X } from 'lucide-react'
 import { useState } from 'react'
@@ -74,10 +75,7 @@ export function AmbassadorShare({
 				icon: '📋',
 			})
 		} catch (err) {
-			// В production логируем в систему мониторинга
-			if (import.meta.env.DEV) {
-				console.error('Failed to copy:', err)
-			}
+			logger.error('Failed to copy:', err)
 		}
 	}
 

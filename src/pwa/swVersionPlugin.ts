@@ -41,10 +41,13 @@ export function swVersionPlugin(): Plugin {
 				// Записываем обратно
 				writeFileSync(swPath, swContent, 'utf-8')
 
+				// Logger не доступен в vite plugin контексте, используем console
+				// eslint-disable-next-line no-console
 				console.log(
 					`[SW Version Plugin] ✅ Updated cache version to: ${version}`
 				)
 			} catch (error) {
+				// eslint-disable-next-line no-console
 				console.error('[SW Version Plugin] ❌ Failed to update version:', error)
 			}
 		},

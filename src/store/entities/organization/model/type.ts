@@ -82,38 +82,3 @@ export interface UpdateOrganizationResponse {
 export interface DeleteOrganizationResponse {
 	message: string
 }
-
-// Типы для справочников
-export interface OrganizationTypeResponse {
-	id: number
-	name: string
-	createdAt: string
-	updatedAt: string
-}
-
-export interface HelpTypeResponse {
-	id: number
-	name: string
-	createdAt: string
-	updatedAt: string
-}
-
-export interface CityResponse {
-	id: number
-	name: string
-	latitude: string
-	longitude: string
-	regionId: number
-	region: {
-		id: number
-		name: string
-	}
-	createdAt: string
-	updatedAt: string
-}
-
-// Типы для загрузки изображений
-export interface UploadImageResponse {
-	fileName: string
-	url: string
-}

@@ -1,19 +1,21 @@
-import { MAX_ORGANIZATIONS_PER_USER } from '@/constants'
 import type { Organization } from '@/components/map/types/types'
+import { MAX_ORGANIZATIONS_PER_USER } from '@/constants'
 import { useUser } from '@/hooks/useUser'
 import { useUpdateUserMutation } from '@/store/entities'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import type { CityResponse } from '@/store/entities/city'
 import {
 	useCreateOrganizationMutation,
 	useDeleteOrganizationMutation,
-	useGetCitiesQuery,
 	useGetOrganizationQuery,
 	useUpdateOrganizationMutation,
-	useUploadImagesMutation,
-	type CityResponse,
 	type CreateOrganizationRequest,
 	type UpdateOrganizationRequest,
 } from '@/store/entities/organization'
+import { useUploadImagesMutation } from '@/store/entities/upload'
 import { transformUserFromAPI } from '@/utils/auth'
+import { getErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type React from 'react'
 import { useEffect, useState } from 'react'
@@ -46,9 +48,13 @@ export function useOrganizationForm(
 			skip: !existingOrgId || disableEditMode,
 		})
 
-	const existingOrg = disableEditMode ? null : ((organizationResponse as unknown as Organization) || null)
+	const existingOrg = disableEditMode
+		? null
+		: (organizationResponse as unknown as Organization) || null
 
-	const isEditMode = disableEditMode ? false : (forceEditMode ?? !!(existingOrgId && existingOrg))
+	const isEditMode = disableEditMode
+		? false
+		: forceEditMode ?? !!(existingOrgId && existingOrg)
 
 	useEffect(() => {
 		if (disableEditMode) {
@@ -147,7 +153,8 @@ export function useOrganizationForm(
 
 	const onSubmit = async (data: OrganizationFormData) => {
 		if (!isEditMode && !canCreateOrganization()) {
-			const orgWord = MAX_ORGANIZATIONS_PER_USER === 1 ? 'организацию' : 'организаций'
+			const orgWord =
+				MAX_ORGANIZATIONS_PER_USER === 1 ? 'организацию' : 'организаций'
 			toast.error(
 				`Вы уже создали максимальное количество организаций. Один пользователь может создать максимум ${MAX_ORGANIZATIONS_PER_USER} ${orgWord}.`
 			)
@@ -168,7 +175,7 @@ export function useOrganizationForm(
 					const image = data.gallery[i]
 
 					if (typeof image !== 'string') {
-						console.warn(`Image ${i + 1} is not a string:`, typeof image)
+						logger.warn(`Image ${i + 1} is not a string:`, typeof image)
 						continue
 					}
 
@@ -180,7 +187,7 @@ export function useOrganizationForm(
 						const base64WithPrefix = `data:image/jpeg;base64,${image}`
 						newImages.push(base64WithPrefix)
 					} else {
-						console.warn(`Image ${i + 1} has unknown format:`, {
+						logger.warn(`Image ${i + 1} has unknown format:`, {
 							length: image.length,
 							preview: image.substring(0, 50),
 							isBase64Like: /^[A-Za-z0-9+/=]+$/.test(image),
@@ -199,7 +206,7 @@ export function useOrganizationForm(
 								/^data:([A-Za-z-+/]+);base64,(.+)$/
 							)
 							if (!matches || matches.length !== 3) {
-								console.error(`Invalid base64 format for image ${i + 1}:`, {
+								logger.error(`Invalid base64 format for image ${i + 1}:`, {
 									preview: base64String.substring(0, 100),
 									hasDataPrefix: base64String.startsWith('data:'),
 								})
@@ -228,22 +235,19 @@ export function useOrganizationForm(
 						const uploadedUrls = uploadResult.map(img => img.url)
 						imageUrls = [...imageUrls, ...uploadedUrls]
 					} catch (uploadError) {
-						console.error('Error uploading images:', uploadError)
+						logger.error('Error uploading images:', uploadError)
 						if (
 							uploadError &&
 							typeof uploadError === 'object' &&
 							'data' in uploadError
 						) {
-							console.error('Upload error details:', uploadError.data)
+							logger.error('Upload error details:', uploadError.data)
 						}
 
-						const errorMessage =
-							uploadError &&
-							typeof uploadError === 'object' &&
-							'data' in uploadError
-								? (uploadError.data as { message?: string })?.message ||
-								  'Не удалось загрузить изображения'
-								: 'Не удалось загрузить изображения. Попробуйте еще раз.'
+						const errorMessage = getErrorMessage(
+							uploadError,
+							'Не удалось загрузить изображения. Попробуйте еще раз.'
+						)
 
 						toast.error(errorMessage)
 						return
@@ -329,13 +333,10 @@ export function useOrganizationForm(
 						setUser(updatedUser)
 					}
 				} catch (error) {
-					if (import.meta.env.DEV) {
-						console.error('Error updating user organisationId:', error)
-						if (error && typeof error === 'object' && 'data' in error) {
-							console.error('Error details:', error.data)
-						}
+					logger.error('Error updating user organisationId:', error)
+					if (error && typeof error === 'object' && 'data' in error) {
+						logger.error('Error details:', error.data)
 					}
-					// Показываем ошибку, но не блокируем процесс полностью
 					toast.error('Не удалось обновить ID организации у пользователя')
 				}
 
@@ -358,16 +359,11 @@ export function useOrganizationForm(
 				}
 			}
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error saving organization:', error)
-			}
-
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось сохранить организацию'
-					: 'Не удалось сохранить организацию. Попробуйте еще раз.'
-
+			logger.error('Error saving organization:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось сохранить организацию. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 		}
 	}
@@ -378,8 +374,6 @@ export function useOrganizationForm(
 		const city = cities.find((c: CityResponse) => c.name === cityName)
 		if (city) {
 			form.setValue('cityId', city.id)
-			// Устанавливаем координаты города для зума, но не перезаписываем координаты организации
-			// Координаты организации должны устанавливаться через карту
 		}
 	}
 
@@ -426,27 +420,20 @@ export function useOrganizationForm(
 						setUser(updatedUser)
 					}
 				} catch (updateError) {
-					if (import.meta.env.DEV) {
-						console.error(
-							'Error updating user after organization deletion:',
-							updateError
-						)
-					}
+					logger.error(
+						'Error updating user after organization deletion:',
+						updateError
+					)
 				}
 			}
 
 			toast.success('Организация успешно удалена.')
 		} catch (error: unknown) {
-			if (import.meta.env.DEV) {
-				console.error('Error deleting organization:', error)
-			}
-
-			const errorMessage =
-				error && typeof error === 'object' && 'data' in error
-					? (error.data as { message?: string })?.message ||
-					  'Не удалось удалить организацию'
-					: 'Не удалось удалить организацию. Попробуйте еще раз.'
-
+			logger.error('Error deleting organization:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Не удалось удалить организацию. Попробуйте еще раз.'
+			)
 			toast.error(errorMessage)
 		}
 	}

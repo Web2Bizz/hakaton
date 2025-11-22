@@ -12,6 +12,8 @@ import {
 import { useUser } from '@/hooks/useUser'
 import { useLazyGetUserQuery, useLoginMutation } from '@/store/entities'
 import { saveToken, transformUserFromAPI } from '@/utils/auth'
+import { getErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -23,19 +25,6 @@ const loginSchema = z.object({
 	email: z.string().email('Введите корректный email адрес'),
 	password: z.string().min(1, 'Пароль обязателен для заполнения'),
 })
-
-const getErrorMessage = (error: unknown) => {
-	if (import.meta.env.DEV) {
-		console.error('Login error:', error)
-	}
-
-	const errorMessage =
-		(error as { data?: { message?: string } })?.data?.message ||
-		(error as { message?: string })?.message ||
-		'Ошибка входа. Попробуйте еще раз.'
-
-	toast.error(errorMessage)
-}
 
 type LoginFormData = z.infer<typeof loginSchema>
 
@@ -73,9 +62,13 @@ export function LoginForm() {
 				password: data.password,
 			})
 
-			// Проверяем на ошибки (RTK Query возвращает error для статусов >= 400)
 			if (result.error) {
-				getErrorMessage(result.error)
+				logger.error('Login error:', result.error)
+				const errorMessage = getErrorMessage(
+					result.error,
+					'Ошибка входа. Попробуйте еще раз.'
+				)
+				toast.error(errorMessage)
 				return
 			}
 
@@ -99,7 +92,12 @@ export function LoginForm() {
 
 			const userResult = await getUser(userId)
 			if (userResult.error) {
-				getErrorMessage(userResult.error)
+				logger.error('Get user error:', userResult.error)
+				const errorMessage = getErrorMessage(
+					userResult.error,
+					'Ошибка получения пользователя. Попробуйте еще раз.'
+				)
+				toast.error(errorMessage)
 				return
 			}
 
@@ -121,7 +119,12 @@ export function LoginForm() {
 				globalThis.location.href = '/'
 			}, 1000)
 		} catch (error: unknown) {
-			getErrorMessage(error)
+			logger.error('Login error:', error)
+			const errorMessage = getErrorMessage(
+				error,
+				'Ошибка входа. Попробуйте еще раз.'
+			)
+			toast.error(errorMessage)
 		}
 	}
 

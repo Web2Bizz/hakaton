@@ -4,9 +4,13 @@ import storage from 'redux-persist/lib/storage'
 import { achievementService } from './entities/achievement'
 import { authService } from './entities/auth'
 import { categoryService } from './entities/category'
+import { cityService } from './entities/city'
 import { experienceService } from './entities/experience'
+import { helpTypeService } from './entities/help-type'
 import { organizationService } from './entities/organization'
+import { organizationTypeService } from './entities/organization-type'
 import { questService } from './entities/quest'
+import { uploadService } from './entities/upload'
 
 const persistConfig = {
 	key: 'root',
@@ -24,6 +28,10 @@ const rootReducer = combineReducers({
 	[experienceService.reducerPath]: experienceService.reducer,
 	[organizationService.reducerPath]: organizationService.reducer,
 	[categoryService.reducerPath]: categoryService.reducer,
+	[cityService.reducerPath]: cityService.reducer,
+	[organizationTypeService.reducerPath]: organizationTypeService.reducer,
+	[helpTypeService.reducerPath]: helpTypeService.reducer,
+	[uploadService.reducerPath]: uploadService.reducer,
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
@@ -49,7 +57,11 @@ export const setupStore = () => {
 				achievementService.middleware,
 				experienceService.middleware,
 				organizationService.middleware,
-				categoryService.middleware
+				categoryService.middleware,
+				cityService.middleware,
+				organizationTypeService.middleware,
+				helpTypeService.middleware,
+				uploadService.middleware
 			),
 	})
 

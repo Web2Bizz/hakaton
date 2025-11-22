@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger'
 import React from 'react'
 import { usePWA } from './PWAContext'
 
@@ -24,13 +25,13 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
 			const { outcome } = await installPrompt.userChoice
 
 			if (outcome === 'accepted') {
-				console.log('Пользователь принял установку')
+				logger.info('Пользователь принял установку')
 				setInstallPrompt(null)
 			} else {
-				console.log('Пользователь отклонил установку')
+				logger.info('Пользователь отклонил установку')
 			}
 		} catch (error) {
-			console.error('Ошибка при установке:', error)
+			logger.error('Ошибка при установке:', error)
 		}
 	}
 
