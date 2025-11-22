@@ -27,7 +27,8 @@ export interface QuestAchievement {
 
 // Требование для шага квеста
 export interface QuestStepRequirement {
-	value: number
+	currentValue: number
+	targetValue: number
 }
 
 // Шаг квеста
@@ -46,7 +47,7 @@ export interface CreateQuestRequest {
 	description: string
 	status: 'active' | 'completed' | 'archived'
 	experienceReward: number
-	achievement: QuestAchievement
+	achievement?: QuestAchievement
 	cityId: number
 	organizationTypeId: number
 	latitude: number

@@ -43,10 +43,21 @@ export function transformFormDataToCreateRequest(
 				progress: stage.progress,
 			}
 
-			// Добавляем requirement если есть финансовые требования
+			// Добавляем requirement если есть требования (финансовые, волонтеры или предметы)
 			if (stage.hasFinancial && stage.financialNeeded) {
 				step.requirement = {
-					value: stage.financialNeeded,
+					currentValue: 0,
+					targetValue: stage.financialNeeded,
+				}
+			} else if (stage.hasVolunteers && stage.volunteersNeeded) {
+				step.requirement = {
+					currentValue: 0,
+					targetValue: stage.volunteersNeeded,
+				}
+			} else if (stage.hasItems && stage.itemsNeeded) {
+				step.requirement = {
+					currentValue: 0,
+					targetValue: stage.itemsNeeded,
 				}
 			}
 
@@ -62,18 +73,14 @@ export function transformFormDataToCreateRequest(
 		.filter(c => c.value.trim() !== '')
 		.map(c => ({ name: c.name, value: c.value.trim() }))
 
-	// Преобразуем customAchievement в achievement
-	const achievement: QuestAchievement = data.customAchievement
+	// Преобразуем customAchievement в achievement (только если заполнено)
+	const achievement: QuestAchievement | undefined = data.customAchievement
 		? {
 				icon: data.customAchievement.icon,
 				title: data.customAchievement.title,
 				description: data.customAchievement.description,
 		  }
-		: {
-				icon: '🏆',
-				title: 'Участник квеста',
-				description: 'Завершил квест',
-		  }
+		: undefined
 
 	// Преобразуем category в categoryIds
 	const categoryId = CATEGORY_TO_ID_MAP[data.category] || 5
@@ -105,7 +112,6 @@ export function transformFormDataToCreateRequest(
 		description: data.story,
 		status: 'active',
 		experienceReward: 100, // Можно сделать настраиваемым
-		achievement,
 		cityId,
 		organizationTypeId,
 		latitude,
@@ -116,6 +122,11 @@ export function transformFormDataToCreateRequest(
 		gallery: data.gallery.length > 0 ? data.gallery : undefined,
 		steps,
 		categoryIds: [categoryId],
+	}
+
+	// Добавляем achievement только если customAchievement заполнено
+	if (achievement) {
+		request.achievement = achievement
 	}
 
 	return request
@@ -137,9 +148,21 @@ export function transformFormDataToUpdateRequest(
 				progress: stage.progress,
 			}
 
+			// Добавляем requirement если есть требования (финансовые, волонтеры или предметы)
 			if (stage.hasFinancial && stage.financialNeeded) {
 				step.requirement = {
-					value: stage.financialNeeded,
+					currentValue: 0,
+					targetValue: stage.financialNeeded,
+				}
+			} else if (stage.hasVolunteers && stage.volunteersNeeded) {
+				step.requirement = {
+					currentValue: 0,
+					targetValue: stage.volunteersNeeded,
+				}
+			} else if (stage.hasItems && stage.itemsNeeded) {
+				step.requirement = {
+					currentValue: 0,
+					targetValue: stage.itemsNeeded,
 				}
 			}
 
@@ -247,9 +270,11 @@ export function transformApiResponseToFormData(
 		status: step.status,
 		progress: step.progress,
 		hasFinancial: !!step.requirement,
-		financialNeeded: step.requirement?.value,
+		financialNeeded: step.requirement?.targetValue,
 		hasVolunteers: false,
+		volunteersNeeded: step.requirement?.targetValue,
 		hasItems: false,
+		itemsNeeded: step.requirement?.targetValue,
 		itemName: undefined,
 		deadline: step.deadline || undefined,
 	}))

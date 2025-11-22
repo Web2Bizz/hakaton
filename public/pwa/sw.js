@@ -2,7 +2,7 @@
  * Версия кэша автоматически обновляется при каждой сборке через Vite плагин.
  * Не нужно обновлять вручную - версия генерируется на основе timestamp сборки.
  */
-const CACHE_VERSION = 'v20251122.011137' // Автоматически заменяется при сборке
+const CACHE_VERSION = 'v20251122.122901' // Автоматически заменяется при сборке
 const CACHE_NAME = `atom-dobro-cache-${CACHE_VERSION}`
 const urlsToCache = ['/', '/pwa/manifest.json']
 
