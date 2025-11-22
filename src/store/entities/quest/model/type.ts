@@ -204,3 +204,7 @@ export interface QuestUpdateResponse {
 		message?: string
 	}
 }
+
+export interface DeleteQuestUpdateResponse {
+	message: string
+}

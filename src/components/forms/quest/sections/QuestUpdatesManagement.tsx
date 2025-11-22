@@ -1,9 +1,23 @@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { useGetQuestUpdatesQuery } from '@/store/entities/quest'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+	useDeleteQuestUpdateMutation,
+	useGetQuestUpdatesQuery,
+} from '@/store/entities/quest'
 import { formatDate } from '@/utils/format'
-import { Edit2, Plus, X } from 'lucide-react'
+import { Edit2, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { QuestUpdateForm } from '../QuestUpdateForm'
 import type { QuestUpdate } from '@/store/entities/quest/model/type'
 
@@ -138,6 +152,7 @@ export function QuestUpdatesManagement({
 							key={update.id}
 							update={update}
 							onEdit={() => setEditingUpdateId(update.id)}
+							onDelete={refetch}
 						/>
 					))}
 				</div>
@@ -149,10 +164,35 @@ export function QuestUpdatesManagement({
 function UpdateCard({
 	update,
 	onEdit,
+	onDelete,
 }: {
 	update: QuestUpdate
 	onEdit: () => void
+	onDelete: () => void
 }) {
+	const [deleteQuestUpdate, { isLoading: isDeleting }] =
+		useDeleteQuestUpdateMutation()
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+	const handleDelete = async () => {
+		try {
+			await deleteQuestUpdate(update.id).unwrap()
+			toast.success('Обновление успешно удалено')
+			setShowDeleteDialog(false)
+			onDelete()
+		} catch (error) {
+			if (import.meta.env.DEV) {
+				console.error('Error deleting quest update:', error)
+			}
+			const errorMessage =
+				error && typeof error === 'object' && 'data' in error
+					? (error.data as { message?: string })?.message ||
+					  'Не удалось удалить обновление'
+					: 'Не удалось удалить обновление. Попробуйте еще раз.'
+			toast.error(errorMessage)
+		}
+	}
+
 	return (
 		<div className='border border-slate-200 rounded-lg p-6 bg-white'>
 			<div className='flex items-start justify-between mb-3'>
@@ -166,16 +206,58 @@ function UpdateCard({
 						</p>
 					)}
 				</div>
-				<Button
-					type='button'
-					variant='outline'
-					size='sm'
-					onClick={onEdit}
-				>
-					<Edit2 className='h-4 w-4 mr-1' />
-					Редактировать
-				</Button>
+				<div className='flex items-center gap-2'>
+					<Button
+						type='button'
+						variant='outline'
+						size='sm'
+						onClick={onEdit}
+					>
+						<Edit2 className='h-4 w-4 mr-1' />
+						Редактировать
+					</Button>
+					<Button
+						type='button'
+						variant='outline'
+						size='sm'
+						onClick={() => setShowDeleteDialog(true)}
+						disabled={isDeleting}
+						className='text-red-600 hover:text-red-700 hover:border-red-300'
+					>
+						<Trash2 className='h-4 w-4 mr-1' />
+						Удалить
+					</Button>
+				</div>
 			</div>
+
+			<AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Подтверждение удаления</AlertDialogTitle>
+						<AlertDialogDescription>
+							Вы уверены, что хотите удалить обновление "{update.title}"? Это
+							действие нельзя отменить.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={isDeleting}>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleDelete}
+							disabled={isDeleting}
+							className='bg-red-600 hover:bg-red-700 focus:ring-red-600'
+						>
+							{isDeleting ? (
+								<div className='flex items-center gap-2'>
+									<Spinner />
+									<span>Удаление...</span>
+								</div>
+							) : (
+								'Удалить'
+							)}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 			<p className='text-sm text-slate-700 leading-relaxed m-0 mb-3'>
 				{update.text}
 			</p>

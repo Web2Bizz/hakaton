@@ -14,6 +14,7 @@ export {
 	useGetQuestUpdatesQuery,
 	useLazyGetQuestUpdatesQuery,
 	useUpdateQuestUpdateMutation,
+	useDeleteQuestUpdateMutation,
 } from './model/quest-service'
 export type * from './model/type'
 

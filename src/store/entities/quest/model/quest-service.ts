@@ -5,6 +5,7 @@ import type {
 	CreateQuestResponse,
 	CreateQuestUpdateRequest,
 	DeleteQuestResponse,
+	DeleteQuestUpdateResponse,
 	GetQuestsParams,
 	JoinQuestResponse,
 	Quest,
@@ -230,6 +231,21 @@ export const questService = createApi({
 				return tags
 			},
 		}),
+
+		// DELETE /quest-updates/:id - Удалить обновление квеста
+		deleteQuestUpdate: builder.mutation<
+			DeleteQuestUpdateResponse,
+			number | string
+		>({
+			query: id => ({
+				url: `/quest-updates/${id}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (_result, _error, id) => [
+				{ type: 'QuestUpdate', id: String(id) },
+				'QuestUpdate',
+			],
+		}),
 	}),
 })
 
@@ -248,4 +264,5 @@ export const {
 	useGetQuestUpdatesQuery,
 	useLazyGetQuestUpdatesQuery,
 	useUpdateQuestUpdateMutation,
+	useDeleteQuestUpdateMutation,
 } = questService

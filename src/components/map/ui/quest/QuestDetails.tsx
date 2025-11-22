@@ -126,6 +126,10 @@ export function QuestDetails({
 	} | null>(null)
 	const [showAmbassadorShare, setShowAmbassadorShare] = useState(false)
 	const [galleryIndex, setGalleryIndex] = useState<number | null>(null)
+	const [updateGalleryState, setUpdateGalleryState] = useState<{
+		updateId: number
+		imageIndex: number
+	} | null>(null)
 	const [showAuthDialog, setShowAuthDialog] = useState(false)
 
 	// Получаем обновления квеста через API
@@ -661,11 +665,16 @@ export function QuestDetails({
 												{update.photos && update.photos.length > 0 && (
 													<div className='grid grid-cols-2 gap-2'>
 														{update.photos.map((img: string, idx: number) => (
-															<img
+															<GalleryImage
 																key={idx}
-																src={img}
-																alt={update.title}
-																className='w-full h-32 object-cover rounded-lg'
+																image={img}
+																index={idx}
+																onClick={() =>
+																	setUpdateGalleryState({
+																		updateId: update.id,
+																		imageIndex: idx,
+																	})
+																}
 															/>
 														))}
 													</div>
@@ -746,7 +755,7 @@ export function QuestDetails({
 				)}
 			</section>
 
-			{/* Галерея изображений */}
+			{/* Галерея изображений квеста */}
 			{galleryIndex !== null && quest && (
 				<ImageGallery
 					images={
@@ -757,6 +766,24 @@ export function QuestDetails({
 					currentIndex={galleryIndex}
 					onClose={() => setGalleryIndex(null)}
 					onChangeIndex={setGalleryIndex}
+				/>
+			)}
+
+			{/* Галерея изображений обновлений */}
+			{updateGalleryState !== null && questUpdates.length > 0 && (
+				<ImageGallery
+					images={
+						questUpdates.find(u => u.id === updateGalleryState.updateId)
+							?.photos || []
+					}
+					currentIndex={updateGalleryState.imageIndex}
+					onClose={() => setUpdateGalleryState(null)}
+					onChangeIndex={index =>
+						setUpdateGalleryState({
+							updateId: updateGalleryState.updateId,
+							imageIndex: index,
+						})
+					}
 				/>
 			)}
 		</>
