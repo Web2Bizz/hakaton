@@ -2,6 +2,8 @@ import { ActiveQuests } from '@/components/profile/ActiveQuests'
 import { ProfileAchievements } from '@/components/profile/ProfileAchievements'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileLevelProgress } from '@/components/profile/ProfileLevelProgress'
+import { MyQuests } from '@/components/profile/MyQuests'
+import { MyOrganizations } from '@/components/profile/MyOrganizations'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
@@ -53,6 +55,10 @@ export default function ProfilePage() {
 					</div>
 
 					<ProfileAchievements userAchievements={user.achievements} />
+
+					<MyQuests />
+
+					<MyOrganizations />
 
 					<ActiveQuests />
 				</div>

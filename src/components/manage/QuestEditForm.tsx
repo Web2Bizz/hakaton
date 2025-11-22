@@ -18,6 +18,8 @@ interface QuestEditFormProps {
 	questId: number
 }
 
+type FormSubTab = 'info' | 'achievement' | 'stages'
+
 export function QuestEditForm({ questId }: QuestEditFormProps) {
 	const navigate = useNavigate()
 	const {
@@ -33,6 +35,7 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 	})
 
 	const [showLocationPicker, setShowLocationPicker] = useState(false)
+	const [activeSubTab, setActiveSubTab] = useState<FormSubTab>('info')
 
 	const handleLocationSelect = (coordinates: [number, number]) => {
 		form.setValue('latitude', coordinates[0].toString())
@@ -67,21 +70,69 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 		<>
 			<Form {...form}>
 				<form onSubmit={onSubmit} className='space-y-6'>
-					{/* Основная информация */}
-					<div className='space-y-6'>
-						<QuestBasicInfo onCityChange={handleCityChange} />
-
-						<QuestLocationSection
-							onOpenMap={() => setShowLocationPicker(true)}
-						/>
-
-						<QuestContactsSection />
-
-						<QuestAchievementSection />
-
-						{/* Настройка этапов */}
-						<QuestStagesSection />
+					{/* Подвкладки */}
+					<div className='mb-6'>
+						<div className='flex items-center gap-2 border-b border-slate-200'>
+							<button
+								type='button'
+								onClick={() => setActiveSubTab('info')}
+								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+									activeSubTab === 'info'
+										? 'border-blue-600 text-blue-600'
+										: 'border-transparent text-slate-600 hover:text-slate-900'
+								}`}
+							>
+								Редактирование информации
+							</button>
+							<button
+								type='button'
+								onClick={() => setActiveSubTab('achievement')}
+								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+									activeSubTab === 'achievement'
+										? 'border-blue-600 text-blue-600'
+										: 'border-transparent text-slate-600 hover:text-slate-900'
+								}`}
+							>
+								Достижения
+							</button>
+							<button
+								type='button'
+								onClick={() => setActiveSubTab('stages')}
+								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+									activeSubTab === 'stages'
+										? 'border-blue-600 text-blue-600'
+										: 'border-transparent text-slate-600 hover:text-slate-900'
+								}`}
+							>
+								Этапы
+							</button>
+						</div>
 					</div>
+
+					{/* Контент подвкладок */}
+					{activeSubTab === 'info' && (
+						<div className='space-y-6'>
+							<QuestBasicInfo onCityChange={handleCityChange} />
+
+							<QuestLocationSection
+								onOpenMap={() => setShowLocationPicker(true)}
+							/>
+
+							<QuestContactsSection />
+						</div>
+					)}
+
+					{activeSubTab === 'achievement' && (
+						<div className='space-y-6'>
+							<QuestAchievementSection />
+						</div>
+					)}
+
+					{activeSubTab === 'stages' && (
+						<div className='space-y-6'>
+							<QuestStagesSection />
+						</div>
+					)}
 
 					{/* Кнопка сохранения */}
 					<div className='flex justify-end pt-6 border-t border-slate-200 mt-6'>
