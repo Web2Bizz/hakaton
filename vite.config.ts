@@ -12,6 +12,7 @@ export default defineConfig({
 		react(),
 		w2bViteFileBasedRouting({
 			baseUrl: 'https://it-hackathon-team05.mephi.ru',
+			disallowPaths: ['/health', '/api', '/sw.js', '/registerSW.js'],
 			enableSEO: true,
 		}),
 		tailwindcss(),
