@@ -59,12 +59,6 @@ export interface OrganizationsListResponse {
 	}
 }
 
-export interface OrganizationResponse {
-	data: {
-		organization: Organization
-	}
-}
-
 export interface CreateOrganizationResponse {
 	data: {
 		organization: Organization

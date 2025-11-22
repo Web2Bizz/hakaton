@@ -5,7 +5,6 @@ import type {
 	CreateOrganizationResponse,
 	DeleteOrganizationResponse,
 	Organization,
-	OrganizationResponse,
 	UpdateOrganizationRequest,
 	UpdateOrganizationResponse,
 } from './type'
@@ -40,7 +39,7 @@ export const organizationService = createApi({
 		}),
 
 		// GET /organizations/:organizationId - Получить детальную информацию об организации
-		getOrganization: builder.query<OrganizationResponse, string>({
+		getOrganization: builder.query<Organization, string>({
 			query: organizationId => `/organizations/${organizationId}`,
 			providesTags: (_result, _error, organizationId) => [
 				{ type: 'Organization', id: organizationId },

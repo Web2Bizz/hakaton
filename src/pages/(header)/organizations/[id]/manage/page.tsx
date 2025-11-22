@@ -71,10 +71,10 @@ export default function OrganizationManagePage() {
 	}
 
 	// Проверяем, что пользователь является владельцем организации
-	const org = organization.data?.organization
+	const org = organization.id
 	const isOwner =
-		org?.id === user.createdOrganizationId ||
-		String(org?.id) === user.createdOrganizationId
+		org === user.createdOrganizationId ||
+		String(org) === user.createdOrganizationId
 
 	if (!isOwner) {
 		return (
@@ -122,7 +122,7 @@ export default function OrganizationManagePage() {
 								Назад к списку
 							</Button>
 							<h1 className='text-3xl sm:text-4xl font-bold mb-2 drop-shadow-lg'>
-								{org?.name || 'Организация'}
+								{organization.name || 'Организация'}
 							</h1>
 							<p className='text-blue-100 text-lg'>
 								Панель управления организацией
