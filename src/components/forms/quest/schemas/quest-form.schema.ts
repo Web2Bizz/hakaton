@@ -15,12 +15,10 @@ export const stageFormSchema = z.object({
 	description: z.string().min(1, 'Описание этапа обязательно'),
 	status: z.enum(['pending', 'in_progress', 'completed']).default('pending'),
 	progress: z.number().min(0).max(100).default(0),
-	hasFinancial: z.boolean().optional(),
-	financialNeeded: z.number().min(0).optional(),
-	hasVolunteers: z.boolean().optional(),
-	volunteersNeeded: z.number().min(0).optional(),
-	hasItems: z.boolean().optional(),
-	itemsNeeded: z.number().min(0).optional(),
+	requirementType: z
+		.enum(['none', 'financial', 'volunteers', 'items'])
+		.default('none'),
+	requirementValue: z.number().min(0).optional(),
 	itemName: z
 		.string()
 		.optional()

@@ -43,21 +43,15 @@ export function transformFormDataToCreateRequest(
 				progress: stage.progress,
 			}
 
-			// Добавляем requirement если есть требования (финансовые, волонтеры или предметы)
-			if (stage.hasFinancial && stage.financialNeeded) {
+			// Добавляем requirement если есть требования
+			if (
+				stage.requirementType &&
+				stage.requirementType !== 'none' &&
+				stage.requirementValue
+			) {
 				step.requirement = {
 					currentValue: 0,
-					targetValue: stage.financialNeeded,
-				}
-			} else if (stage.hasVolunteers && stage.volunteersNeeded) {
-				step.requirement = {
-					currentValue: 0,
-					targetValue: stage.volunteersNeeded,
-				}
-			} else if (stage.hasItems && stage.itemsNeeded) {
-				step.requirement = {
-					currentValue: 0,
-					targetValue: stage.itemsNeeded,
+					targetValue: stage.requirementValue,
 				}
 			}
 
@@ -148,21 +142,15 @@ export function transformFormDataToUpdateRequest(
 				progress: stage.progress,
 			}
 
-			// Добавляем requirement если есть требования (финансовые, волонтеры или предметы)
-			if (stage.hasFinancial && stage.financialNeeded) {
+			// Добавляем requirement если есть требования
+			if (
+				stage.requirementType &&
+				stage.requirementType !== 'none' &&
+				stage.requirementValue
+			) {
 				step.requirement = {
 					currentValue: 0,
-					targetValue: stage.financialNeeded,
-				}
-			} else if (stage.hasVolunteers && stage.volunteersNeeded) {
-				step.requirement = {
-					currentValue: 0,
-					targetValue: stage.volunteersNeeded,
-				}
-			} else if (stage.hasItems && stage.itemsNeeded) {
-				step.requirement = {
-					currentValue: 0,
-					targetValue: stage.itemsNeeded,
+					targetValue: stage.requirementValue,
 				}
 			}
 
@@ -269,12 +257,10 @@ export function transformApiResponseToFormData(
 		description: step.description,
 		status: step.status,
 		progress: step.progress,
-		hasFinancial: !!step.requirement,
-		financialNeeded: step.requirement?.targetValue,
-		hasVolunteers: false,
-		volunteersNeeded: step.requirement?.targetValue,
-		hasItems: false,
-		itemsNeeded: step.requirement?.targetValue,
+		requirementType: step.requirement
+			? ('financial' as const) // По умолчанию financial, так как API не возвращает тип
+			: ('none' as const),
+		requirementValue: step.requirement?.targetValue,
 		itemName: undefined,
 		deadline: step.deadline || undefined,
 	}))

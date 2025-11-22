@@ -23,9 +23,7 @@ export function QuestStageForm({
 }: QuestStageFormProps) {
 	const form = useFormContext<QuestFormData>()
 
-	const hasFinancial = form.watch(`stages.${index}.hasFinancial`)
-	const hasVolunteers = form.watch(`stages.${index}.hasVolunteers`)
-	const hasItems = form.watch(`stages.${index}.hasItems`)
+	const requirementType = form.watch(`stages.${index}.requirementType`)
 
 	return (
 		<div className='border border-slate-200 rounded-lg p-4 bg-slate-50'>
@@ -134,139 +132,81 @@ export function QuestStageForm({
 						Требования этапа (необязательно)
 					</p>
 
-					<div className='space-y-4 pr-4'>
+					<div className='space-y-3 pr-4'>
 						<FormField
 							control={form.control}
-							name={`stages.${index}.hasFinancial`}
+							name={`stages.${index}.requirementType`}
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
-										<label className='flex items-center gap-2'>
-											<input
-												type='checkbox'
-												checked={field.value || false}
-												onChange={e => field.onChange(e.target.checked)}
-												className='w-4 h-4 rounded border-slate-300'
-											/>
-											<span className='text-xs text-slate-700'>
-												Требуется финансовая поддержка
-											</span>
-										</label>
+										<div className='space-y-2'>
+											<label className='flex items-center gap-2 cursor-pointer'>
+												<input
+													type='radio'
+													name={`requirementType-${index}`}
+													value='none'
+													checked={field.value === 'none'}
+													onChange={() => {
+														field.onChange('none')
+														form.setValue(`stages.${index}.requirementValue`, undefined)
+													}}
+													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
+												/>
+												<span className='text-xs text-slate-700'>
+													Нет требований
+												</span>
+											</label>
+											<label className='flex items-center gap-2 cursor-pointer'>
+												<input
+													type='radio'
+													name={`requirementType-${index}`}
+													value='financial'
+													checked={field.value === 'financial'}
+													onChange={() => field.onChange('financial')}
+													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
+												/>
+												<span className='text-xs text-slate-700'>
+													Требуется финансовая поддержка
+												</span>
+											</label>
+											<label className='flex items-center gap-2 cursor-pointer'>
+												<input
+													type='radio'
+													name={`requirementType-${index}`}
+													value='volunteers'
+													checked={field.value === 'volunteers'}
+													onChange={() => field.onChange('volunteers')}
+													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
+												/>
+												<span className='text-xs text-slate-700'>
+													Требуются волонтеры
+												</span>
+											</label>
+											<label className='flex items-center gap-2 cursor-pointer'>
+												<input
+													type='radio'
+													name={`requirementType-${index}`}
+													value='items'
+													checked={field.value === 'items'}
+													onChange={() => field.onChange('items')}
+													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
+												/>
+												<span className='text-xs text-slate-700'>
+													Требуются предметы/материалы
+												</span>
+											</label>
+										</div>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
-						{hasFinancial && (
-							<FormField
-								control={form.control}
-								name={`stages.${index}.financialNeeded`}
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<Input
-												type='number'
-												min={0}
-												{...field}
-												value={field.value || ''}
-												onChange={e => field.onChange(Number(e.target.value))}
-												placeholder='Сумма (руб.)'
-												className='ml-6'
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						)}
 
-						<FormField
-							control={form.control}
-							name={`stages.${index}.hasVolunteers`}
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<label className='flex items-center gap-2'>
-											<input
-												type='checkbox'
-												checked={field.value || false}
-												onChange={e => field.onChange(e.target.checked)}
-												className='w-4 h-4 rounded border-slate-300'
-											/>
-											<span className='text-xs text-slate-700'>
-												Требуются волонтеры
-											</span>
-										</label>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						{hasVolunteers && (
-							<FormField
-								control={form.control}
-								name={`stages.${index}.volunteersNeeded`}
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<Input
-												type='number'
-												min={0}
-												{...field}
-												value={field.value || ''}
-												onChange={e => field.onChange(Number(e.target.value))}
-												placeholder='Количество волонтеров'
-												className='ml-6'
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						)}
-
-						<FormField
-							control={form.control}
-							name={`stages.${index}.hasItems`}
-							render={({ field }) => (
-								<FormItem>
-									<FormControl>
-										<label className='flex items-center gap-2'>
-											<input
-												type='checkbox'
-												checked={field.value || false}
-												onChange={e => field.onChange(e.target.checked)}
-												className='w-4 h-4 rounded border-slate-300'
-											/>
-											<span className='text-xs text-slate-700'>
-												Требуются предметы/материалы
-											</span>
-										</label>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						{hasItems && (
+						{requirementType !== 'none' && (
 							<div className='ml-6 space-y-2'>
 								<FormField
 									control={form.control}
-									name={`stages.${index}.itemName`}
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													placeholder='Название предмета'
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<FormField
-									control={form.control}
-									name={`stages.${index}.itemsNeeded`}
+									name={`stages.${index}.requirementValue`}
 									render={({ field }) => (
 										<FormItem>
 											<FormControl>
@@ -276,7 +216,13 @@ export function QuestStageForm({
 													{...field}
 													value={field.value || ''}
 													onChange={e => field.onChange(Number(e.target.value))}
-													placeholder='Количество'
+													placeholder={
+														requirementType === 'financial'
+															? 'Сумма (руб.)'
+															: requirementType === 'volunteers'
+																? 'Количество волонтеров'
+																: 'Количество'
+													}
 												/>
 											</FormControl>
 											<FormMessage />

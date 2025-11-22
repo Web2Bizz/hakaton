@@ -26,10 +26,10 @@ export function QuestStagesSection() {
 							description: '',
 							status: 'pending' as const,
 							progress: 0,
+							requirementType: 'none' as const,
+							requirementValue: undefined,
 							itemName: undefined,
 							deadline: undefined,
-							hasFinancial: false,
-							itemsNeeded: undefined,
 						})
 					}
 					size='sm'
