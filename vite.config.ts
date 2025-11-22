@@ -10,7 +10,10 @@ import { swVersionPlugin } from './src/pwa/swVersionPlugin'
 export default defineConfig({
 	plugins: [
 		react(),
-		w2bViteFileBasedRouting(),
+		w2bViteFileBasedRouting({
+			baseUrl: 'https://it-hackathon-team05.mephi.ru',
+			enableSEO: true,
+		}),
 		tailwindcss(),
 		swVersionPlugin(), // Плагин для автоматического обновления версии
 		VitePWA({

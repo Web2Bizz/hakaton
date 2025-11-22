@@ -1,5 +1,6 @@
 export * from './forms'
 export * from './header'
+export * from './manage'
 export * from './map'
 export * from './notifications'
 export * from './profile'
