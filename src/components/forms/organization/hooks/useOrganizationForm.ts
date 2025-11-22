@@ -1,3 +1,4 @@
+import { MAX_ORGANIZATIONS_PER_USER } from '@/constants'
 import type { Organization } from '@/components/map/types/types'
 import { useUser } from '@/hooks/useUser'
 import { useUpdateUserMutation } from '@/store/entities'
@@ -140,8 +141,9 @@ export function useOrganizationForm(
 
 	const onSubmit = async (data: OrganizationFormData) => {
 		if (!isEditMode && !canCreateOrganization()) {
+			const orgWord = MAX_ORGANIZATIONS_PER_USER === 1 ? 'организацию' : 'организаций'
 			toast.error(
-				'Вы уже создали организацию. Один пользователь может создать только одну организацию.'
+				`Вы уже создали максимальное количество организаций. Один пользователь может создать максимум ${MAX_ORGANIZATIONS_PER_USER} ${orgWord}.`
 			)
 			return
 		}

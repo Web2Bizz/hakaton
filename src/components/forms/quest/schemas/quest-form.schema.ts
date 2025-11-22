@@ -76,6 +76,7 @@ export const questFormSchema = z.object({
 		}, 'Некорректная долгота'),
 	stages: z.array(stageFormSchema).min(1, 'Добавьте хотя бы один этап квеста'),
 	customAchievement: customAchievementSchema,
+	achievementId: z.number().optional().nullable(), // ID существующего achievement
 	curatorName: z.string().optional(),
 	curatorPhone: z.string().optional(),
 	curatorEmail: z.preprocess(

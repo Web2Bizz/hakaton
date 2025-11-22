@@ -19,9 +19,11 @@ export {
 	useDeleteQuestMutation,
 	useGetQuestQuery,
 	useGetQuestsQuery,
+	useGetUserQuestsQuery,
 	useJoinQuestMutation,
 	useLazyGetQuestQuery,
 	useLazyGetQuestsQuery,
+	useLazyGetUserQuestsQuery,
 	useUpdateQuestMutation,
 } from './quest'
 export type {

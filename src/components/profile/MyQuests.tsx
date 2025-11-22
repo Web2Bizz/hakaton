@@ -1,33 +1,31 @@
+import type { Quest } from '@/components/map/types/quest-types'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
-import { useGetQuestsQuery } from '@/store/entities/quest'
+import { useGetUserQuestsQuery } from '@/store/entities/quest'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
+import { ArrowRight, Map, MapPin, Target, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Spinner } from '@/components/ui/spinner'
-import { Button } from '@/components/ui/button'
-import type { Quest } from '@/components/map/types/quest-types'
-import { Target, ArrowRight, MapPin, TrendingUp, Map } from 'lucide-react'
 
 export function MyQuests() {
 	const { user } = useUser()
 	const navigate = useNavigate()
-	const { data: questsResponse, isLoading } = useGetQuestsQuery()
+
+	// Получаем квесты пользователя через новый endpoint
+	const { data: questsResponse, isLoading } = useGetUserQuestsQuery(
+		user?.id || '',
+		{
+			skip: !user?.id, // Пропускаем запрос, если нет userId
+		}
+	)
 
 	// Преобразуем квесты с сервера в формат компонентов
-	const apiQuests = useMemo(() => {
+	const myQuests = useMemo(() => {
+		console.log('questsResponse', questsResponse)
 		if (!questsResponse?.data?.quests) return []
 		return transformApiQuestsToComponentQuests(questsResponse.data.quests)
 	}, [questsResponse])
-
-	// Фильтруем только мои квесты (созданные пользователем)
-	const myQuests = useMemo(() => {
-		if (!user?.createdQuestId) return []
-		return apiQuests.filter(q => {
-			const questId = typeof q.id === 'string' ? Number.parseInt(q.id, 10) : q.id
-			const createdId = Number.parseInt(user.createdQuestId || '', 10)
-			return questId === createdId || q.id === user.createdQuestId
-		})
-	}, [apiQuests, user?.createdQuestId])
 
 	if (isLoading) {
 		return (
@@ -55,7 +53,10 @@ export function MyQuests() {
 					<p className='text-sm sm:text-base text-slate-500 mb-4'>
 						У вас пока нет созданных квестов
 					</p>
-					<Button asChild className='bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700'>
+					<Button
+						asChild
+						className='bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700'
+					>
 						<a href='/add-quest'>
 							Создать квест
 							<ArrowRight className='h-4 w-4 ml-2' />
@@ -91,9 +92,10 @@ export function MyQuests() {
 				<QuestCard
 					quest={displayedQuest}
 					onClick={() => {
-						const questId = typeof displayedQuest.id === 'string' 
-							? Number.parseInt(displayedQuest.id, 10) 
-							: displayedQuest.id
+						const questId =
+							typeof displayedQuest.id === 'string'
+								? Number.parseInt(displayedQuest.id, 10)
+								: displayedQuest.id
 						navigate(`/quests/${questId}/manage`)
 					}}
 				/>
@@ -108,11 +110,12 @@ interface QuestCardProps {
 }
 
 function QuestCard({ quest, onClick }: QuestCardProps) {
-	const progressColor = quest.overallProgress === 100 
-		? 'from-green-500 to-emerald-600'
-		: quest.overallProgress >= 50
-		? 'from-orange-500 to-amber-600'
-		: 'from-orange-400 to-orange-500'
+	const progressColor =
+		quest.overallProgress === 100
+			? 'from-green-500 to-emerald-600'
+			: quest.overallProgress >= 50
+			? 'from-orange-500 to-amber-600'
+			: 'from-orange-400 to-orange-500'
 
 	return (
 		<article
@@ -152,9 +155,13 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 						<div className='flex items-center justify-between mb-2'>
 							<div className='flex items-center gap-2'>
 								<TrendingUp className='h-4 w-4 text-slate-500' />
-								<span className='text-xs font-medium text-slate-600'>Прогресс</span>
+								<span className='text-xs font-medium text-slate-600'>
+									Прогресс
+								</span>
 							</div>
-							<span className='text-sm font-bold text-slate-900'>{quest.overallProgress}%</span>
+							<span className='text-sm font-bold text-slate-900'>
+								{quest.overallProgress}%
+							</span>
 						</div>
 						<div className='h-2 bg-slate-200 rounded-full overflow-hidden'>
 							<div
@@ -170,10 +177,9 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 							size='sm'
 							onClick={e => {
 								e.stopPropagation()
-								const questId = typeof quest.id === 'string' 
-									? quest.id 
-									: String(quest.id)
-								
+								const questId =
+									typeof quest.id === 'string' ? quest.id : String(quest.id)
+
 								// Сохраняем координаты для зума на карте
 								if (quest.coordinates && quest.coordinates.length === 2) {
 									localStorage.setItem(
@@ -185,7 +191,7 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 										})
 									)
 								}
-								
+
 								window.location.href = `/map?quest=${questId}`
 							}}
 							className='flex-1 sm:flex-none text-orange-600 border-orange-200 hover:bg-orange-50'
@@ -207,4 +213,3 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 		</article>
 	)
 }
-

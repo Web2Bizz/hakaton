@@ -4,6 +4,8 @@ export {
 	useLazyGetQuestsQuery,
 	useGetQuestQuery,
 	useLazyGetQuestQuery,
+	useGetUserQuestsQuery,
+	useLazyGetUserQuestsQuery,
 	useCreateQuestMutation,
 	useUpdateQuestMutation,
 	useDeleteQuestMutation,

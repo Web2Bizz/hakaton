@@ -68,7 +68,7 @@ export interface CreateQuestRequest {
 	description: string
 	status: 'active' | 'completed' | 'archived'
 	experienceReward: number
-	achievement?: QuestAchievement
+	achievementId?: number // ID достижения (если есть)
 	cityId: number
 	organizationTypeId: number
 	latitude: number
@@ -87,7 +87,7 @@ export interface UpdateQuestRequest {
 	description?: string
 	status?: 'active' | 'completed' | 'archived'
 	experienceReward?: number
-	achievement?: QuestAchievement
+	achievementId?: number | null // ID достижения (если есть, null для удаления)
 	cityId?: number
 	organizationTypeId?: number
 	latitude?: number

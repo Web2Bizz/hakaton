@@ -1,6 +1,15 @@
 import { API_BASE_URL } from '@/constants'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { AchievementsListResponse, UserAchievementsResponse } from './type'
+import type {
+	AchievementsListResponse,
+	CreateAchievementRequest,
+	CreateAchievementResponse,
+	DeleteAchievementResponse,
+	GetAchievementResponse,
+	UpdateAchievementRequest,
+	UpdateAchievementResponse,
+	UserAchievementsResponse,
+} from './type'
 
 // Функция для получения токена из localStorage
 const getToken = () => {
@@ -30,6 +39,72 @@ export const achievementService = createApi({
 			providesTags: ['Achievement'],
 		}),
 
+		// GET /achievements/:id - Получить одно достижение
+		getAchievement: builder.query<GetAchievementResponse, number | string>({
+			query: id => `/achievements/${id}`,
+			providesTags: (_result, _error, id) => [
+				{ type: 'Achievement', id: String(id) },
+			],
+		}),
+
+		// POST /achievements - Создать достижение
+		createAchievement: builder.mutation<
+			CreateAchievementResponse,
+			CreateAchievementRequest
+		>({
+			query: body => ({
+				url: '/achievements',
+				method: 'POST',
+				body,
+			}),
+			transformResponse: (response: CreateAchievementResponse | { data: CreateAchievementResponse }): CreateAchievementResponse => {
+				// Обрабатываем оба формата ответа: прямой объект или обернутый в data
+				if ('data' in response && response.data) {
+					return response.data
+				}
+				return response as CreateAchievementResponse
+			},
+			invalidatesTags: ['Achievement'],
+		}),
+
+		// PATCH /achievements/:id - Обновить достижение
+		updateAchievement: builder.mutation<
+			UpdateAchievementResponse,
+			{ id: number | string; data: UpdateAchievementRequest }
+		>({
+			query: ({ id, data }) => ({
+				url: `/achievements/${id}`,
+				method: 'PATCH',
+				body: data,
+			}),
+			transformResponse: (response: UpdateAchievementResponse | { data: UpdateAchievementResponse }): UpdateAchievementResponse => {
+				// Обрабатываем оба формата ответа: прямой объект или обернутый в data
+				if ('data' in response && response.data) {
+					return response.data
+				}
+				return response as UpdateAchievementResponse
+			},
+			invalidatesTags: (_result, _error, { id }) => [
+				'Achievement',
+				{ type: 'Achievement', id: String(id) },
+			],
+		}),
+
+		// DELETE /achievements/:id - Удалить достижение
+		deleteAchievement: builder.mutation<
+			DeleteAchievementResponse,
+			number | string
+		>({
+			query: id => ({
+				url: `/achievements/${id}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (_result, _error, id) => [
+				'Achievement',
+				{ type: 'Achievement', id: String(id) },
+			],
+		}),
+
 		// GET /users/:userId/achievements - Получить достижения пользователя
 		getUserAchievements: builder.query<UserAchievementsResponse, string>({
 			query: userId => `/users/${userId}/achievements`,
@@ -43,6 +118,11 @@ export const achievementService = createApi({
 export const {
 	useGetAchievementsQuery,
 	useLazyGetAchievementsQuery,
+	useGetAchievementQuery,
+	useLazyGetAchievementQuery,
+	useCreateAchievementMutation,
+	useUpdateAchievementMutation,
+	useDeleteAchievementMutation,
 	useGetUserAchievementsQuery,
 	useLazyGetUserAchievementsQuery,
 } = achievementService

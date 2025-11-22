@@ -1,17 +1,46 @@
+import { MAX_ORGANIZATIONS_PER_USER, MAX_QUESTS_PER_USER } from '@/constants'
 import { AddOrganizationForm, AddQuestForm } from '@/components/forms'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
-import { useGetOrganizationQuery } from '@/store/entities/organization'
+import { useGetOrganizationQuery, useGetOrganizationsQuery } from '@/store/entities/organization'
+import { useGetQuestsQuery } from '@/store/entities/quest'
 import { useMemo, useState } from 'react'
 
 type FormType = 'quest' | 'organization'
 
 export default function AddOrganizationPage() {
-	const { canCreateQuest, canCreateOrganization, getUserOrganization } =
+	const { canCreateQuest, canCreateOrganization, getUserOrganization, user } =
 		useUser()
 	const [formType, setFormType] = useState<FormType>('organization')
 	const [isRedirecting, setIsRedirecting] = useState(false)
+
+	// Загружаем все квесты для подсчета
+	const { data: questsResponse } = useGetQuestsQuery()
+	
+	// Загружаем все организации для подсчета
+	const { data: organizations = [] } = useGetOrganizationsQuery()
+
+	// Подсчитываем количество созданных квестов пользователем
+	const createdQuestsCount = useMemo(() => {
+		if (!user?.id || !questsResponse?.data?.quests) return 0
+		const userId = Number.parseInt(user.id, 10)
+		return questsResponse.data.quests.filter(quest => quest.ownerId === userId).length
+	}, [questsResponse, user?.id])
+
+	// Подсчитываем количество созданных организаций пользователем
+	const createdOrganizationsCount = useMemo(() => {
+		if (!user?.createdOrganizationId || !organizations.length) return 0
+		// Используем createdOrganizationId для определения созданной организации
+		// Если MAX_ORGANIZATIONS_PER_USER > 1, потребуется изменить структуру User
+		const orgId = typeof user.createdOrganizationId === 'string' 
+			? Number.parseInt(user.createdOrganizationId, 10) 
+			: Number.parseInt(String(user.createdOrganizationId), 10)
+		return organizations.filter(org => {
+			const orgIdNum = typeof org.id === 'string' ? Number.parseInt(org.id, 10) : org.id
+			return orgIdNum === orgId
+		}).length
+	}, [organizations, user?.createdOrganizationId])
 
 	// Получаем ID организации пользователя
 	const userOrgId = getUserOrganization()
@@ -88,8 +117,10 @@ export default function AddOrganizationPage() {
 							}`}
 						>
 							Организация
-							{!canCreateOrg && (
-								<span className='ml-2 text-xs opacity-75'>(создана)</span>
+							{createdOrganizationsCount > 0 && (
+								<span className='ml-2 text-xs opacity-75'>
+									(создано {createdOrganizationsCount}/{MAX_ORGANIZATIONS_PER_USER})
+								</span>
 							)}
 						</button>
 						<button
@@ -102,8 +133,10 @@ export default function AddOrganizationPage() {
 							}`}
 						>
 							Квест
-							{!canCreateQuest() && (
-								<span className='ml-2 text-xs opacity-75'>(создан)</span>
+							{createdQuestsCount > 0 && (
+								<span className='ml-2 text-xs opacity-75'>
+									(создано {createdQuestsCount}/{MAX_QUESTS_PER_USER})
+								</span>
 							)}
 						</button>
 					</div>
@@ -113,17 +146,8 @@ export default function AddOrganizationPage() {
 						{formType === 'organization' ? (
 							<AddOrganizationForm onSuccess={handleSuccess} />
 						) : (
-							<AddQuestForm onSuccess={handleSuccess} />
+							<AddQuestForm onSuccess={handleSuccess} disableEditMode={true} />
 						)}
-					</div>
-
-					{/* Информация об ограничениях */}
-					<div className='mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4'>
-						<p className='text-sm text-blue-800'>
-							<strong>Важно:</strong> Один пользователь может создать только
-							одну организацию и один квест. Это помогает поддерживать качество
-							контента на платформе.
-						</p>
 					</div>
 				</div>
 			</div>

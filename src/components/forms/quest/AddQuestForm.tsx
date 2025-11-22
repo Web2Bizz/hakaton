@@ -3,7 +3,6 @@ import { Form } from '@/components/ui/form'
 import { Spinner } from '@/components/ui/spinner'
 import { useGetCitiesQuery } from '@/store/entities/organization'
 import { useState } from 'react'
-import { DangerZone } from '../shared/DangerZone'
 import { LocationPicker } from '../shared/LocationPicker'
 import { useQuestForm } from './hooks/useQuestForm'
 import { QuestAchievementSection } from './sections/QuestAchievementSection'
@@ -11,25 +10,20 @@ import { QuestBasicInfo } from './sections/QuestBasicInfo'
 import { QuestContactsSection } from './sections/QuestContactsSection'
 import { QuestLocationSection } from './sections/QuestLocationSection'
 import { QuestStagesSection } from './sections/QuestStagesSection'
-import { QuestUpdatesManagement } from './sections/QuestUpdatesManagement'
 
 interface AddQuestFormProps {
 	onSuccess?: (questId: string) => void
+	disableEditMode?: boolean // Отключает режим редактирования
 }
 
 type FormStep = 'basic' | 'stages' | 'updates'
 
-export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
-	const {
-		form,
-		isSubmitting,
-		isEditMode,
-		isLoadingQuest,
-		onSubmit,
-		handleCityChange,
-		handleDelete,
-		questId,
-	} = useQuestForm(onSuccess)
+export function AddQuestForm({
+	onSuccess,
+	disableEditMode = false,
+}: Readonly<AddQuestFormProps>) {
+	const { form, isSubmitting, isLoadingQuest, onSubmit, handleCityChange } =
+		useQuestForm(onSuccess, disableEditMode)
 
 	const [showLocationPicker, setShowLocationPicker] = useState(false)
 	const [currentStep, setCurrentStep] = useState<FormStep>('basic')
@@ -37,7 +31,6 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 	const steps: Array<{ id: FormStep; label: string }> = [
 		{ id: 'basic', label: 'Основная информация' },
 		{ id: 'stages', label: 'Настройка этапов' },
-		...(isEditMode ? [{ id: 'updates' as FormStep, label: 'Обновления' }] : []),
 	]
 
 	const handleLocationSelect = (coordinates: [number, number]) => {
@@ -52,7 +45,8 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 	const longitude = form.watch('longitude')
 	const city = cities.find(c => c.id === cityId)
 
-	if (isLoadingQuest) {
+	// Не показываем загрузку, если режим редактирования отключен
+	if (isLoadingQuest && !disableEditMode) {
 		return (
 			<div className='flex items-center justify-center py-12'>
 				<div className='flex flex-col items-center gap-4'>
@@ -65,16 +59,6 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 
 	return (
 		<>
-			{isEditMode && (
-				<div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6'>
-					<p className='text-sm text-blue-800'>
-						<strong>Режим редактирования:</strong> Вы редактируете свой
-						созданный квест. Изменения будут сохранены при нажатии "Сохранить
-						изменения".
-					</p>
-				</div>
-			)}
-
 			{/* Навигация по вкладкам */}
 			<div className='mb-6'>
 				<div className='flex items-center justify-between border-b border-slate-200'>
@@ -99,83 +83,62 @@ export function AddQuestForm({ onSuccess }: Readonly<AddQuestFormProps>) {
 				</div>
 			</div>
 
-			{/* Вкладка 3: Обновления (только в режиме редактирования) - вне формы */}
-			{currentStep === 'updates' && isEditMode && questId ? (
-				<div className='space-y-6'>
-					<QuestUpdatesManagement questId={questId} />
-				</div>
-			) : (
-				<Form {...form}>
-					<form onSubmit={onSubmit} className='space-y-6'>
-						{/* Вкладка 1: Основная информация */}
-						{currentStep === 'basic' && (
-							<div className='space-y-6'>
-								<QuestBasicInfo onCityChange={handleCityChange} />
+			<Form {...form}>
+				<form onSubmit={onSubmit} className='space-y-6'>
+					{/* Вкладка 1: Основная информация */}
+					{currentStep === 'basic' && (
+						<div className='space-y-6'>
+							<QuestBasicInfo onCityChange={handleCityChange} />
 
-								<QuestLocationSection
-									onOpenMap={() => setShowLocationPicker(true)}
-								/>
-
-								<QuestContactsSection />
-
-								<QuestAchievementSection />
-							</div>
-						)}
-
-						{/* Вкладка 2: Настройка этапов */}
-						{currentStep === 'stages' && (
-							<div className='space-y-6'>
-								<QuestStagesSection />
-							</div>
-						)}
-
-						{/* Общая кнопка сохранения */}
-						<div className='flex justify-end pt-6 border-t border-slate-200 mt-6'>
-							<Button
-								type='submit'
-								disabled={isSubmitting}
-								className='min-w-[200px]'
-							>
-								{isSubmitting ? (
-									<div className='flex items-center gap-2'>
-										<Spinner />
-										<span>{isEditMode ? 'Сохранение...' : 'Создание...'}</span>
-									</div>
-								) : (
-									<span>
-										{isEditMode ? 'Сохранить изменения' : 'Создать квест'}
-									</span>
-								)}
-							</Button>
-						</div>
-
-						{isEditMode && (
-							<div className='mt-6'>
-								<DangerZone
-									title='Опасная зона'
-									description='Удаление квеста необратимо. Все данные будут потеряны.'
-									confirmMessage='Вы уверены, что хотите удалить этот квест?'
-									onDelete={handleDelete}
-									deleteButtonText='Удалить квест'
-								/>
-							</div>
-						)}
-
-						{showLocationPicker && (
-							<LocationPicker
-								city={city?.name || ''}
-								initialCoordinates={
-									latitude && longitude
-										? [parseFloat(latitude), parseFloat(longitude)]
-										: undefined
-								}
-								onSelect={handleLocationSelect}
-								onClose={() => setShowLocationPicker(false)}
+							<QuestLocationSection
+								onOpenMap={() => setShowLocationPicker(true)}
 							/>
-						)}
-					</form>
-				</Form>
-			)}
+
+							<QuestContactsSection />
+
+							<QuestAchievementSection />
+						</div>
+					)}
+
+					{/* Вкладка 2: Настройка этапов */}
+					{currentStep === 'stages' && (
+						<div className='space-y-6'>
+							<QuestStagesSection />
+						</div>
+					)}
+
+					{/* Общая кнопка сохранения */}
+					<div className='flex justify-end pt-6 border-t border-slate-200 mt-6'>
+						<Button
+							type='submit'
+							disabled={isSubmitting}
+							className='min-w-[200px]'
+						>
+							{isSubmitting ? (
+								<div className='flex items-center gap-2'>
+									<Spinner />
+									<span>Создание...</span>
+								</div>
+							) : (
+								<span>Создать квест</span>
+							)}
+						</Button>
+					</div>
+
+					{showLocationPicker && (
+						<LocationPicker
+							city={city?.name || ''}
+							initialCoordinates={
+								latitude && longitude
+									? [parseFloat(latitude), parseFloat(longitude)]
+									: undefined
+							}
+							onSelect={handleLocationSelect}
+							onClose={() => setShowLocationPicker(false)}
+						/>
+					)}
+				</form>
+			</Form>
 		</>
 	)
 }

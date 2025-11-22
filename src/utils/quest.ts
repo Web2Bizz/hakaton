@@ -43,13 +43,16 @@ const ID_TO_CATEGORY_MAP: Record<number, 'environment' | 'animals' | 'people' | 
  * Преобразует данные квеста с сервера в формат для компонентов
  */
 export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
+	// Проверяем наличие steps, если их нет - используем пустой массив
+	const steps = apiQuest.steps || []
+	
 	// Вычисляем общий прогресс на основе шагов
-	const overallProgress = apiQuest.steps.length > 0
-		? Math.round(apiQuest.steps.reduce((sum, step) => sum + step.progress, 0) / apiQuest.steps.length)
+	const overallProgress = steps.length > 0
+		? Math.round(steps.reduce((sum, step) => sum + step.progress, 0) / steps.length)
 		: 0
 
 	// Преобразуем steps в stages
-	const stages: QuestStage[] = apiQuest.steps.map((step, index) => {
+	const stages: QuestStage[] = steps.map((step, index) => {
 		const stage: QuestStage = {
 			id: `step-${apiQuest.id}-${index}`,
 			title: step.title,
@@ -93,14 +96,15 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 		? (ID_TO_CATEGORY_MAP[apiQuest.categories[0].id] || 'other')
 		: 'other'
 
-	// Извлекаем контакты куратора
-	const phoneContact = apiQuest.contacts.find(
+	// Извлекаем контакты куратора (проверяем наличие contacts)
+	const contacts = apiQuest.contacts || []
+	const phoneContact = contacts.find(
 		c => c.name === 'Телефон' || c.name.toLowerCase() === 'телефон'
 	)
-	const emailContact = apiQuest.contacts.find(
+	const emailContact = contacts.find(
 		c => c.name === 'Email' || c.name.toLowerCase() === 'email'
 	)
-	const curatorContact = apiQuest.contacts.find(
+	const curatorContact = contacts.find(
 		c => c.name === 'Куратор' || c.name.toLowerCase() === 'куратор'
 	)
 

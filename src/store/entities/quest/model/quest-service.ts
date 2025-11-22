@@ -117,6 +117,75 @@ export const questService = createApi({
 			],
 		}),
 
+		// GET /quests/user/:userId - Получить квесты пользователя
+		getUserQuests: builder.query<QuestsListResponse, number | string>({
+			query: userId => `/quests/user/${userId}`,
+			transformResponse: (
+				response: any
+			): QuestsListResponse => {
+				// Новый endpoint возвращает массив объектов с полем quest
+				// Структура: [{ id, questId, userId, status, quest: {...}, achievement: {...}, city: {...} }, ...]
+				if (Array.isArray(response)) {
+					// Извлекаем квесты из поля quest каждого элемента
+					const quests: Quest[] = response
+						.map((item: any) => {
+							if (!item.quest) return null
+							
+							const quest: Quest = { ...item.quest }
+							
+							// Объединяем данные из achievement, если они есть и отсутствуют в quest
+							if (item.achievement && !quest.achievement) {
+								quest.achievement = {
+									id: item.achievement.id,
+									title: item.achievement.title,
+									description: item.achievement.description,
+									icon: item.achievement.icon,
+								}
+							}
+							
+							// Объединяем данные из city, если они есть и отсутствуют в quest
+							if (item.city && !quest.city) {
+								quest.city = {
+									id: item.city.id,
+									name: item.city.name,
+								}
+							}
+							
+							return quest
+						})
+						.filter((quest: Quest | null) => quest !== null) as Quest[]
+					
+					return {
+						data: {
+							quests,
+						},
+					}
+				}
+				
+				// Если ответ уже в формате QuestsListResponse
+				if (response.data && Array.isArray(response.data.quests)) {
+					return response
+				}
+				
+				// Если ответ в формате { data: Quest[] }
+				if (response.data && Array.isArray(response.data)) {
+					return {
+						data: {
+							quests: response.data as Quest[],
+						},
+					}
+				}
+				
+				// Возвращаем пустой массив по умолчанию
+				return {
+					data: {
+						quests: [],
+					},
+				}
+			},
+			providesTags: ['QuestList'],
+		}),
+
 		// POST /quests - Создать новый квест
 		createQuest: builder.mutation<CreateQuestResponse, CreateQuestRequest>({
 			query: body => ({
@@ -254,6 +323,8 @@ export const {
 	useLazyGetQuestsQuery,
 	useGetQuestQuery,
 	useLazyGetQuestQuery,
+	useGetUserQuestsQuery,
+	useLazyGetUserQuestsQuery,
 	useCreateQuestMutation,
 	useUpdateQuestMutation,
 	useDeleteQuestMutation,

@@ -54,3 +54,50 @@ export interface UserAchievementsResponse {
 		totalCount: number
 	}
 }
+
+// Типы для создания и обновления достижений
+export interface CreateAchievementRequest {
+	title: string
+	description: string
+	icon: string
+	rarity: AchievementRarity
+}
+
+export interface UpdateAchievementRequest {
+	title?: string
+	description?: string
+	icon?: string
+	rarity?: AchievementRarity
+}
+
+// Ответ при создании достижения
+export interface CreateAchievementResponse {
+	id: number
+	title: string
+	description: string
+	icon: string
+	rarity: AchievementRarity
+}
+
+// Ответ при получении одного достижения
+export interface GetAchievementResponse {
+	id: number
+	title: string
+	description: string
+	icon: string
+	rarity: AchievementRarity
+}
+
+// Ответ при обновлении достижения
+export interface UpdateAchievementResponse {
+	id: number
+	title: string
+	description: string
+	icon: string
+	rarity: AchievementRarity
+}
+
+// Ответ при удалении достижения
+export interface DeleteAchievementResponse {
+	message: string
+}

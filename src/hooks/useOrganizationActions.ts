@@ -1,4 +1,5 @@
 import { UserContext } from '@/contexts/UserContext'
+import { MAX_QUESTS_PER_USER, MAX_ORGANIZATIONS_PER_USER } from '@/constants'
 import { useCallback, useContext } from 'react'
 
 export function useOrganizationActions() {
@@ -49,10 +50,26 @@ export function useOrganizationActions() {
 	)
 
 	const canCreateQuest = useCallback(() => {
+		// Проверяем, не превышен ли лимит на создание квестов
+		// Сейчас используется createdQuestId (один квест), но можно расширить до массива
+		// Если MAX_QUESTS_PER_USER > 1, потребуется изменить структуру User на массив createdQuestIds
+		if (MAX_QUESTS_PER_USER === 1) {
+			return !user?.createdQuestId
+		}
+		// Для поддержки нескольких квестов нужно будет изменить структуру User
+		// и подсчитывать количество созданных квестов
 		return !user?.createdQuestId
 	}, [user])
 
 	const canCreateOrganization = useCallback(() => {
+		// Проверяем, не превышен ли лимит на создание организаций
+		// Сейчас используется createdOrganizationId (одна организация), но можно расширить до массива
+		// Если MAX_ORGANIZATIONS_PER_USER > 1, потребуется изменить структуру User на массив createdOrganizationIds
+		if (MAX_ORGANIZATIONS_PER_USER === 1) {
+			return !user?.createdOrganizationId
+		}
+		// Для поддержки нескольких организаций нужно будет изменить структуру User
+		// и подсчитывать количество созданных организаций
 		return !user?.createdOrganizationId
 	}, [user])
 

@@ -1,4 +1,10 @@
+import { MAX_QUESTS_PER_USER } from '@/constants'
 import { useUser } from '@/hooks/useUser'
+import {
+	useCreateAchievementMutation,
+	useDeleteAchievementMutation,
+	useUpdateAchievementMutation,
+} from '@/store/entities/achievement'
 import {
 	useCreateQuestMutation,
 	useDeleteQuestMutation,
@@ -28,7 +34,10 @@ import {
 	transformFormDataToUpdateRequest,
 } from '../utils/questTransformers'
 
-export function useQuestForm(onSuccess?: (questId: string) => void) {
+export function useQuestForm(
+	onSuccess?: (questId: string) => void,
+	disableEditMode?: boolean
+) {
 	const {
 		user,
 		setUser,
@@ -38,14 +47,14 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 		getUserQuest: getUserQuestId,
 	} = useUser()
 
-	const existingQuestId = getUserQuestId()
+	const existingQuestId = disableEditMode ? null : getUserQuestId()
 
 	const [forceEditMode, setForceEditMode] = useState<boolean | null>(null)
 
 	const { data: questResponse, isLoading: isLoadingQuest } = useGetQuestQuery(
 		existingQuestId || '',
 		{
-			skip: !existingQuestId,
+			skip: !existingQuestId || disableEditMode === true,
 		}
 	)
 
@@ -54,16 +63,22 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 
 	const existingQuest = questResponse || null
 
-	const isEditMode = forceEditMode ?? !!(existingQuestId && existingQuest)
+	const isEditMode = disableEditMode
+		? false
+		: forceEditMode ?? !!(existingQuestId && existingQuest)
 
 	useEffect(() => {
+		if (disableEditMode) {
+			setForceEditMode(false)
+			return
+		}
 		if (forceEditMode === null) {
 			const shouldBeEditMode = !!(existingQuestId && existingQuest)
 			setForceEditMode(shouldBeEditMode)
 		} else if (forceEditMode === false && existingQuest) {
 			setForceEditMode(null)
 		}
-	}, [existingQuest, existingQuestId, forceEditMode])
+	}, [existingQuest, existingQuestId, forceEditMode, disableEditMode])
 
 	const [createQuestMutation, { isLoading: isCreating }] =
 		useCreateQuestMutation()
@@ -74,6 +89,9 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 	const [uploadImagesMutation, { isLoading: isUploadingImages }] =
 		useUploadImagesMutation()
 	const [updateUserMutation] = useUpdateUserMutation()
+	const [createAchievementMutation] = useCreateAchievementMutation()
+	const [updateAchievementMutation] = useUpdateAchievementMutation()
+	const [deleteAchievementMutation] = useDeleteAchievementMutation()
 
 	const form = useForm<QuestFormData>({
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,7 +134,12 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 
 	// Загружаем данные существующего квеста для редактирования
 	useEffect(() => {
-		if (questResponse && !form.formState.isDirty && !isLoadingQuest) {
+		if (
+			!disableEditMode &&
+			questResponse &&
+			!form.formState.isDirty &&
+			!isLoadingQuest
+		) {
 			const formData = transformApiResponseToFormData(questResponse)
 			form.reset(formData as QuestFormData)
 
@@ -148,7 +171,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				})
 			}
 		}
-	}, [questResponse, cities, organizationTypes, form, isLoadingQuest])
+	}, [questResponse, cities, organizationTypes, form, isLoadingQuest, disableEditMode])
 
 	// Синхронизация между контактами и полями куратора
 	useEffect(() => {
@@ -239,8 +262,9 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 
 	const onSubmit = async (data: QuestFormData) => {
 		if (!isEditMode && !canCreateQuest()) {
+			const questWord = MAX_QUESTS_PER_USER === 1 ? 'квест' : 'квестов'
 			toast.error(
-				'Вы уже создали квест. Один пользователь может создать только один квест.'
+				`Вы уже создали максимальное количество квестов. Один пользователь может создать максимум ${MAX_QUESTS_PER_USER} ${questWord}.`
 			)
 			return
 		}
@@ -361,16 +385,76 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				}
 			}
 
-			// Обновляем данные формы с загруженными URL
+			// Обрабатываем achievement
+			let achievementId: number | undefined = data.achievementId || undefined
+			
+			if (data.customAchievement) {
+				// Если есть customAchievement
+				if (data.achievementId) {
+					// Обновляем существующее achievement
+					try {
+						const updateResult = await updateAchievementMutation({
+							id: data.achievementId,
+							data: {
+								title: data.customAchievement.title,
+								description: data.customAchievement.description,
+								icon: data.customAchievement.icon,
+								rarity: 'common', // По умолчанию common для пользовательских достижений
+							},
+						}).unwrap()
+						achievementId = updateResult.id
+						console.log('Achievement updated:', updateResult)
+					} catch (error) {
+						console.error('Error updating achievement:', error)
+						toast.error('Не удалось обновить достижение')
+						return
+					}
+				} else {
+					// Создаем новое achievement
+					try {
+						const createResult = await createAchievementMutation({
+							title: data.customAchievement.title,
+							description: data.customAchievement.description,
+							icon: data.customAchievement.icon,
+							rarity: 'common', // По умолчанию common для пользовательских достижений
+						}).unwrap()
+						console.log('Achievement created:', createResult)
+						// API возвращает объект с полем id
+						achievementId = createResult.id
+						console.log('Achievement ID:', achievementId)
+					} catch (error) {
+						console.error('Error creating achievement:', error)
+						if (import.meta.env.DEV) {
+							console.error('Full error:', error)
+						}
+						toast.error('Не удалось создать достижение')
+						return
+					}
+				}
+			} else if (data.achievementId && !data.customAchievement) {
+				// Если achievementId есть, но customAchievement удалено - удаляем achievement
+				try {
+					await deleteAchievementMutation(data.achievementId).unwrap()
+					achievementId = undefined
+				} catch (error) {
+					console.error('Error deleting achievement:', error)
+					// Не прерываем процесс, просто логируем ошибку
+				}
+			}
+
+			// Обновляем данные формы с загруженными URL и achievementId
 			const updatedData = {
 				...data,
 				storyImage: storyImageUrl,
 				gallery: galleryUrls,
+				achievementId,
 			}
+			
+			console.log('Updated data with achievementId:', updatedData.achievementId)
 
 			if (isEditMode && existingQuestId) {
 				const requestData = transformFormDataToUpdateRequest(updatedData)
-				console.log(requestData)
+				console.log('Update request data:', requestData)
 
 				const result = await updateQuestMutation({
 					id: String(existingQuestId),
@@ -397,6 +481,8 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 				}
 			} else {
 				const requestData = transformFormDataToCreateRequest(updatedData)
+				console.log('Create request data:', requestData)
+				console.log('AchievementId in request:', requestData.achievementId)
 
 				const result = await createQuestMutation(requestData).unwrap()
 
@@ -514,6 +600,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 					},
 				],
 				customAchievement: undefined,
+				achievementId: undefined,
 				curatorName: user?.name || '',
 				curatorPhone: '',
 				curatorEmail: '',

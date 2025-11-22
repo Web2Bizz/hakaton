@@ -19,9 +19,19 @@ export function QuestLocationSection({
 }: QuestLocationSectionProps) {
 	const form = useFormContext<QuestFormData>()
 	const cityId = form.watch('cityId')
+	const latitude = form.watch('latitude')
+	const longitude = form.watch('longitude')
+	
+	// Проверяем ошибки валидации для координат
+	const latitudeError = form.formState.errors.latitude
+	const longitudeError = form.formState.errors.longitude
+	const hasLocationError = !!latitudeError || !!longitudeError
+	
+	// Проверяем, выбрано ли местоположение
+	const hasLocation = latitude && longitude && latitude.trim() !== '' && longitude.trim() !== ''
 
 	return (
-		<div>
+		<div className='space-y-4'>
 			<FormField
 				control={form.control}
 				name='address'
@@ -40,6 +50,11 @@ export function QuestLocationSection({
 									variant='outline'
 									onClick={onOpenMap}
 									disabled={!cityId}
+									className={
+										hasLocationError
+											? 'border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600'
+											: ''
+									}
 								>
 									Найти на карте
 								</Button>
@@ -49,6 +64,24 @@ export function QuestLocationSection({
 					</FormItem>
 				)}
 			/>
+			
+			{/* Отображение ошибки для координат */}
+			{(hasLocationError || (!hasLocation && form.formState.isSubmitted)) && (
+				<div className='text-sm text-red-600 flex items-center gap-2'>
+					<span>⚠️</span>
+					<span>
+						{latitudeError?.message || longitudeError?.message || 'Выберите местоположение на карте'}
+					</span>
+				</div>
+			)}
+			
+			{/* Индикатор выбранного местоположения */}
+			{hasLocation && !hasLocationError && (
+				<div className='text-sm text-green-600 flex items-center gap-2'>
+					<span>✓</span>
+					<span>Местоположение выбрано</span>
+				</div>
+			)}
 		</div>
 	)
 }

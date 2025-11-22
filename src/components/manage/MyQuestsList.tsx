@@ -1,5 +1,5 @@
 import { useUser } from '@/hooks/useUser'
-import { useGetQuestsQuery } from '@/store/entities/quest'
+import { useGetUserQuestsQuery } from '@/store/entities/quest'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,25 +10,20 @@ import { Target, MapPin, TrendingUp, ArrowRight, Map } from 'lucide-react'
 export function MyQuestsList() {
 	const { user } = useUser()
 	const navigate = useNavigate()
-	const { data: questsResponse, isLoading } = useGetQuestsQuery()
+	
+	// Получаем квесты пользователя через новый endpoint
+	const { data: questsResponse, isLoading } = useGetUserQuestsQuery(
+		user?.id || '',
+		{
+			skip: !user?.id, // Пропускаем запрос, если нет userId
+		}
+	)
 
 	// Преобразуем квесты с сервера в формат компонентов
-	const apiQuests = useMemo(() => {
+	const myQuests = useMemo(() => {
 		if (!questsResponse?.data?.quests) return []
 		return transformApiQuestsToComponentQuests(questsResponse.data.quests)
 	}, [questsResponse])
-
-	// Фильтруем только мои квесты (созданные пользователем)
-	const myQuests = useMemo(() => {
-		if (!user?.createdQuestId) return []
-		// Ищем квест по ID из createdQuestId
-		// createdQuestId может быть строкой, а ID квеста - числом
-		return apiQuests.filter(q => {
-			const questId = typeof q.id === 'string' ? Number.parseInt(q.id, 10) : q.id
-			const createdId = Number.parseInt(user.createdQuestId || '', 10)
-			return questId === createdId || q.id === user.createdQuestId
-		})
-	}, [apiQuests, user?.createdQuestId])
 
 	if (isLoading) {
 		return (

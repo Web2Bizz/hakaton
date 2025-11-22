@@ -86,17 +86,6 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 							</button>
 							<button
 								type='button'
-								onClick={() => setActiveSubTab('achievement')}
-								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
-									activeSubTab === 'achievement'
-										? 'border-blue-600 text-blue-600'
-										: 'border-transparent text-slate-600 hover:text-slate-900'
-								}`}
-							>
-								Достижения
-							</button>
-							<button
-								type='button'
 								onClick={() => setActiveSubTab('stages')}
 								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
 									activeSubTab === 'stages'
@@ -105,6 +94,17 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 								}`}
 							>
 								Этапы
+							</button>
+							<button
+								type='button'
+								onClick={() => setActiveSubTab('achievement')}
+								className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+									activeSubTab === 'achievement'
+										? 'border-blue-600 text-blue-600'
+										: 'border-transparent text-slate-600 hover:text-slate-900'
+								}`}
+							>
+								Достижения
 							</button>
 						</div>
 					</div>
@@ -122,15 +122,15 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 						</div>
 					)}
 
-					{activeSubTab === 'achievement' && (
-						<div className='space-y-6'>
-							<QuestAchievementSection />
-						</div>
-					)}
-
 					{activeSubTab === 'stages' && (
 						<div className='space-y-6'>
 							<QuestStagesSection />
+						</div>
+					)}
+
+					{activeSubTab === 'achievement' && (
+						<div className='space-y-6'>
+							<QuestAchievementSection />
 						</div>
 					)}
 

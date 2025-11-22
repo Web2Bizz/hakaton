@@ -67,15 +67,6 @@ export function transformFormDataToCreateRequest(
 		.filter(c => c.value.trim() !== '')
 		.map(c => ({ name: c.name, value: c.value.trim() }))
 
-	// Преобразуем customAchievement в achievement (только если заполнено)
-	const achievement: QuestAchievement | undefined = data.customAchievement
-		? {
-				icon: data.customAchievement.icon,
-				title: data.customAchievement.title,
-				description: data.customAchievement.description,
-		  }
-		: undefined
-
 	// Преобразуем category в categoryIds
 	const categoryId = CATEGORY_TO_ID_MAP[data.category] || 5
 
@@ -118,9 +109,12 @@ export function transformFormDataToCreateRequest(
 		categoryIds: [categoryId],
 	}
 
-	// Добавляем achievement только если customAchievement заполнено
-	if (achievement) {
-		request.achievement = achievement
+	// Добавляем achievementId только если он есть
+	if (data.achievementId !== undefined && data.achievementId !== null) {
+		request.achievementId = data.achievementId
+		console.log('Adding achievementId to create request:', data.achievementId)
+	} else {
+		console.log('No achievementId in data:', data.achievementId)
 	}
 
 	return request
@@ -166,14 +160,6 @@ export function transformFormDataToUpdateRequest(
 		.filter(c => c.value.trim() !== '')
 		.map(c => ({ name: c.name, value: c.value.trim() }))
 
-	const achievement: QuestAchievement | undefined = data.customAchievement
-		? {
-				icon: data.customAchievement.icon,
-				title: data.customAchievement.title,
-				description: data.customAchievement.description,
-		  }
-		: undefined
-
 	const categoryId = CATEGORY_TO_ID_MAP[data.category] || 5
 
 	// Убеждаемся, что latitude и longitude - числа
@@ -211,7 +197,11 @@ export function transformFormDataToUpdateRequest(
 		gallery: data.gallery.length > 0 ? data.gallery : undefined,
 		steps,
 		categoryIds: [categoryId],
-		achievement,
+	}
+
+	// Добавляем achievementId (null для удаления, undefined если не менялось)
+	if (data.achievementId !== undefined) {
+		request.achievementId = data.achievementId || null
 	}
 
 	return request
@@ -296,6 +286,7 @@ export function transformApiResponseToFormData(
 		longitude: quest.longitude.toString(),
 		stages,
 		customAchievement,
+		achievementId: quest.achievementId || undefined, // Сохраняем ID достижения
 		curatorName: curatorContact?.value || '',
 		curatorPhone: phoneContact?.value || '',
 		curatorEmail: emailContact?.value || '',

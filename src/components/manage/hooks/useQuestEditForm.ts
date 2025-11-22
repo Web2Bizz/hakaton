@@ -1,5 +1,10 @@
 import { useUser } from '@/hooks/useUser'
 import {
+	useCreateAchievementMutation,
+	useDeleteAchievementMutation,
+	useUpdateAchievementMutation,
+} from '@/store/entities/achievement'
+import {
 	useDeleteQuestMutation,
 	useGetQuestQuery,
 	useUpdateQuestMutation,
@@ -49,6 +54,9 @@ export function useQuestEditForm(
 	const [uploadImagesMutation, { isLoading: isUploadingImages }] =
 		useUploadImagesMutation()
 	const [updateUserMutation] = useUpdateUserMutation()
+	const [createAchievementMutation] = useCreateAchievementMutation()
+	const [updateAchievementMutation] = useUpdateAchievementMutation()
+	const [deleteAchievementMutation] = useDeleteAchievementMutation()
 
 	const form = useForm<QuestFormData>({
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -330,14 +338,74 @@ export function useQuestEditForm(
 				}
 			}
 
-			// Обновляем данные формы с загруженными URL
+			// Обрабатываем achievement
+			let achievementId: number | undefined = data.achievementId || undefined
+			
+			if (data.customAchievement) {
+				// Если есть customAchievement
+				if (data.achievementId) {
+					// Обновляем существующее achievement
+					try {
+						const updateResult = await updateAchievementMutation({
+							id: data.achievementId,
+							data: {
+								title: data.customAchievement.title,
+								description: data.customAchievement.description,
+								icon: data.customAchievement.icon,
+								rarity: 'common', // По умолчанию common для пользовательских достижений
+							},
+						}).unwrap()
+						achievementId = updateResult.id
+						console.log('Achievement updated:', updateResult)
+					} catch (error) {
+						console.error('Error updating achievement:', error)
+						toast.error('Не удалось обновить достижение')
+						return
+					}
+				} else {
+					// Создаем новое achievement
+					try {
+						const createResult = await createAchievementMutation({
+							title: data.customAchievement.title,
+							description: data.customAchievement.description,
+							icon: data.customAchievement.icon,
+							rarity: 'common', // По умолчанию common для пользовательских достижений
+						}).unwrap()
+						console.log('Achievement created:', createResult)
+						achievementId = createResult.id
+						console.log('Achievement ID:', achievementId)
+					} catch (error) {
+						console.error('Error creating achievement:', error)
+						if (import.meta.env.DEV) {
+							console.error('Full error:', error)
+						}
+						toast.error('Не удалось создать достижение')
+						return
+					}
+				}
+			} else if (data.achievementId && !data.customAchievement) {
+				// Если achievementId есть, но customAchievement удалено - удаляем achievement
+				try {
+					await deleteAchievementMutation(data.achievementId).unwrap()
+					achievementId = undefined
+				} catch (error) {
+					console.error('Error deleting achievement:', error)
+					// Не прерываем процесс, просто логируем ошибку
+				}
+			}
+
+			// Обновляем данные формы с загруженными URL и achievementId
 			const updatedData = {
 				...data,
 				storyImage: storyImageUrl,
 				gallery: galleryUrls,
+				achievementId,
 			}
+			
+			console.log('Updated data with achievementId:', updatedData.achievementId)
 
 			const requestData = transformFormDataToUpdateRequest(updatedData)
+			console.log('Update request data:', requestData)
 
 			const result = await updateQuestMutation({
 				id: String(questId),
@@ -423,6 +491,7 @@ export function useQuestEditForm(
 					},
 				],
 				customAchievement: undefined,
+				achievementId: undefined,
 				curatorName: user?.name || '',
 				curatorPhone: '',
 				curatorEmail: '',

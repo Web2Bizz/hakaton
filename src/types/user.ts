@@ -49,8 +49,8 @@ export interface User {
 	stats: UserStats
 	achievements: Achievement[]
 	participatingQuests: string[] // Quest IDs
-	createdQuestId?: string // ID созданного квеста (один пользователь может создать один квест)
-	createdOrganizationId?: string // ID созданной организации (один пользователь может создать одну организацию)
+	createdQuestId?: string // ID созданного квеста (максимум определяется константой MAX_QUESTS_PER_USER)
+	createdOrganizationId?: string // ID созданной организации (максимум определяется константой MAX_ORGANIZATIONS_PER_USER)
 	createdAt: string
 }
 

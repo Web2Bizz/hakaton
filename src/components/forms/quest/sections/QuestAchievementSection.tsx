@@ -7,19 +7,36 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { useDeleteAchievementMutation } from '@/store/entities/achievement'
 import { Trophy, X } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
+import { toast } from 'sonner'
 import type { QuestFormData } from '../schemas/quest-form.schema'
 
 export function QuestAchievementSection() {
 	const form = useFormContext<QuestFormData>()
+	const [deleteAchievementMutation] = useDeleteAchievementMutation()
 
 	const customAchievement = form.watch('customAchievement')
+	const achievementId = form.watch('achievementId')
 	const hasAchievement = !!customAchievement
 
-	const handleToggle = () => {
+	const handleToggle = async () => {
 		if (hasAchievement) {
+			// Если есть achievementId, удаляем achievement через API
+			if (achievementId) {
+				try {
+					await deleteAchievementMutation(achievementId).unwrap()
+					toast.success('Достижение удалено')
+				} catch (error) {
+					console.error('Error deleting achievement:', error)
+					toast.error('Не удалось удалить достижение')
+					// Продолжаем удаление из формы даже если API вызов не удался
+				}
+			}
+			// Удаляем из формы
 			form.setValue('customAchievement', undefined)
+			form.setValue('achievementId', undefined)
 		} else {
 			form.setValue('customAchievement', {
 				icon: '🏆',
