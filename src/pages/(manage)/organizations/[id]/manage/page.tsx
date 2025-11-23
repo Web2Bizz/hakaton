@@ -1,3 +1,11 @@
+/**
+ * @title Управление организацией
+ * @description Редактируйте информацию о вашей организации, управляйте обновлениями и отслеживайте активность. Изменяйте описание, контакты и другие данные
+ * @keywords управление организацией, редактировать организацию, настройки организации, обновления организации
+ * @changefreq weekly
+ * @priority 0.6
+ */
+
 import { OrganizationEditForm } from '@/components/manage/OrganizationEditForm'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -187,3 +195,4 @@ export default function OrganizationManagePage() {
 		</ProtectedRoute>
 	)
 }
+

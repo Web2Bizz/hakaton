@@ -1,3 +1,11 @@
+/**
+ * @title Профиль пользователя
+ * @description Личный профиль пользователя с достижениями, статистикой участия в квестах, уровнем и опытом. Управляйте своими организациями и квестами
+ * @keywords профиль, пользователь, достижения, статистика, уровень, опыт, мои квесты, мои организации
+ * @changefreq daily
+ * @priority 0.8
+ */
+
 import { ActiveQuests } from '@/components/profile/ActiveQuests'
 import { ProfileAchievements } from '@/components/profile/ProfileAchievements'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'

@@ -1,3 +1,11 @@
+/**
+ * @title Управление квестом
+ * @description Редактируйте информацию о вашем квесте, управляйте этапами, обновлениями и отслеживайте прогресс участников. Полный контроль над вашей инициативой
+ * @keywords управление квестом, редактировать квест, настройки квеста, обновления квеста, этапы квеста
+ * @changefreq weekly
+ * @priority 0.6
+ */
+
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'

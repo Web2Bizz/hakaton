@@ -1,3 +1,11 @@
+/**
+ * @title Добавить организацию или квест
+ * @description Создайте новую волонтерскую организацию или квест на карте. Добавьте информацию о вашей инициативе, чтобы другие могли найти и присоединиться к вам
+ * @keywords добавить организацию, создать квест, добавить точку на карте, новая организация, новый квест, создать организацию
+ * @changefreq weekly
+ * @priority 0.8
+ */
+
 import { AddOrganizationForm, AddQuestForm } from '@/components/forms'
 import { Spinner } from '@/components/ui/spinner'
 import { MAX_ORGANIZATIONS_PER_USER, MAX_QUESTS_PER_USER } from '@/constants'

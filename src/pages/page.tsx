@@ -1,3 +1,11 @@
+/**
+ * @title Главная страница
+ * @description Карта добрых дел атомных городов - единая платформа для волонтеров, организаций и всех, кто хочет делать добрые дела
+ * @keywords атом добро, карта добрых дел, волонтерство, атомные города, квесты, благотворительность, НКО, помощь, добрые дела
+ * @changefreq daily
+ * @priority 1.0
+ */
+
 import { Button } from '@/components/ui/button'
 import '@/styles/atomic-animation.css'
 import {
