@@ -25,10 +25,10 @@ export const uploadService = createApi({
 	}),
 	tagTypes: ['Upload'],
 	endpoints: builder => ({
-		// POST /upload/images - Загрузить изображения
+		// POST /v1/upload/images - Загрузить изображения
 		uploadImages: builder.mutation<UploadImageResponse[], FormData>({
 			query: formData => ({
-				url: '/upload/images',
+				url: '/v1/upload/images',
 				method: 'POST',
 				body: formData,
 			}),

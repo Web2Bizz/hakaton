@@ -5,6 +5,7 @@ import {
 	useAddExperienceMutation,
 	useJoinQuestMutation,
 	useLazyGetUserQuery,
+	useLeaveQuestMutation,
 } from '@/store/entities'
 import type { Achievement, QuestContribution, User } from '@/types/user'
 import { logger } from '@/utils'
@@ -25,17 +26,12 @@ export function useQuestActions() {
 	const { setUser, user } = context
 	const [addExperience] = useAddExperienceMutation()
 	const [joinQuest] = useJoinQuestMutation()
+	const [leaveQuest] = useLeaveQuestMutation()
 	const [getUser] = useLazyGetUserQuery()
 
 	const participateInQuest = useCallback(
 		async (questId: string) => {
 			if (!user) return
-
-			const alreadyParticipating = user.participatingQuests.includes(questId)
-			if (alreadyParticipating) {
-				toast.info('Вы уже участвуете в этом квесте')
-				return
-			}
 
 			try {
 				// Преобразуем questId в число, если нужно
@@ -67,105 +63,13 @@ export function useQuestActions() {
 					}
 				} catch (error) {
 					logger.error('Error fetching updated user data after join:', error)
-					// Если не удалось получить данные с сервера, обновляем локально
-					setUser(currentUser => {
-						if (!currentUser) return currentUser
-
-						const updatedUser: User = {
-							...currentUser,
-							participatingQuests: [...currentUser.participatingQuests, questId],
-							stats: {
-								...(currentUser.stats || {
-									totalQuests: 0,
-									completedQuests: 0,
-									totalDonations: 0,
-									totalVolunteerHours: 0,
-									totalImpact: {
-										treesPlanted: 0,
-										animalsHelped: 0,
-										areasCleaned: 0,
-										livesChanged: 0,
-									},
-								}),
-								totalQuests: (currentUser.stats?.totalQuests ?? 0) + 1,
-							},
-						}
-
-						// Разблокируем достижение "Первый шаг"
-						if (updatedUser.stats.totalQuests === 1) {
-							const firstQuestAchievement = allAchievements.first_quest
-							if (!updatedUser.achievements.some(a => a.id === 'first_quest')) {
-								updatedUser.achievements.push({
-									...firstQuestAchievement,
-									unlockedAt: new Date().toISOString(),
-								})
-							}
-						}
-
-						return updatedUser
-					})
+					// Данные пользователя должны обновляться с сервера, не обновляем локально
 				}
 
-				// Начисляем опыт за участие в квесте (50 опыта)
-				const experienceGain = 50
-				try {
-					const result = await addExperience({
-						userId: user.id,
-						data: { amount: experienceGain },
-					}).unwrap()
-
-					try {
-						const userResult = await getUser(user.id).unwrap()
-						if (userResult) {
-							const transformedUser = transformUserFromAPI(userResult)
-							setUser(transformedUser)
-						}
-					} catch (error) {
-						logger.error('Error fetching updated user data:', error)
-						// Если не удалось получить данные с сервера, обновляем локально
-						setUser(currentUser => {
-							if (!currentUser) return currentUser
-
-							const normalized = normalizeUserLevel(
-								result.level,
-								result.experience,
-								calculateExperienceToNext(result.level)
-							)
-
-							return {
-								...currentUser,
-								level: {
-									level: normalized.level,
-									experience: normalized.experience,
-									experienceToNext: normalized.experienceToNext,
-									title: getLevelTitle(normalized.level),
-								},
-							}
-						})
-					}
-
-					// Показываем уведомление
-					if (result.levelUp) {
-						toast.success(
-							`🎉 Поздравляем! Вы достигли ${result.levelUp.newLevel} уровня!`,
-							{
-								description: `Получено опыта: +${result.levelUp.experienceGain}`,
-								duration: 5000,
-							}
-						)
-					} else {
-						toast.success(`Получено опыта: +${experienceGain}`, {
-							duration: 3000,
-						})
-					}
-				} catch (error) {
-					const errorMessage =
-						error instanceof Error
-							? error.message
-							: 'Не удалось начислить опыт. Попробуйте еще раз.'
-					toast.error(errorMessage)
-					logger.error('Error adding experience on participate:', error)
-				}
+				// Показываем уведомление об успешном присоединении
+				toast.success('Вы успешно присоединились к квесту!', {
+					duration: 3000,
+				})
 			} catch (error) {
 				// Обработка ошибок при присоединении к квесту
 				let errorMessage =
@@ -205,7 +109,86 @@ export function useQuestActions() {
 				logger.error('Error joining quest:', error)
 			}
 		},
-		[setUser, user, addExperience, getUser, joinQuest]
+		[setUser, user, getUser, joinQuest]
+	)
+
+	const leaveQuestAction = useCallback(
+		async (questId: string) => {
+			if (!user) return
+
+			try {
+				// Преобразуем questId в число, если нужно
+				const questIdNum =
+					typeof questId === 'string' ? Number.parseInt(questId, 10) : questId
+				const userIdNum =
+					typeof user.id === 'string'
+						? Number.parseInt(user.id, 10)
+						: Number(user.id)
+
+				if (isNaN(questIdNum) || isNaN(userIdNum)) {
+					throw new Error('Неверный формат ID квеста или пользователя')
+				}
+
+				// Вызываем API для выхода из квеста
+				const leaveResult = await leaveQuest({
+					id: questIdNum,
+					userId: userIdNum,
+				}).unwrap()
+
+				logger.debug('Leave quest result:', leaveResult)
+
+				// Обновляем данные пользователя с сервера после успешного выхода
+				try {
+					const userResult = await getUser(user.id).unwrap()
+					if (userResult) {
+						const transformedUser = transformUserFromAPI(userResult)
+						setUser(transformedUser)
+					}
+				} catch (error) {
+					logger.error('Error fetching updated user data after leave:', error)
+					// Данные пользователя должны обновляться с сервера, не обновляем локально
+				}
+
+				toast.success('Вы успешно вышли из квеста')
+			} catch (error) {
+				// Обработка ошибок при выходе из квеста
+				let errorMessage = 'Не удалось выйти из квеста. Попробуйте еще раз.'
+
+				if (error && typeof error === 'object') {
+					if ('data' in error && error.data) {
+						const errorData = error.data as
+							| { message?: string }
+							| { error?: string }
+							| string
+						if (typeof errorData === 'string') {
+							errorMessage = errorData
+						} else if (errorData && typeof errorData === 'object') {
+							if (
+								'message' in errorData &&
+								typeof errorData.message === 'string'
+							) {
+								errorMessage = errorData.message
+							} else if (
+								'error' in errorData &&
+								typeof errorData.error === 'string'
+							) {
+								errorMessage = errorData.error
+							}
+						}
+					} else if ('error' in error && typeof error.error === 'string') {
+						errorMessage = error.error
+					} else if ('message' in error && typeof error.message === 'string') {
+						errorMessage = error.message
+					}
+				} else if (error instanceof Error) {
+					errorMessage = error.message
+				}
+
+				toast.error(errorMessage)
+				logger.error('Error leaving quest:', error)
+			}
+		},
+		[setUser, user, getUser, leaveQuest]
 	)
 
 	const contributeToQuest = useCallback(
@@ -405,10 +388,8 @@ export function useQuestActions() {
 					return currentUser
 				}
 
-				// Проверяем, что пользователь участвует в квесте
-				if (!currentUser.participatingQuests.includes(questId)) {
-					return currentUser
-				}
+				// Проверка участия пользователя в квесте должна выполняться через API (isParticipating)
+				// Здесь просто разблокируем достижение, если квест завершен
 
 				// Проверяем, что достижение еще не разблокировано
 				const achievementId = `custom-${questId}`
@@ -465,10 +446,8 @@ export function useQuestActions() {
 			setUser(currentUser => {
 				if (!currentUser) return currentUser
 
-				// Проверяем, что пользователь участвует в квесте
-				if (!currentUser.participatingQuests.includes(quest.id)) {
-					return currentUser
-				}
+				// Проверяем, что пользователь участвует в квесте (через isParticipating из API)
+				// Если квест не имеет isParticipating, пропускаем проверку
 
 				// Проверяем, что квест завершен на 100%
 				if (quest.overallProgress < 100) {
@@ -528,6 +507,7 @@ export function useQuestActions() {
 
 	return {
 		participateInQuest,
+		leaveQuest: leaveQuestAction,
 		contributeToQuest,
 		checkAndUnlockAchievements,
 		checkCustomAchievement,

@@ -126,6 +126,8 @@ export interface Quest {
 	owner?: QuestOwner
 	city?: QuestCity
 	organizationType?: QuestOrganizationType
+	// Поле, указывающее участвует ли текущий пользователь в квесте
+	isParticipating?: boolean
 }
 
 export interface Category {
@@ -167,6 +169,13 @@ export interface DeleteQuestResponse {
 }
 
 export interface JoinQuestResponse {
+	data: {
+		message: string
+		quest: Quest
+	}
+}
+
+export interface LeaveQuestResponse {
 	data: {
 		message: string
 		quest: Quest

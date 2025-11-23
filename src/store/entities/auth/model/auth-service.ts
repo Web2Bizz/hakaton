@@ -33,42 +33,42 @@ export const authService = createApi({
 	}),
 	tagTypes: ['Auth', 'User'],
 	endpoints: builder => ({
-		// POST /auth/register - Регистрация нового пользователя
+		// POST /v1/auth/register - Регистрация нового пользователя
 		register: builder.mutation<AuthResponse, RegisterRequest>({
 			query: credentials => ({
-				url: '/auth/register',
+				url: '/v1/auth/register',
 				method: 'POST',
 				body: credentials,
 			}),
 			invalidatesTags: ['Auth'],
 		}),
 
-		// POST /auth/login - Вход в систему
+		// POST /v1/auth/login - Вход в систему
 		login: builder.mutation<AuthResponse, LoginRequest>({
 			query: credentials => ({
-				url: '/auth/login',
+				url: '/v1/auth/login',
 				method: 'POST',
 				body: credentials,
 			}),
 			invalidatesTags: ['Auth'],
 		}),
 
-		// POST /auth/forgot-password - Запрос на восстановление пароля
+		// POST /v1/auth/forgot-password - Запрос на восстановление пароля
 		forgotPassword: builder.mutation<
 			{ message: string },
 			ForgotPasswordRequest
 		>({
 			query: data => ({
-				url: '/auth/forgot-password',
+				url: '/v1/auth/forgot-password',
 				method: 'POST',
 				body: data,
 			}),
 		}),
 
-		// POST /auth/reset-password - Сброс пароля
+		// POST /v1/auth/reset-password - Сброс пароля
 		resetPassword: builder.mutation<{ message: string }, ResetPasswordRequest>({
 			query: data => ({
-				url: '/auth/reset-password',
+				url: '/v1/auth/reset-password',
 				method: 'POST',
 				body: data,
 			}),
@@ -76,19 +76,19 @@ export const authService = createApi({
 
 		// POST /auth/logout - Выход из системы
 
-		// GET /users/:userId - Получить информацию о пользователе
+		// GET /v1/users/:userId - Получить информацию о пользователе
 		getUser: builder.query<UserFullData, string>({
-			query: userId => `/users/${userId}`,
+			query: userId => `/v1/users/${userId}`,
 			providesTags: (_result, _error, userId) => [{ type: 'User', id: userId }],
 		}),
 
-		// PATCH /users/:userId - Обновить информацию о пользователе
+		// PATCH /v1/users/:userId - Обновить информацию о пользователе
 		updateUser: builder.mutation<
 			UserFullData,
 			{ userId: string; data: UpdateUserRequest }
 		>({
 			query: ({ userId, data }) => ({
-				url: `/users/${userId}`,
+				url: `/v1/users/${userId}`,
 				method: 'PATCH',
 				body: data,
 			}),

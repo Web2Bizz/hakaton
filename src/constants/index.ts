@@ -1,8 +1,6 @@
 // Общие константы приложения
 
-export const API_BASE_URL =
-	import.meta.env.VITE_API_BASE_URL ||
-	'https://it-hackathon-team05.mephi.ru/api/v1'
+export const API_BASE_URL = 'https://it-hackathon-team05.mephi.ru/api'
 
 export const DEFAULT_MAP_CENTER: [number, number] = [55.751244, 37.618423]
 export const DEFAULT_MAP_ZOOM = 4

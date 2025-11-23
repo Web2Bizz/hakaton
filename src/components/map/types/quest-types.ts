@@ -116,5 +116,8 @@ export interface Quest {
 	
 	// Участие пользователя (опционально, для авторизованных)
 	userParticipation?: QuestParticipation
+	
+	// Поле, указывающее участвует ли текущий пользователь в квесте
+	isParticipating?: boolean
 }
 

@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useQuestActions } from '@/hooks/useQuestActions'
 import { useUser } from '@/hooks/useUser'
-import { useGetQuestsQuery } from '@/store/entities/quest'
-import { getAllQuests } from '@/utils/userData'
+import { useGetUserQuestsQuery } from '@/store/entities/quest'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
 import { ArrowRight, Clock } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
@@ -14,25 +13,20 @@ export function ActiveQuests() {
 	const { checkQuestCompletion } = useQuestActions()
 	const { addNotification } = useNotifications()
 
-	// Загружаем квесты с сервера
-	const { data: questsResponse } = useGetQuestsQuery()
+	// Загружаем квесты пользователя с сервера
+	const { data: userQuestsResponse } = useGetUserQuestsQuery(user?.id ?? '', {
+		skip: !user?.id,
+	})
 
-	// Преобразуем квесты с сервера в формат компонентов
-	const apiQuests = useMemo(() => {
-		if (!questsResponse?.data?.quests) return []
-		return transformApiQuestsToComponentQuests(questsResponse.data.quests)
-	}, [questsResponse])
-
-	// Получаем все квесты (включая созданные пользователями)
-	const allQuests = useMemo(() => getAllQuests(apiQuests), [apiQuests])
-
-	// Фильтруем квесты, в которых участвует пользователь
+	// Преобразуем квесты пользователя с сервера в формат компонентов
 	// Исключаем архивированные квесты
-	const participatingQuests = allQuests.filter(
-		q =>
-			(user?.participatingQuests.includes(q.id) ?? false) &&
-			q.status !== 'archived'
-	)
+	const participatingQuests = useMemo(() => {
+		if (!userQuestsResponse?.data?.quests) return []
+		const quests = transformApiQuestsToComponentQuests(
+			userQuestsResponse.data.quests
+		)
+		return quests.filter(q => q.status !== 'archived')
+	}, [userQuestsResponse])
 
 	// Проверка завершения квестов и отправка уведомлений
 	useEffect(() => {

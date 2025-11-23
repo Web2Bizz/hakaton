@@ -1,11 +1,10 @@
 import { memo } from 'react'
 import { OrganizationDetails } from './organization/OrganizationDetails'
 import { QuestDetails } from './quest/QuestDetails'
-import type { Quest } from '../types/quest-types'
 import type { Organization } from '../types/types'
 
 interface MapDetailsProps {
-	selectedQuest?: Quest
+	selectedQuestId?: string | number
 	selectedOrganization?: Organization
 	isClosing: boolean
 	onClose: () => void
@@ -13,7 +12,7 @@ interface MapDetailsProps {
 }
 
 export const MapDetails = memo(function MapDetails({
-	selectedQuest,
+	selectedQuestId,
 	selectedOrganization,
 	isClosing,
 	onClose,
@@ -21,9 +20,9 @@ export const MapDetails = memo(function MapDetails({
 }: MapDetailsProps) {
 	return (
 		<>
-			{selectedQuest && (
+			{selectedQuestId && (
 				<QuestDetails
-					quest={selectedQuest}
+					questId={selectedQuestId}
 					onClose={onClose}
 					isClosing={isClosing}
 					onParticipate={onParticipate}

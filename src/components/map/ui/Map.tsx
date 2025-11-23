@@ -18,8 +18,8 @@ export const MapComponent = () => {
 		setSearchCenter,
 		searchZoom,
 		setSearchZoom,
-		selectedQuest,
-		setSelectedQuest,
+		selectedQuestId,
+		setSelectedQuestId,
 		selectedOrganization,
 		setSelectedOrganization,
 		isClosing,
@@ -52,11 +52,12 @@ export const MapComponent = () => {
 	} = useMapHandlers({
 		setSearchCenter,
 		setSearchZoom,
-		selectedQuest,
-		setSelectedQuest,
+		selectedQuestId,
+		setSelectedQuestId,
 		selectedOrganization,
 		setSelectedOrganization,
 		setIsClosing,
+		allQuests,
 	})
 
 	const { handleToggleFilters, handleToggleList } = useMapControls({
@@ -231,7 +232,13 @@ export const MapComponent = () => {
 						? filteredOrganizations
 						: []
 				}
-				activeQuestId={selectedQuest?.id}
+				activeQuestId={
+					selectedQuestId
+						? typeof selectedQuestId === 'string'
+							? selectedQuestId
+							: String(selectedQuestId)
+						: undefined
+				}
 				activeOrgId={
 					selectedOrganization?.id ? String(selectedOrganization.id) : undefined
 				}
@@ -243,7 +250,7 @@ export const MapComponent = () => {
 			/>
 
 			<MapDetails
-				selectedQuest={selectedQuest}
+				selectedQuestId={selectedQuestId}
 				selectedOrganization={selectedOrganization}
 				isClosing={isClosing}
 				onClose={handleCloseDetails}

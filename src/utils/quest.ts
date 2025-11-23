@@ -193,6 +193,7 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 		customAchievement,
 		createdAt: apiQuest.createdAt || new Date().toISOString(),
 		updatedAt: apiQuest.updatedAt || new Date().toISOString(),
+		isParticipating: apiQuest.isParticipating,
 	}
 
 	return componentQuest

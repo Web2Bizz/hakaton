@@ -24,9 +24,9 @@ export const organizationTypeService = createApi({
 	}),
 	tagTypes: ['OrganizationType'],
 	endpoints: builder => ({
-		// GET /organization-types - Получить список типов организаций
+		// GET /v1/organization-types - Получить список типов организаций
 		getOrganizationTypes: builder.query<OrganizationTypeResponse[], void>({
-			query: () => '/organization-types',
+			query: () => '/v1/organization-types',
 		}),
 	}),
 })

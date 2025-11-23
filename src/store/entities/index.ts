@@ -22,6 +22,7 @@ export {
 	useGetQuestsQuery,
 	useGetUserQuestsQuery,
 	useJoinQuestMutation,
+	useLeaveQuestMutation,
 	useLazyGetQuestQuery,
 	useLazyGetQuestsQuery,
 	useLazyGetUserQuestsQuery,

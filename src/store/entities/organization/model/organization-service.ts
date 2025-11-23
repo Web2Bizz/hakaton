@@ -32,40 +32,40 @@ export const organizationService = createApi({
 	}),
 	tagTypes: ['Organization', 'OrganizationList'],
 	endpoints: builder => ({
-		// GET /organizations - Получить список всех организаций
+		// GET /v1/organizations - Получить список всех организаций
 		getOrganizations: builder.query<Organization[], void>({
-			query: () => '/organizations',
+			query: () => '/v1/organizations',
 			providesTags: ['OrganizationList'],
 		}),
 
-		// GET /organizations/:organizationId - Получить детальную информацию об организации
+		// GET /v1/organizations/:organizationId - Получить детальную информацию об организации
 		getOrganization: builder.query<Organization, string>({
-			query: organizationId => `/organizations/${organizationId}`,
+			query: organizationId => `/v1/organizations/${organizationId}`,
 			providesTags: (_result, _error, organizationId) => [
 				{ type: 'Organization', id: organizationId },
 			],
 		}),
 
-		// POST /organizations - Создать новую организацию
+		// POST /v1/organizations - Создать новую организацию
 		createOrganization: builder.mutation<
 			CreateOrganizationResponse,
 			CreateOrganizationRequest
 		>({
 			query: body => ({
-				url: '/organizations',
+				url: '/v1/organizations',
 				method: 'POST',
 				body,
 			}),
 			invalidatesTags: ['OrganizationList'],
 		}),
 
-		// PATCH /organizations/:organizationId - Обновить организацию
+		// PATCH /v1/organizations/:organizationId - Обновить организацию
 		updateOrganization: builder.mutation<
 			UpdateOrganizationResponse,
 			{ organizationId: string; data: UpdateOrganizationRequest }
 		>({
 			query: ({ organizationId, data }) => ({
-				url: `/organizations/${organizationId}`,
+				url: `/v1/organizations/${organizationId}`,
 				method: 'PATCH',
 				body: data,
 			}),
@@ -75,10 +75,10 @@ export const organizationService = createApi({
 			],
 		}),
 
-		// DELETE /organizations/:organizationId - Удалить организацию
+		// DELETE /v1/organizations/:organizationId - Удалить организацию
 		deleteOrganization: builder.mutation<DeleteOrganizationResponse, string>({
 			query: organizationId => ({
-				url: `/organizations/${organizationId}`,
+				url: `/v1/organizations/${organizationId}`,
 				method: 'DELETE',
 			}),
 			invalidatesTags: (_result, _error, organizationId) => [

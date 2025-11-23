@@ -24,9 +24,9 @@ export const cityService = createApi({
 	}),
 	tagTypes: ['City'],
 	endpoints: builder => ({
-		// GET /cities - Получить список городов
+		// GET /v1/cities - Получить список городов
 		getCities: builder.query<CityResponse[], void>({
-			query: () => '/cities',
+			query: () => '/v1/cities',
 		}),
 	}),
 })

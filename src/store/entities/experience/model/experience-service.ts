@@ -24,13 +24,13 @@ export const experienceService = createApi({
 	}),
 	tagTypes: ['Experience', 'User'],
 	endpoints: builder => ({
-		// PATCH /experience/:userId - Начислить опыт пользователю
+		// PATCH /v1/experience/:userId - Начислить опыт пользователю
 		addExperience: builder.mutation<
 			AddExperienceResponse,
 			{ userId: string; data: AddExperienceRequest }
 		>({
 			query: ({ userId, data }) => ({
-				url: `/experience/${userId}`,
+				url: `/v1/experience/${userId}`,
 				method: 'PATCH',
 				body: data,
 			}),

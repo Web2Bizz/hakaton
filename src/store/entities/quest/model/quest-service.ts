@@ -8,6 +8,7 @@ import type {
 	DeleteQuestUpdateResponse,
 	GetQuestsParams,
 	JoinQuestResponse,
+	LeaveQuestResponse,
 	Quest,
 	QuestUpdate,
 	QuestUpdateResponse,
@@ -43,7 +44,7 @@ export const questService = createApi({
 		// GET /quests - Получить список квестов с фильтрацией
 		getQuests: builder.query<QuestsListResponse, GetQuestsParams | void>({
 			query: params => {
-				if (!params) return '/quests'
+				if (!params) return '/v1/quests'
 				const searchParams = new URLSearchParams()
 				if (params.cityId) {
 					searchParams.append('cityId', params.cityId.toString())
@@ -75,7 +76,7 @@ export const questService = createApi({
 					searchParams.append('sort', params.sort)
 				}
 				const queryString = searchParams.toString()
-				return queryString ? `/quests?${queryString}` : '/quests'
+				return queryString ? `/v1/quests?${queryString}` : '/v1/quests'
 			},
 			transformResponse: (
 				response: Quest[] | QuestsListResponse
@@ -110,17 +111,17 @@ export const questService = createApi({
 			providesTags: ['QuestList'],
 		}),
 
-		// GET /quests/:id - Получить детальную информацию о квесте
+		// GET /v2/quests/:id - Получить детальную информацию о квесте
 		getQuest: builder.query<Quest, number | string>({
-			query: id => `/quests/${id}`,
+			query: id => `/v2/quests/${id}`,
 			providesTags: (_result, _error, id) => [
 				{ type: 'Quest', id: String(id) },
 			],
 		}),
 
-		// GET /quests/user/:userId - Получить квесты пользователя
+		// GET /v1/quests/user/:userId - Получить квесты пользователя
 		getUserQuests: builder.query<QuestsListResponse, number | string>({
-			query: userId => `/quests/user/${userId}`,
+			query: userId => `/v1/quests/user/${userId}`,
 			transformResponse: (
 				response: UserQuestItem[] | QuestsListResponse
 			): QuestsListResponse => {
@@ -210,23 +211,23 @@ export const questService = createApi({
 			providesTags: ['QuestList'],
 		}),
 
-		// POST /quests - Создать новый квест
+		// POST /v1/quests - Создать новый квест
 		createQuest: builder.mutation<CreateQuestResponse, CreateQuestRequest>({
 			query: body => ({
-				url: '/quests',
+				url: '/v1/quests',
 				method: 'POST',
 				body,
 			}),
 			invalidatesTags: ['QuestList'],
 		}),
 
-		// PATCH /quests/:id - Обновить квест
+		// PATCH /v1/quests/:id - Обновить квест
 		updateQuest: builder.mutation<
 			UpdateQuestResponse,
 			{ id: number | string; data: UpdateQuestRequest }
 		>({
 			query: ({ id, data }) => ({
-				url: `/quests/${id}`,
+				url: `/v1/quests/${id}`,
 				method: 'PATCH',
 				body: data,
 			}),
@@ -236,10 +237,10 @@ export const questService = createApi({
 			],
 		}),
 
-		// DELETE /quests/:id - Удалить квест
+		// DELETE /v1/quests/:id - Удалить квест
 		deleteQuest: builder.mutation<DeleteQuestResponse, number | string>({
 			query: id => ({
-				url: `/quests/${id}`,
+				url: `/v1/quests/${id}`,
 				method: 'DELETE',
 			}),
 			invalidatesTags: (_result, _error, id) => [
@@ -248,10 +249,10 @@ export const questService = createApi({
 			],
 		}),
 
-		// POST /quests/:id/complete - Завершить квест
+		// POST /v1/quests/:id/complete - Завершить квест
 		completeQuest: builder.mutation<UpdateQuestResponse, number | string>({
 			query: id => ({
-				url: `/quests/${id}/complete`,
+				url: `/v1/quests/${id}/complete`,
 				method: 'POST',
 			}),
 			invalidatesTags: (_result, _error, id) => [
@@ -260,13 +261,13 @@ export const questService = createApi({
 			],
 		}),
 
-		// POST /quests/:id/join/:userId - Присоединиться к квесту
+		// POST /v1/quests/:id/join/:userId - Присоединиться к квесту
 		joinQuest: builder.mutation<
 			JoinQuestResponse,
 			{ id: number | string; userId: number | string }
 		>({
 			query: ({ id, userId }) => ({
-				url: `/quests/${id}/join/${userId}`,
+				url: `/v1/quests/${id}/join/${userId}`,
 				method: 'POST',
 			}),
 			invalidatesTags: (_result, _error, { id }) => [
@@ -275,13 +276,28 @@ export const questService = createApi({
 			],
 		}),
 
-		// POST /api/v1/quest-updates - Создать обновление квеста
+		// POST /v1/quests/:id/leave/:userId - Выйти из квеста
+		leaveQuest: builder.mutation<
+			LeaveQuestResponse,
+			{ id: number | string; userId: number | string }
+		>({
+			query: ({ id, userId }) => ({
+				url: `/v1/quests/${id}/leave/${userId}`,
+				method: 'POST',
+			}),
+			invalidatesTags: (_result, _error, { id }) => [
+				'QuestList',
+				{ type: 'Quest', id: String(id) },
+			],
+		}),
+
+		// POST /v1/quest-updates - Создать обновление квеста
 		createQuestUpdate: builder.mutation<
 			QuestUpdateResponse,
 			CreateQuestUpdateRequest
 		>({
 			query: body => ({
-				url: '/quest-updates',
+				url: '/v1/quest-updates',
 				method: 'POST',
 				body,
 			}),
@@ -291,17 +307,17 @@ export const questService = createApi({
 			],
 		}),
 
-		// GET /api/v1/quest-updates/:id - Получить обновление квеста
+		// GET /v1/quest-updates/:id - Получить обновление квеста
 		getQuestUpdate: builder.query<QuestUpdate, number | string>({
-			query: id => `/quest-updates/${id}`,
+			query: id => `/v1/quest-updates/${id}`,
 			providesTags: (_result, _error, id) => [
 				{ type: 'QuestUpdate', id: String(id) },
 			],
 		}),
 
-		// GET /api/v1/quest-updates?questId=... - Получить все обновления квеста
+		// GET /v1/quest-updates?questId=... - Получить все обновления квеста
 		getQuestUpdates: builder.query<QuestUpdate[], number | string>({
-			query: questId => `/quest-updates?questId=${questId}`,
+			query: questId => `/v1/quest-updates?questId=${questId}`,
 			transformResponse: (
 				response: { data?: QuestUpdate[] } | QuestUpdate[]
 			) => {
@@ -316,13 +332,13 @@ export const questService = createApi({
 			],
 		}),
 
-		// PATCH /api/v1/quest-updates/:id - Обновить обновление квеста
+		// PATCH /v1/quest-updates/:id - Обновить обновление квеста
 		updateQuestUpdate: builder.mutation<
 			QuestUpdateResponse,
 			{ id: number | string; data: UpdateQuestUpdateRequest }
 		>({
 			query: ({ id, data }) => ({
-				url: `/quest-updates/${id}`,
+				url: `/v1/quest-updates/${id}`,
 				method: 'PATCH',
 				body: data,
 			}),
@@ -337,13 +353,13 @@ export const questService = createApi({
 			},
 		}),
 
-		// DELETE /quest-updates/:id - Удалить обновление квеста
+		// DELETE /v1/quest-updates/:id - Удалить обновление квеста
 		deleteQuestUpdate: builder.mutation<
 			DeleteQuestUpdateResponse,
 			number | string
 		>({
 			query: id => ({
-				url: `/quest-updates/${id}`,
+				url: `/v1/quest-updates/${id}`,
 				method: 'DELETE',
 			}),
 			invalidatesTags: (_result, _error, id) => [
@@ -366,6 +382,7 @@ export const {
 	useDeleteQuestMutation,
 	useCompleteQuestMutation,
 	useJoinQuestMutation,
+	useLeaveQuestMutation,
 	useCreateQuestUpdateMutation,
 	useGetQuestUpdateQuery,
 	useLazyGetQuestUpdateQuery,

@@ -24,9 +24,9 @@ export const helpTypeService = createApi({
 	}),
 	tagTypes: ['HelpType'],
 	endpoints: builder => ({
-		// GET /help-types - Получить список видов помощи
+		// GET /v1/help-types - Получить список видов помощи
 		getHelpTypes: builder.query<HelpTypeResponse[], void>({
-			query: () => '/help-types',
+			query: () => '/v1/help-types',
 		}),
 	}),
 })

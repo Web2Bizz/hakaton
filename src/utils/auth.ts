@@ -29,14 +29,14 @@ function getAvatarUrl(
 				return urlValue
 			}
 			// Иначе формируем URL по ID
-			return `${API_BASE_URL}/upload/images/${lastId}`
+			return `${API_BASE_URL}/v1/upload/images/${lastId}`
 		}
 	}
 
 	// Если avatar - это число (ID), формируем URL
 	if (avatar !== undefined && avatar !== null) {
 		if (typeof avatar === 'number') {
-			return `${API_BASE_URL}/upload/images/${avatar}`
+			return `${API_BASE_URL}/v1/upload/images/${avatar}`
 		}
 		// Если avatar - это строка и это число (ID), формируем URL
 		if (typeof avatar === 'string') {
@@ -46,7 +46,7 @@ function getAvatarUrl(
 				if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
 					return avatar
 				}
-				return `${API_BASE_URL}/upload/images/${avatarId}`
+				return `${API_BASE_URL}/v1/upload/images/${avatarId}`
 			}
 			// Если это уже URL, возвращаем как есть
 			if (avatar.startsWith('http://') || avatar.startsWith('https://')) {

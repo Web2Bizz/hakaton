@@ -8,21 +8,23 @@ import type { Organization } from '../../types/types'
 interface UseMapHandlersProps {
 	setSearchCenter: (center: [number, number] | undefined) => void
 	setSearchZoom: (zoom: number | undefined) => void
-	selectedQuest: Quest | undefined
-	setSelectedQuest: (quest: Quest | undefined) => void
+	selectedQuestId: string | number | undefined
+	setSelectedQuestId: (questId: string | number | undefined) => void
 	selectedOrganization: Organization | undefined
 	setSelectedOrganization: (org: Organization | undefined) => void
 	setIsClosing: (closing: boolean) => void
+	allQuests: Quest[]
 }
 
 export function useMapHandlers({
 	setSearchCenter,
 	setSearchZoom,
-	selectedQuest,
-	setSelectedQuest,
+	selectedQuestId,
+	setSelectedQuestId,
 	selectedOrganization,
 	setSelectedOrganization,
 	setIsClosing,
+	allQuests,
 }: UseMapHandlersProps) {
 	const handleAddressSelect = useCallback(
 		(result: GeocodeResult) => {
@@ -34,6 +36,7 @@ export function useMapHandlers({
 
 	const handleSelectQuest = useCallback(
 		(quest: Quest) => {
+			const questId = typeof quest.id === 'string' ? quest.id : quest.id
 			setSearchCenter(quest.coordinates)
 			setSearchZoom(SEARCH_MAP_ZOOM)
 			// Закрываем организацию, если открыта
@@ -41,14 +44,14 @@ export function useMapHandlers({
 				setSelectedOrganization(undefined)
 			}
 			// Если уже открыт другой квест, закрываем панель перед открытием новой
-			if (selectedQuest && selectedQuest.id !== quest.id) {
+			if (selectedQuestId && selectedQuestId !== questId) {
 				setIsClosing(true)
 				setTimeout(() => {
-					setSelectedQuest(quest)
+					setSelectedQuestId(questId)
 					setIsClosing(false)
 				}, ANIMATION_DURATION)
 			} else {
-				setSelectedQuest(quest)
+				setSelectedQuestId(questId)
 				setIsClosing(false)
 			}
 		},
@@ -57,8 +60,8 @@ export function useMapHandlers({
 			setSearchZoom,
 			selectedOrganization,
 			setSelectedOrganization,
-			selectedQuest,
-			setSelectedQuest,
+			selectedQuestId,
+			setSelectedQuestId,
 			setIsClosing,
 		]
 	)
@@ -68,8 +71,8 @@ export function useMapHandlers({
 			setSearchCenter(getOrganizationCoordinates(organization))
 			setSearchZoom(SEARCH_MAP_ZOOM)
 			// Закрываем квест, если открыт
-			if (selectedQuest) {
-				setSelectedQuest(undefined)
+			if (selectedQuestId) {
+				setSelectedQuestId(undefined)
 			}
 			// Если уже открыта другая организация, закрываем панель перед открытием новой
 			if (selectedOrganization && selectedOrganization.id !== organization.id) {
@@ -86,8 +89,8 @@ export function useMapHandlers({
 		[
 			setSearchCenter,
 			setSearchZoom,
-			selectedQuest,
-			setSelectedQuest,
+			selectedQuestId,
+			setSelectedQuestId,
 			selectedOrganization,
 			setSelectedOrganization,
 			setIsClosing,
@@ -99,10 +102,11 @@ export function useMapHandlers({
 			// При клике на маркер закрываем открытую панель
 			if ('story' in item) {
 				// Это квест
-				if (selectedQuest && selectedQuest.id !== item.id) {
+				const questId = typeof item.id === 'string' ? item.id : item.id
+				if (selectedQuestId && selectedQuestId !== questId) {
 					setIsClosing(true)
 					setTimeout(() => {
-						setSelectedQuest(undefined)
+						setSelectedQuestId(undefined)
 						setIsClosing(false)
 					}, ANIMATION_DURATION)
 				}
@@ -118,14 +122,14 @@ export function useMapHandlers({
 						setIsClosing(false)
 					}, ANIMATION_DURATION)
 				}
-				if (selectedQuest) {
-					setSelectedQuest(undefined)
+				if (selectedQuestId) {
+					setSelectedQuestId(undefined)
 				}
 			}
 		},
 		[
-			selectedQuest,
-			setSelectedQuest,
+			selectedQuestId,
+			setSelectedQuestId,
 			selectedOrganization,
 			setSelectedOrganization,
 			setIsClosing,
@@ -135,11 +139,11 @@ export function useMapHandlers({
 	const handleCloseDetails = useCallback(() => {
 		setIsClosing(true)
 		setTimeout(() => {
-			setSelectedQuest(undefined)
+			setSelectedQuestId(undefined)
 			setSelectedOrganization(undefined)
 			setIsClosing(false)
 		}, ANIMATION_DURATION)
-	}, [setSelectedQuest, setSelectedOrganization, setIsClosing])
+	}, [setSelectedQuestId, setSelectedOrganization, setIsClosing])
 
 	return {
 		handleAddressSelect,

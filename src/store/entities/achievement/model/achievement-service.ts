@@ -33,27 +33,27 @@ export const achievementService = createApi({
 	}),
 	tagTypes: ['Achievement', 'UserAchievement'],
 	endpoints: builder => ({
-		// GET /achievements - Получить список всех достижений
+		// GET /v1/achievements - Получить список всех достижений
 		getAchievements: builder.query<AchievementsListResponse, void>({
-			query: () => '/achievements',
+			query: () => '/v1/achievements',
 			providesTags: ['Achievement'],
 		}),
 
-		// GET /achievements/:id - Получить одно достижение
+		// GET /v1/achievements/:id - Получить одно достижение
 		getAchievement: builder.query<GetAchievementResponse, number | string>({
-			query: id => `/achievements/${id}`,
+			query: id => `/v1/achievements/${id}`,
 			providesTags: (_result, _error, id) => [
 				{ type: 'Achievement', id: String(id) },
 			],
 		}),
 
-		// POST /achievements - Создать достижение
+		// POST /v1/achievements - Создать достижение
 		createAchievement: builder.mutation<
 			CreateAchievementResponse,
 			CreateAchievementRequest
 		>({
 			query: body => ({
-				url: '/achievements',
+				url: '/v1/achievements',
 				method: 'POST',
 				body,
 			}),
@@ -67,13 +67,13 @@ export const achievementService = createApi({
 			invalidatesTags: ['Achievement'],
 		}),
 
-		// PATCH /achievements/:id - Обновить достижение
+		// PATCH /v1/achievements/:id - Обновить достижение
 		updateAchievement: builder.mutation<
 			UpdateAchievementResponse,
 			{ id: number | string; data: UpdateAchievementRequest }
 		>({
 			query: ({ id, data }) => ({
-				url: `/achievements/${id}`,
+				url: `/v1/achievements/${id}`,
 				method: 'PATCH',
 				body: data,
 			}),
@@ -90,13 +90,13 @@ export const achievementService = createApi({
 			],
 		}),
 
-		// DELETE /achievements/:id - Удалить достижение
+		// DELETE /v1/achievements/:id - Удалить достижение
 		deleteAchievement: builder.mutation<
 			DeleteAchievementResponse,
 			number | string
 		>({
 			query: id => ({
-				url: `/achievements/${id}`,
+				url: `/v1/achievements/${id}`,
 				method: 'DELETE',
 			}),
 			invalidatesTags: (_result, _error, id) => [
@@ -105,9 +105,9 @@ export const achievementService = createApi({
 			],
 		}),
 
-		// GET /users/:userId/achievements - Получить достижения пользователя
+		// GET /v1/users/:userId/achievements - Получить достижения пользователя
 		getUserAchievements: builder.query<UserAchievementsResponse, string>({
-			query: userId => `/users/${userId}/achievements`,
+			query: userId => `/v1/users/${userId}/achievements`,
 			providesTags: (_result, _error, userId) => [
 				{ type: 'UserAchievement', id: userId },
 			],

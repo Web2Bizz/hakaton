@@ -24,9 +24,9 @@ export const categoryService = createApi({
 	}),
 	tagTypes: ['Category'],
 	endpoints: builder => ({
-		// GET /categories - Получить список категорий квестов
+		// GET /v1/categories - Получить список категорий квестов
 		getCategories: builder.query<CategoryResponse[], void>({
-			query: () => '/categories',
+			query: () => '/v1/categories',
 			transformResponse: (response: unknown): CategoryResponse[] => {
 				// Если ответ - это массив, возвращаем его напрямую
 				if (Array.isArray(response)) {

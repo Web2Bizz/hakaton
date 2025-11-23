@@ -29,7 +29,9 @@ export function useMapState() {
 		[number, number] | undefined
 	>()
 	const [searchZoom, setSearchZoom] = useState<number | undefined>()
-	const [selectedQuest, setSelectedQuest] = useState<Quest | undefined>()
+	const [selectedQuestId, setSelectedQuestId] = useState<
+		string | number | undefined
+	>()
 	const [selectedOrganization, setSelectedOrganization] = useState<
 		Organization | undefined
 	>()
@@ -209,8 +211,8 @@ export function useMapState() {
 		setSearchCenter,
 		searchZoom,
 		setSearchZoom,
-		selectedQuest,
-		setSelectedQuest,
+		selectedQuestId,
+		setSelectedQuestId,
 		selectedOrganization,
 		setSelectedOrganization,
 		isClosing,
