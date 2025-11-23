@@ -59,7 +59,11 @@ export const achievementService = createApi({
 				method: 'POST',
 				body,
 			}),
-			transformResponse: (response: CreateAchievementResponse | { data: CreateAchievementResponse }): CreateAchievementResponse => {
+			transformResponse: (
+				response:
+					| CreateAchievementResponse
+					| { data: CreateAchievementResponse }
+			): CreateAchievementResponse => {
 				// Обрабатываем оба формата ответа: прямой объект или обернутый в data
 				if ('data' in response && response.data) {
 					return response.data
@@ -79,7 +83,11 @@ export const achievementService = createApi({
 				method: 'PATCH',
 				body: data,
 			}),
-			transformResponse: (response: UpdateAchievementResponse | { data: UpdateAchievementResponse }): UpdateAchievementResponse => {
+			transformResponse: (
+				response:
+					| UpdateAchievementResponse
+					| { data: UpdateAchievementResponse }
+			): UpdateAchievementResponse => {
 				// Обрабатываем оба формата ответа: прямой объект или обернутый в data
 				if ('data' in response && response.data) {
 					return response.data
@@ -135,6 +143,51 @@ export const achievementService = createApi({
 			number | string
 		>({
 			query: userId => `/v1/achievements/user/${userId}`,
+			transformResponse: (
+				response:
+					| UserAchievementsByUserIdResponse
+					| { data: UserAchievementsByUserIdResponse }
+					| UserAchievementsByUserIdResponse['data']
+			): UserAchievementsByUserIdResponse => {
+				// Обрабатываем разные форматы ответа API
+				// Если ответ уже в правильном формате
+				if (
+					'data' in response &&
+					response.data &&
+					'achievements' in response.data
+				) {
+					return response as UserAchievementsByUserIdResponse
+				}
+				// Если data - это массив achievements
+				if ('data' in response && Array.isArray(response.data)) {
+					return {
+						data: {
+							achievements: response.data,
+						},
+					}
+				}
+				// Если ответ - это массив achievements напрямую
+				if (Array.isArray(response)) {
+					return {
+						data: {
+							achievements: response,
+						},
+					}
+				}
+				// Если achievements на верхнем уровне
+				if (
+					'achievements' in response &&
+					Array.isArray(response.achievements)
+				) {
+					return {
+						data: {
+							achievements: response.achievements,
+						},
+					}
+				}
+				// Возвращаем как есть, если формат правильный
+				return response as UserAchievementsByUserIdResponse
+			},
 			providesTags: (_result, _error, userId) => [
 				{ type: 'UserAchievement', id: String(userId) },
 			],

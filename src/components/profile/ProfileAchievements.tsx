@@ -1,9 +1,9 @@
+import { Spinner } from '@/components/ui/spinner'
 import { allAchievements } from '@/data/achievements'
 import { useGetUserAchievementsByUserIdQuery } from '@/store/entities'
+import type { UserAchievement } from '@/store/entities/achievement/model/type'
 import { Award } from 'lucide-react'
 import { memo, useMemo } from 'react'
-import { Spinner } from '@/components/ui/spinner'
-import type { UserAchievement } from '@/store/entities/achievement/model/type'
 
 interface ProfileAchievementsProps {
 	userId: string | number
@@ -24,7 +24,9 @@ export const ProfileAchievements = memo(function ProfileAchievements({
 		data: achievementsResponse,
 		isLoading,
 		error,
-	} = useGetUserAchievementsByUserIdQuery(userId)
+	} = useGetUserAchievementsByUserIdQuery(userId, {
+		skip: !userId, // Пропускаем запрос, если userId не указан
+	})
 
 	const userAchievements: UserAchievement[] = useMemo(
 		() => achievementsResponse?.data?.achievements || [],
@@ -43,7 +45,10 @@ export const ProfileAchievements = memo(function ProfileAchievements({
 
 		unlockedAchievements.forEach(achievement => {
 			// Пользовательские достижения имеют ID вида "custom-*" или type === 'custom'
-			if (achievement.id.startsWith('custom-') || achievement.type === 'custom') {
+			if (
+				achievement.id.startsWith('custom-') ||
+				achievement.type === 'custom'
+			) {
 				custom.push(achievement)
 			} else {
 				system.push(achievement)
@@ -72,10 +77,15 @@ export const ProfileAchievements = memo(function ProfileAchievements({
 	}
 
 	if (error) {
+		console.error('Error loading achievements:', error)
+		console.error('UserId:', userId)
 		return (
 			<div className='bg-white rounded-2xl shadow-lg p-8'>
 				<div className='text-center py-12 text-slate-500'>
 					Не удалось загрузить достижения
+					{'status' in error && (
+						<div className='text-xs mt-2'>Ошибка: {String(error.status)}</div>
+					)}
 				</div>
 			</div>
 		)
