@@ -22,7 +22,7 @@ import {
 	Users,
 	X,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { QuestStage } from '../../types/quest-types'
 import { AmbassadorShare } from './AmbassadorShare'
@@ -184,12 +184,22 @@ export function QuestDetails({
 	// Используем поле isParticipating из API
 	const isParticipating = transformedQuest?.isParticipating ?? false
 
+	// Отслеживаем уже обработанные квесты, чтобы не отправлять уведомления повторно
+	const processedQuestRef = useRef<string | null>(null)
+
 	// Проверка завершения квеста и отправка уведомлений
 	useEffect(() => {
 		if (!transformedQuest || !isParticipating) return
 
 		// Проверяем завершение квеста (когда куратор нажал кнопку "Завершить квест")
 		if (transformedQuest.status === 'completed') {
+			const questKey = `quest_completed_${transformedQuest.id}`
+
+			// Пропускаем, если уже обработали этот квест
+			if (processedQuestRef.current === questKey) {
+				return
+			}
+
 			// Проверяем, было ли уже отправлено уведомление о завершении этого квеста
 			// Проверяем существующие уведомления в localStorage
 			const existingNotifications = JSON.parse(
@@ -202,6 +212,8 @@ export function QuestDetails({
 
 			// Уведомление о завершении квеста (отправляем только один раз)
 			if (!hasQuestNotification) {
+				// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
+				processedQuestRef.current = questKey
 				checkQuestCompletion(
 					transformedQuest,
 					// Callback для уведомления о завершении квеста
@@ -259,7 +271,13 @@ export function QuestDetails({
 						}
 					}
 				)
+			} else {
+				// Если уведомление уже существует, тоже помечаем как обработанное
+				processedQuestRef.current = questKey
 			}
+		} else {
+			// Если квест не завершен, сбрасываем флаг обработки
+			processedQuestRef.current = null
 		}
 	}, [transformedQuest, isParticipating, checkQuestCompletion, addNotification])
 
@@ -383,20 +401,20 @@ export function QuestDetails({
 					})
 						.unwrap()
 						.then(() => {
-					// Показываем уведомление о достижении
-					addNotification({
-						type: 'achievement_unlocked',
-						title: '🎉 Достижение разблокировано!',
-						message:
-							'Социальный амбассадор - Поделились квестом в социальных сетях',
-						questId: transformedQuest.id,
-						icon: '🏆',
+							// Показываем уведомление о достижении
+							addNotification({
+								type: 'achievement_unlocked',
+								title: '🎉 Достижение разблокировано!',
+								message:
+									'Социальный амбассадор - Поделились квестом в социальных сетях',
+								questId: transformedQuest.id,
+								icon: '🏆',
 							})
 						})
 						.catch(error => {
 							// Логируем ошибку, но не показываем пользователю, чтобы не мешать UX
 							console.error('Failed to assign achievement:', error)
-					})
+						})
 				}
 
 				checkAndUnlockAchievements()

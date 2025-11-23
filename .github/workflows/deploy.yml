@@ -75,55 +75,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -p "$BUILD_SERVER_SSH_PORT" "$BUILD_SERVER_USER@$BUILD_SERVER_HOST" \
             "echo 'SSH connection to build server successful'; hostname"
 
-      - name: Setup Git SSH key on build server (if provided)
-        if: steps.build_target.outputs.use_remote == 'true'
-        shell: bash
-        env:
-          BUILD_SERVER_HOST: ${{ secrets.BUILD_SERVER_HOST }}
-          BUILD_SERVER_USER: ${{ secrets.BUILD_SERVER_USER }}
-          BUILD_SERVER_SSH_PORT: ${{ secrets.BUILD_SERVER_SSH_PORT || '22' }}
-          BUILD_SERVER_GIT_SSH_KEY: ${{ secrets.BUILD_SERVER_GIT_SSH_KEY }}
-          HAS_GIT_SSH_KEY: ${{ secrets.BUILD_SERVER_GIT_SSH_KEY != '' }}
-        run: |
-          if [ "$HAS_GIT_SSH_KEY" != "true" ]; then
-            echo "ℹ️  BUILD_SERVER_GIT_SSH_KEY not provided, skipping Git SSH setup"
-            exit 0
-          fi
-
-          echo "🔑 Setting up Git SSH key on build server..."
-
-          # Кодируем ключ в base64 для безопасной передачи
-          ENCODED_KEY=$(echo "$BUILD_SERVER_GIT_SSH_KEY" | base64 -w 0)
-
-          ssh -o StrictHostKeyChecking=no -p "$BUILD_SERVER_SSH_PORT" "$BUILD_SERVER_USER@$BUILD_SERVER_HOST" \
-            ENCODED_KEY="$ENCODED_KEY" \
-            'bash -s' <<'REMOTE_SCRIPT'
-          set -euo pipefail
-
-          # Создаём директорию для SSH ключей
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
-          # Декодируем и сохраняем Git SSH ключ
-          echo "$ENCODED_KEY" | base64 -d > ~/.ssh/github_deploy_key
-          chmod 600 ~/.ssh/github_deploy_key
-
-          # Добавляем github.com в known_hosts
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          # Настраиваем Git для использования этого ключа
-          cat > ~/.ssh/config <<'SSHCONFIG'
-          Host github.com
-              HostName github.com
-              User git
-              IdentityFile ~/.ssh/github_deploy_key
-              StrictHostKeyChecking no
-          SSHCONFIG
-          chmod 600 ~/.ssh/config
-
-          echo "✅ Git SSH key configured"
-          REMOTE_SCRIPT
-
       - name: Sync source to build server
         if: steps.build_target.outputs.use_remote == 'true'
         shell: bash
@@ -134,25 +85,24 @@ jobs:
           BUILD_SERVER_SSH_PORT: ${{ secrets.BUILD_SERVER_SSH_PORT || '22' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REF: ${{ github.ref }}
-          USE_GIT_SSH: ${{ secrets.BUILD_SERVER_GIT_SSH_KEY != '' && 'true' || 'false' }}
-          GITHUB_TOKEN: ${{ secrets.BUILD_SERVER_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          BUILD_SERVER_GIT_SSH_KEY: ${{ secrets.BUILD_SERVER_GIT_SSH_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no -p "$BUILD_SERVER_SSH_PORT" "$BUILD_SERVER_USER@$BUILD_SERVER_HOST" \
-            GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
-            GITHUB_SHA="$GITHUB_SHA" \
-            GITHUB_REF="$GITHUB_REF" \
-            BUILD_SERVER_PROJECT_PATH="$BUILD_SERVER_PROJECT_PATH" \
-            USE_GIT_SSH="$USE_GIT_SSH" \
-            'bash -s' <<'REMOTE_SCRIPT'
-          set -euo pipefail
-
-          echo "📦 Syncing repository to build server..."
+          echo "📦 Syncing repository to build server via git SSH..."
           echo "Repository: $GITHUB_REPOSITORY"
           echo "Commit: $GITHUB_SHA"
-          echo "Ref: $GITHUB_REF"
           echo "Path: $BUILD_SERVER_PROJECT_PATH"
-          echo "Use SSH: $USE_GIT_SSH"
+
+          # Кодируем SSH ключ в base64 для безопасной передачи
+          ENCODED_KEY=$(echo "$BUILD_SERVER_GIT_SSH_KEY" | base64 -w 0)
+
+          # Передаём SSH ключ на build server и настраиваем git для использования SSH
+          ssh -o StrictHostKeyChecking=no -p "$BUILD_SERVER_SSH_PORT" "$BUILD_SERVER_USER@$BUILD_SERVER_HOST" \
+            BUILD_SERVER_PROJECT_PATH="$BUILD_SERVER_PROJECT_PATH" \
+            GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            GITHUB_SHA="$GITHUB_SHA" \
+            ENCODED_KEY="$ENCODED_KEY" \
+            'bash -s' <<'REMOTE_SCRIPT'
+          set -euo pipefail
 
           # Проверяем наличие git
           if ! command -v git &> /dev/null; then
@@ -161,14 +111,30 @@ jobs:
             exit 1
           fi
 
-          # Определяем URL репозитория (SSH или HTTPS)
-          if [ "$USE_GIT_SSH" = "true" ]; then
-            REPO_URL="git@github.com:$GITHUB_REPOSITORY.git"
-            echo "🔑 Using SSH for git operations"
-          else
-            REPO_URL="https://github.com/$GITHUB_REPOSITORY.git"
-            echo "🌐 Using HTTPS for git operations"
-          fi
+          # Настраиваем SSH ключ для GitHub
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Декодируем и сохраняем SSH ключ
+          echo "$ENCODED_KEY" | base64 -d > ~/.ssh/github_key
+          chmod 600 ~/.ssh/github_key
+
+          # Добавляем github.com в known_hosts
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+          chmod 600 ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Настраиваем SSH config для использования ключа
+          cat > ~/.ssh/config <<'SSHCONFIG'
+          Host github.com
+              HostName github.com
+              User git
+              IdentityFile ~/.ssh/github_key
+              StrictHostKeyChecking no
+              IdentitiesOnly yes
+          SSHCONFIG
+          chmod 600 ~/.ssh/config
+
+          REPO_URL="git@github.com:$GITHUB_REPOSITORY.git"
 
           # Если директория существует и это git репозиторий
           if [ -d "$BUILD_SERVER_PROJECT_PATH/.git" ]; then
@@ -203,7 +169,7 @@ jobs:
           echo "✅ Repository synced successfully"
           echo "Current commit: $(git rev-parse HEAD)"
           echo "📁 Project directory contents:"
-          ls -la
+          ls -la | head -20
           REMOTE_SCRIPT
 
       - name: Build Docker image on build server

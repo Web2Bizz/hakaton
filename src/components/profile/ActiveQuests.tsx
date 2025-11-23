@@ -5,7 +5,7 @@ import { useUser } from '@/hooks/useUser'
 import { useGetUserQuestsQuery } from '@/store/entities/quest'
 import { transformApiQuestsToComponentQuests } from '@/utils/quest'
 import { ArrowRight, Clock } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 export function ActiveQuests() {
@@ -28,6 +28,9 @@ export function ActiveQuests() {
 		return quests.filter(q => q.status !== 'archived')
 	}, [userQuestsResponse])
 
+	// Отслеживаем уже обработанные квесты, чтобы не отправлять уведомления повторно
+	const processedQuestsRef = useRef<Set<string>>(new Set())
+
 	// Проверка завершения квестов и отправка уведомлений
 	useEffect(() => {
 		if (!user || participatingQuests.length === 0) return
@@ -40,6 +43,13 @@ export function ActiveQuests() {
 		participatingQuests.forEach(quest => {
 			// Проверяем завершение квеста (когда куратор нажал кнопку "Завершить квест")
 			if (quest.status === 'completed') {
+				const questKey = `quest_completed_${quest.id}`
+
+				// Пропускаем, если уже обработали этот квест
+				if (processedQuestsRef.current.has(questKey)) {
+					return
+				}
+
 				// Проверяем, было ли уже отправлено уведомление о завершении этого квеста
 				const hasQuestNotification = existingNotifications.some(
 					n => n.type === 'quest_completed' && n.questId === quest.id
@@ -47,6 +57,8 @@ export function ActiveQuests() {
 
 				// Уведомление о завершении квеста (отправляем только один раз)
 				if (!hasQuestNotification) {
+					// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
+					processedQuestsRef.current.add(questKey)
 					checkQuestCompletion(
 						quest,
 						// Callback для уведомления о завершении квеста
@@ -105,6 +117,9 @@ export function ActiveQuests() {
 							}
 						}
 					)
+				} else {
+					// Если уведомление уже существует, тоже помечаем как обработанное
+					processedQuestsRef.current.add(questKey)
 				}
 			}
 		})
@@ -167,9 +182,6 @@ export function ActiveQuests() {
 												<span className='text-xs font-medium text-blue-600 uppercase tracking-wider'>
 													{quest.city}
 												</span>
-												<span className='text-xs font-medium text-slate-500'>
-													{quest.type}
-												</span>
 											</div>
 											<h3 className='text-base sm:text-lg font-bold text-slate-900 mb-1 line-clamp-2 break-words'>
 												{quest.title}
@@ -189,7 +201,6 @@ export function ActiveQuests() {
 											</p>
 										</div>
 									</div>
-
 									{/* Прогресс */}
 									<div className='mb-3 sm:mb-4'>
 										<div className='flex items-center justify-between mb-1'>
@@ -207,7 +218,6 @@ export function ActiveQuests() {
 											/>
 										</div>
 									</div>
-
 									<Button
 										variant='outline'
 										size='sm'

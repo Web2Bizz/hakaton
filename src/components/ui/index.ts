@@ -1,18 +1,18 @@
 export { Button } from './button'
-export { Input } from './input'
-export { Label } from './label'
-export { Spinner } from './spinner'
-export { Skeleton } from './skeleton'
-export { ImageGallery } from './ImageGallery'
-export { Toaster } from './sonner'
 export {
 	Form,
-	FormItem,
-	FormLabel,
 	FormControl,
 	FormDescription,
-	FormMessage,
 	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 	useFormField,
 } from './form'
-
+export { ImageGallery } from './ImageGallery'
+export { Input } from './input'
+export { Label } from './label'
+export { Select, type SelectOption } from './select'
+export { Skeleton } from './skeleton'
+export { Toaster } from './sonner'
+export { Spinner } from './spinner'

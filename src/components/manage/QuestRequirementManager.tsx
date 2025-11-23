@@ -1,14 +1,26 @@
-import type { QuestStep, QuestStepRequirement } from '@/store/entities/quest/model/type'
+import type {
+	QuestStep,
+	QuestStepRequirement,
+} from '@/store/entities/quest/model/type'
 import { getRequirementType } from '@/utils/quest'
-import { QuestRequirementInput, type RequirementType } from './QuestRequirementInput'
+import {
+	QuestRequirementInput,
+	type RequirementType,
+} from './QuestRequirementInput'
 
 interface QuestRequirementManagerProps {
-	step: QuestStep
-	stepIndex: number
-	requirement: QuestStepRequirement
-	isUpdating: boolean
-	onAddAmount: (stepIndex: number, amount: number) => void
-	onGenerateQRCode?: (stepIndex: number) => void
+	readonly step: QuestStep
+	readonly stepIndex: number
+	readonly requirement: QuestStepRequirement
+	readonly isUpdating: boolean
+	readonly questId: number
+	readonly onAddAmount: (
+		stepIndex: number,
+		amount: number,
+		userId?: string,
+		isAnonymous?: boolean
+	) => void
+	readonly onGenerateQRCode?: (stepIndex: number) => void
 }
 
 export function QuestRequirementManager({
@@ -16,37 +28,52 @@ export function QuestRequirementManager({
 	stepIndex,
 	requirement,
 	isUpdating,
+	questId,
 	onAddAmount,
 	onGenerateQRCode,
 }: QuestRequirementManagerProps) {
-	const requirementType: RequirementType = getRequirementType(requirement.targetValue)
+	const requirementType: RequirementType = getRequirementType(
+		requirement.targetValue
+	)
 
 	return (
-		<div className='border border-slate-200 rounded-lg p-6 bg-white'>
-			<div className='flex items-start justify-between mb-4'>
+		<div className='border-2 border-slate-200 rounded-xl p-6 bg-gradient-to-br from-white to-slate-50/50 shadow-lg hover:shadow-xl transition-all duration-300'>
+			<div className='flex items-start justify-between mb-6'>
 				<div className='flex-1'>
-					<h4 className='font-semibold text-slate-900 mb-1'>{step.title}</h4>
-					<p className='text-sm text-slate-600 mb-3'>{step.description}</p>
-					<div className='flex items-center gap-4 text-sm'>
-						<span className='text-slate-600'>
-							Статус:{' '}
+					<div className='flex items-center gap-3 mb-2'>
+						<div className='p-2 bg-slate-100 rounded-lg'>
+							<span className='text-xl font-bold text-slate-700'>
+								{stepIndex + 1}
+							</span>
+						</div>
+						<div>
+							<h4 className='font-bold text-lg text-slate-900'>{step.title}</h4>
+							<p className='text-sm text-slate-600 mt-1'>{step.description}</p>
+						</div>
+					</div>
+					<div className='flex items-center gap-6 text-sm mt-4'>
+						<div className='flex items-center gap-2'>
+							<span className='text-slate-600'>Статус:</span>
 							<span
-								className={`font-medium ${
+								className={`px-3 py-1 rounded-full font-medium text-xs ${
 									step.status === 'completed'
-										? 'text-green-600'
+										? 'bg-green-100 text-green-700'
 										: step.status === 'in_progress'
-										? 'text-blue-600'
-										: 'text-slate-500'
+										? 'bg-blue-100 text-blue-700'
+										: 'bg-slate-100 text-slate-600'
 								}`}
 							>
 								{step.status === 'completed'
-									? 'Завершен'
+									? '✓ Завершен'
 									: step.status === 'in_progress'
-									? 'В процессе'
-									: 'Ожидает'}
+									? '⟳ В процессе'
+									: '○ Ожидает'}
 							</span>
-						</span>
-						<span className='text-slate-600'>Прогресс: {step.progress}%</span>
+						</div>
+						<div className='flex items-center gap-2'>
+							<span className='text-slate-600'>Прогресс:</span>
+							<span className='font-bold text-slate-900'>{step.progress}%</span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -57,6 +84,7 @@ export function QuestRequirementManager({
 					stepIndex={stepIndex}
 					type={requirementType}
 					isUpdating={isUpdating}
+					questId={questId}
 					onAddAmount={onAddAmount}
 					onGenerateQRCode={onGenerateQRCode}
 				/>
@@ -64,4 +92,3 @@ export function QuestRequirementManager({
 		</div>
 	)
 }
-

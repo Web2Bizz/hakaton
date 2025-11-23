@@ -114,12 +114,29 @@ export function QuestManagement({
 		}
 	}
 
-	const handleAddAmount = (stepIndex: number, amount: number) => {
+	const handleAddAmount = (
+		stepIndex: number,
+		amount: number,
+		userId?: string,
+		isAnonymous?: boolean
+	) => {
 		const step = currentQuest.steps?.[stepIndex]
 		if (!step?.requirement) return
 
 		const newValue = step.requirement.currentValue + amount
+
+		// TODO: Отправить информацию о пользователе и инкогнито на сервер
+		// if (userId) {
+		//   await recordContribution(questId, stepIndex, { userId, amount, isAnonymous })
+		// }
+
 		handleUpdateRequirement(stepIndex, newValue)
+
+		if (userId && !isAnonymous) {
+			toast.success(`Вклад засчитан участнику`)
+		} else if (isAnonymous) {
+			toast.success(`Вклад засчитан (анонимно)`)
+		}
 	}
 
 	const handleComplete = async () => {
@@ -254,13 +271,19 @@ export function QuestManagement({
 
 	return (
 		<div className={`space-y-6 ${isArchived ? 'opacity-75' : ''}`}>
-			<h3
-				className={`text-lg font-semibold mb-4 ${
-					isArchived ? 'text-slate-600' : 'text-slate-900'
-				}`}
-			>
-				Управление требованиями выполнения
-			</h3>
+			<div className='mb-6'>
+				<h3
+					className={`text-2xl font-bold mb-2 ${
+						isArchived ? 'text-slate-600' : 'text-slate-900'
+					}`}
+				>
+					Управление требованиями выполнения
+				</h3>
+				<p className='text-slate-600 text-sm'>
+					Отслеживайте прогресс и управляйте вкладами участников в каждый этап
+					квеста
+				</p>
+			</div>
 
 			{currentQuest.steps?.length > 0 ? (
 				<div className='space-y-6'>
@@ -292,6 +315,7 @@ export function QuestManagement({
 								stepIndex={stepIndex}
 								requirement={step.requirement}
 								isUpdating={isUpdating}
+								questId={questId}
 								onAddAmount={handleAddAmount}
 								onGenerateQRCode={generateQRCode}
 							/>

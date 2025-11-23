@@ -10,6 +10,8 @@ import type {
 	JoinQuestResponse,
 	LeaveQuestResponse,
 	Quest,
+	QuestParticipant,
+	QuestParticipantsResponse,
 	QuestUpdate,
 	QuestUpdateResponse,
 	QuestsListResponse,
@@ -167,6 +169,14 @@ export const questService = createApi({
 								}
 							}
 
+							// Объединяем данные из organizationType, если они есть и отсутствуют в quest
+							if (item.organizationType && !quest.organizationType) {
+								quest.organizationType = {
+									id: item.organizationType.id,
+									name: item.organizationType.name,
+								}
+							}
+
 							return quest
 						})
 						.filter((quest): quest is Quest => quest !== null)
@@ -262,7 +272,6 @@ export const questService = createApi({
 				'QuestList',
 				{ type: 'Quest', id: String(id) },
 				'UserQuest', // Инвалидируем квесты пользователя для обновления статуса
-				'UserAchievement', // Инвалидируем достижения пользователя, так как может быть начислено новое достижение
 			],
 		}),
 
@@ -372,6 +381,32 @@ export const questService = createApi({
 				'QuestUpdate',
 			],
 		}),
+
+		// GET /v1/quests/:id/users - Получить участников квеста
+		getQuestUsers: builder.query<QuestParticipantsResponse, number | string>({
+			query: id => `/v1/quests/${id}/users`,
+			transformResponse: (
+				response: QuestParticipant[] | QuestParticipantsResponse
+			): QuestParticipantsResponse => {
+				// Если ответ - это массив участников напрямую
+				if (Array.isArray(response)) {
+					return {
+						data: response,
+					}
+				}
+				// Если ответ уже в формате { data: [...] }
+				if ('data' in response && Array.isArray(response.data)) {
+					return response
+				}
+				// Возвращаем пустой массив по умолчанию
+				return {
+					data: [],
+				}
+			},
+			providesTags: (_result, _error, id) => [
+				{ type: 'Quest', id: String(id) },
+			],
+		}),
 	}),
 })
 
@@ -395,4 +430,6 @@ export const {
 	useLazyGetQuestUpdatesQuery,
 	useUpdateQuestUpdateMutation,
 	useDeleteQuestUpdateMutation,
+	useGetQuestUsersQuery,
+	useLazyGetQuestUsersQuery,
 } = questService

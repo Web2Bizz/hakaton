@@ -227,4 +227,18 @@ export interface UserQuestItem {
 	quest: Quest
 	achievement?: QuestAchievement | null
 	city?: QuestCity | null
+	organizationType?: QuestOrganizationType | null
+}
+
+// Участник квеста
+export interface QuestParticipant {
+	id: number
+	firstName: string
+	lastName: string
+	middleName?: string | null
+}
+
+// Ответ при получении участников квеста
+export interface QuestParticipantsResponse {
+	data: QuestParticipant[]
 }
