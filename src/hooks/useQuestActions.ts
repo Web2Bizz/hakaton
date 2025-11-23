@@ -1,7 +1,11 @@
 import type { Quest } from '@/components/map/types/quest-types'
 import { UserContext } from '@/contexts/UserContext'
 import { allAchievements } from '@/data/achievements'
-import { useAddExperienceMutation, useLazyGetUserQuery } from '@/store/entities'
+import {
+	useAddExperienceMutation,
+	useJoinQuestMutation,
+	useLazyGetUserQuery,
+} from '@/store/entities'
 import type { Achievement, QuestContribution, User } from '@/types/user'
 import { logger } from '@/utils'
 import { transformUserFromAPI } from '@/utils/auth'
@@ -20,6 +24,7 @@ export function useQuestActions() {
 	}
 	const { setUser, user } = context
 	const [addExperience] = useAddExperienceMutation()
+	const [joinQuest] = useJoinQuestMutation()
 	const [getUser] = useLazyGetUserQuery()
 
 	const participateInQuest = useCallback(
@@ -27,54 +32,33 @@ export function useQuestActions() {
 			if (!user) return
 
 			const alreadyParticipating = user.participatingQuests.includes(questId)
-			if (alreadyParticipating) return
+			if (alreadyParticipating) {
+				toast.info('Вы уже участвуете в этом квесте')
+				return
+			}
 
-			// Обновляем локальное состояние
-			setUser(currentUser => {
-				if (!currentUser) return currentUser
-
-				const updatedUser: User = {
-					...currentUser,
-					participatingQuests: [...currentUser.participatingQuests, questId],
-					stats: {
-						...(currentUser.stats || {
-							totalQuests: 0,
-							completedQuests: 0,
-							totalDonations: 0,
-							totalVolunteerHours: 0,
-							totalImpact: {
-								treesPlanted: 0,
-								animalsHelped: 0,
-								areasCleaned: 0,
-								livesChanged: 0,
-							},
-						}),
-						totalQuests: (currentUser.stats?.totalQuests ?? 0) + 1,
-					},
-				}
-
-				// Разблокируем достижение "Первый шаг"
-				if (updatedUser.stats.totalQuests === 1) {
-					const firstQuestAchievement = allAchievements.first_quest
-					if (!updatedUser.achievements.some(a => a.id === 'first_quest')) {
-						updatedUser.achievements.push({
-							...firstQuestAchievement,
-							unlockedAt: new Date().toISOString(),
-						})
-					}
-				}
-
-				return updatedUser
-			})
-
-			// Начисляем опыт за участие в квесте (50 опыта)
-			const experienceGain = 50
 			try {
-				const result = await addExperience({
-					userId: user.id,
-					data: { amount: experienceGain },
+				// Преобразуем questId в число, если нужно
+				const questIdNum =
+					typeof questId === 'string' ? Number.parseInt(questId, 10) : questId
+				const userIdNum =
+					typeof user.id === 'string'
+						? Number.parseInt(user.id, 10)
+						: Number(user.id)
+
+				if (isNaN(questIdNum) || isNaN(userIdNum)) {
+					throw new Error('Неверный формат ID квеста или пользователя')
+				}
+
+				// Вызываем API для присоединения к квесту
+				const joinResult = await joinQuest({
+					id: questIdNum,
+					userId: userIdNum,
 				}).unwrap()
 
+				logger.debug('Join quest result:', joinResult)
+
+				// Обновляем данные пользователя с сервера после успешного присоединения
 				try {
 					const userResult = await getUser(user.id).unwrap()
 					if (userResult) {
@@ -82,53 +66,146 @@ export function useQuestActions() {
 						setUser(transformedUser)
 					}
 				} catch (error) {
-					logger.error('Error fetching updated user data:', error)
+					logger.error('Error fetching updated user data after join:', error)
 					// Если не удалось получить данные с сервера, обновляем локально
 					setUser(currentUser => {
 						if (!currentUser) return currentUser
 
-						const normalized = normalizeUserLevel(
-							result.level,
-							result.experience,
-							calculateExperienceToNext(result.level)
-						)
-
-						return {
+						const updatedUser: User = {
 							...currentUser,
-							level: {
-								level: normalized.level,
-								experience: normalized.experience,
-								experienceToNext: normalized.experienceToNext,
-								title: getLevelTitle(normalized.level),
+							participatingQuests: [...currentUser.participatingQuests, questId],
+							stats: {
+								...(currentUser.stats || {
+									totalQuests: 0,
+									completedQuests: 0,
+									totalDonations: 0,
+									totalVolunteerHours: 0,
+									totalImpact: {
+										treesPlanted: 0,
+										animalsHelped: 0,
+										areasCleaned: 0,
+										livesChanged: 0,
+									},
+								}),
+								totalQuests: (currentUser.stats?.totalQuests ?? 0) + 1,
 							},
 						}
+
+						// Разблокируем достижение "Первый шаг"
+						if (updatedUser.stats.totalQuests === 1) {
+							const firstQuestAchievement = allAchievements.first_quest
+							if (!updatedUser.achievements.some(a => a.id === 'first_quest')) {
+								updatedUser.achievements.push({
+									...firstQuestAchievement,
+									unlockedAt: new Date().toISOString(),
+								})
+							}
+						}
+
+						return updatedUser
 					})
 				}
 
-				// Показываем уведомление
-				if (result.levelUp) {
-					toast.success(
-						`🎉 Поздравляем! Вы достигли ${result.levelUp.newLevel} уровня!`,
-						{
-							description: `Получено опыта: +${result.levelUp.experienceGain}`,
-							duration: 5000,
+				// Начисляем опыт за участие в квесте (50 опыта)
+				const experienceGain = 50
+				try {
+					const result = await addExperience({
+						userId: user.id,
+						data: { amount: experienceGain },
+					}).unwrap()
+
+					try {
+						const userResult = await getUser(user.id).unwrap()
+						if (userResult) {
+							const transformedUser = transformUserFromAPI(userResult)
+							setUser(transformedUser)
 						}
-					)
-				} else {
-					toast.success(`Получено опыта: +${experienceGain}`, {
-						duration: 3000,
-					})
+					} catch (error) {
+						logger.error('Error fetching updated user data:', error)
+						// Если не удалось получить данные с сервера, обновляем локально
+						setUser(currentUser => {
+							if (!currentUser) return currentUser
+
+							const normalized = normalizeUserLevel(
+								result.level,
+								result.experience,
+								calculateExperienceToNext(result.level)
+							)
+
+							return {
+								...currentUser,
+								level: {
+									level: normalized.level,
+									experience: normalized.experience,
+									experienceToNext: normalized.experienceToNext,
+									title: getLevelTitle(normalized.level),
+								},
+							}
+						})
+					}
+
+					// Показываем уведомление
+					if (result.levelUp) {
+						toast.success(
+							`🎉 Поздравляем! Вы достигли ${result.levelUp.newLevel} уровня!`,
+							{
+								description: `Получено опыта: +${result.levelUp.experienceGain}`,
+								duration: 5000,
+							}
+						)
+					} else {
+						toast.success(`Получено опыта: +${experienceGain}`, {
+							duration: 3000,
+						})
+					}
+				} catch (error) {
+					const errorMessage =
+						error instanceof Error
+							? error.message
+							: 'Не удалось начислить опыт. Попробуйте еще раз.'
+					toast.error(errorMessage)
+					logger.error('Error adding experience on participate:', error)
 				}
 			} catch (error) {
-				const errorMessage =
-					error instanceof Error
-						? error.message
-						: 'Не удалось начислить опыт. Попробуйте еще раз.'
+				// Обработка ошибок при присоединении к квесту
+				let errorMessage =
+					'Не удалось присоединиться к квесту. Попробуйте еще раз.'
+
+				if (error && typeof error === 'object') {
+					if ('data' in error && error.data) {
+						const errorData = error.data as
+							| { message?: string }
+							| { error?: string }
+							| string
+						if (typeof errorData === 'string') {
+							errorMessage = errorData
+						} else if (errorData && typeof errorData === 'object') {
+							if (
+								'message' in errorData &&
+								typeof errorData.message === 'string'
+							) {
+								errorMessage = errorData.message
+							} else if (
+								'error' in errorData &&
+								typeof errorData.error === 'string'
+							) {
+								errorMessage = errorData.error
+							}
+						}
+					} else if ('error' in error && typeof error.error === 'string') {
+						errorMessage = error.error
+					} else if ('message' in error && typeof error.message === 'string') {
+						errorMessage = error.message
+					}
+				} else if (error instanceof Error) {
+					errorMessage = error.message
+				}
+
 				toast.error(errorMessage)
-				logger.error('Error adding experience on participate:', error)
+				logger.error('Error joining quest:', error)
 			}
 		},
-		[setUser, user, addExperience, getUser]
+		[setUser, user, addExperience, getUser, joinQuest]
 	)
 
 	const contributeToQuest = useCallback(
