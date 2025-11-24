@@ -5,7 +5,6 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { w2bViteFileBasedRouting } from 'w2b-vite-filebased-routing/core'
-import { swVersionPlugin } from './src/pwa/swVersionPlugin'
 
 export default defineConfig({
 	plugins: [
@@ -16,7 +15,6 @@ export default defineConfig({
 			enableSEO: true,
 		}),
 		tailwindcss(),
-		swVersionPlugin(), // Плагин для автоматического обновления версии
 		VitePWA({
 			registerType: 'prompt', // Используем prompt вместо autoUpdate, так как у нас кастомный SW
 			workbox: {

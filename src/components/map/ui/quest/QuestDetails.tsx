@@ -263,7 +263,8 @@ export function QuestDetails({
 	}
 
 	const handleVolunteerRegister = (
-		stageId: string,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		_stageId: string,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		_data: { name: string; phone: string; email?: string }
 	) => {
