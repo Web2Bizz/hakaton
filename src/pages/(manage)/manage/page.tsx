@@ -8,6 +8,7 @@
 
 import { MyOrganizationsList } from '@/components/manage/MyOrganizationsList'
 import { MyQuestsList } from '@/components/manage/MyQuestsList'
+import { ManageTourProvider } from '@/components/tour'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
@@ -104,7 +105,7 @@ export default function ManagePage() {
 			<div className='min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 pt-[72px]'>
 				<div className='max-w-7xl mx-auto pt-8'>
 					{/* Header с иконкой */}
-					<div className='mb-8'>
+					<div className='manage-header-container mb-8'>
 						<div className='flex items-center gap-4 mb-4'>
 							<div className='w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30'>
 								<Settings className='h-7 w-7 text-white' />
@@ -118,10 +119,11 @@ export default function ManagePage() {
 								</p>
 							</div>
 						</div>
+					</div>
 
-						{/* Статистика (только для квестов) */}
-						{activeTab === 'quests' && (
-							<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-6'>
+					{/* Статистика (только для квестов) */}
+					{activeTab === 'quests' && (
+						<div className='manage-quests-stats-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8'>
 								<div className='bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-4 shadow-sm'>
 									<div className='flex items-center justify-between'>
 										<div>
@@ -180,12 +182,11 @@ export default function ManagePage() {
 								</div>
 							</div>
 						)}
-					</div>
 
 					{/* Вкладки с улучшенным дизайном */}
 					<div className='bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-slate-200/50 overflow-hidden mb-6'>
 						{/* Заголовок вкладок */}
-						<div className='bg-gradient-to-r from-slate-50 to-blue-50/30 border-b border-slate-200/50 px-6 py-4'>
+						<div className='manage-tabs-container bg-gradient-to-r from-slate-50 to-blue-50/30 border-b border-slate-200/50 px-6 py-4'>
 							<div className='flex items-center justify-between'>
 								<div className='flex gap-2'>
 									<button
@@ -236,15 +237,17 @@ export default function ManagePage() {
 									</button>
 								</div>
 								{activeTab === 'quests' && (
-									<button
-										type='button'
-										onClick={() => navigate('/add-organization?type=quest')}
-										className='flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl hover:from-orange-600 hover:to-amber-700 shadow-md shadow-orange-500/30 transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/40'
-									>
-										<Plus className='h-4 w-4' />
-										<span className='hidden sm:inline'>Создать квест</span>
-										<span className='sm:hidden'>Создать</span>
-									</button>
+									<div className='manage-create-button-container'>
+										<button
+											type='button'
+											onClick={() => navigate('/add-organization?type=quest')}
+											className='flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl hover:from-orange-600 hover:to-amber-700 shadow-md shadow-orange-500/30 transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/40'
+										>
+											<Plus className='h-4 w-4' />
+											<span className='hidden sm:inline'>Создать квест</span>
+											<span className='sm:hidden'>Создать</span>
+										</button>
+									</div>
 								)}
 							</div>
 						</div>
@@ -257,6 +260,7 @@ export default function ManagePage() {
 					</div>
 				</div>
 			</div>
+			<ManageTourProvider />
 		</ProtectedRoute>
 	)
 }
