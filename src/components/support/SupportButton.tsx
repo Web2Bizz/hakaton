@@ -1,8 +1,10 @@
+import { useAuth } from '@/hooks/useAuth'
 import { MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { SupportChat } from './SupportChat'
 
 export function SupportButton() {
+	const { isAuthenticated } = useAuth()
 	const [isOpen, setIsOpen] = useState(false)
 	const [isClosing, setIsClosing] = useState(false)
 
@@ -18,6 +20,11 @@ export function SupportButton() {
 			setIsOpen(false)
 			setIsClosing(false)
 		}, 300)
+	}
+
+	// Показываем кнопку только авторизованным пользователям
+	if (!isAuthenticated) {
+		return null
 	}
 
 	return (
