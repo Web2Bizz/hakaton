@@ -70,11 +70,47 @@ export function useTour({ pageKey, showDelay = 1000 }: UseTourOptions) {
 	const handleTourComplete = useCallback(() => {
 		setTourStatus(pageKey, 'completed')
 		setRunTour(false)
+		// Восстанавливаем скролл с небольшой задержкой, чтобы Joyride успел завершиться
+		setTimeout(() => {
+			// Принудительно удаляем overflow и padding-right
+			document.body.style.removeProperty('overflow')
+			document.body.style.removeProperty('padding-right')
+			// Явно устанавливаем auto для гарантии
+			document.body.style.overflow = 'auto'
+			// Также проверяем html элемент
+			document.documentElement.style.removeProperty('overflow')
+			document.documentElement.style.overflow = 'auto'
+			// Удаляем overlay от Joyride, если он остался
+			const overlays = document.querySelectorAll(
+				'[data-joyride-overlay], .react-joyride__overlay'
+			)
+			for (const overlay of overlays) {
+				overlay.remove()
+			}
+		}, 150)
 	}, [pageKey])
 
 	const handleTourSkip = useCallback(() => {
 		setTourStatus(pageKey, 'completed')
 		setRunTour(false)
+		// Восстанавливаем скролл с небольшой задержкой, чтобы Joyride успел завершиться
+		setTimeout(() => {
+			// Принудительно удаляем overflow и padding-right
+			document.body.style.removeProperty('overflow')
+			document.body.style.removeProperty('padding-right')
+			// Явно устанавливаем auto для гарантии
+			document.body.style.overflow = 'auto'
+			// Также проверяем html элемент
+			document.documentElement.style.removeProperty('overflow')
+			document.documentElement.style.overflow = 'auto'
+			// Удаляем overlay от Joyride, если он остался
+			const overlays = document.querySelectorAll(
+				'[data-joyride-overlay], .react-joyride__overlay'
+			)
+			for (const overlay of overlays) {
+				overlay.remove()
+			}
+		}, 150)
 	}, [pageKey])
 
 	return {

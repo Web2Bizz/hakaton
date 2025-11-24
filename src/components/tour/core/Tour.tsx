@@ -1,9 +1,4 @@
-import Joyride, {
-	ACTIONS,
-	EVENTS,
-	type CallBackProps,
-	type Step,
-} from 'react-joyride'
+import Joyride, { ACTIONS, type CallBackProps, type Step } from 'react-joyride'
 
 interface TourProps {
 	readonly steps: Step[]
@@ -35,7 +30,7 @@ export function Tour({
 	styles,
 }: TourProps) {
 	const handleJoyrideCallback = (data: CallBackProps) => {
-		const { action, status, type } = data
+		const { action, status } = data
 
 		if (
 			// Если тур завершен или пропущен
@@ -47,8 +42,6 @@ export function Tour({
 			} else {
 				onComplete()
 			}
-		} else if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
-			// Если шаг завершен или цель не найдена, продолжаем
 		}
 	}
 
@@ -75,7 +68,7 @@ export function Tour({
 			transition: 'none', // Отключаем переходы, чтобы избежать мерцания
 		},
 		tooltipContainer: {
-			textAlign: 'left',
+			textAlign: 'left' as const,
 		},
 		tooltipTitle: {
 			fontSize: '18px',
@@ -129,7 +122,19 @@ export function Tour({
 			callback={handleJoyrideCallback}
 			styles={styles || defaultStyles}
 			locale={locale}
+			scrollOffset={100}
+			floaterProps={{
+				disableAnimation: true,
+				options: {
+					preventOverflow: {
+						boundariesElement: 'viewport',
+						padding: 20,
+					},
+					flip: {
+						behavior: ['top', 'bottom', 'left', 'right'],
+					},
+				},
+			}}
 		/>
 	)
 }
-

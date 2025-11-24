@@ -7,11 +7,12 @@
  */
 
 import { ActiveQuests } from '@/components/profile/ActiveQuests'
+import { MyOrganizations } from '@/components/profile/MyOrganizations'
+import { MyQuests } from '@/components/profile/MyQuests'
 import { ProfileAchievements } from '@/components/profile/ProfileAchievements'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileLevelProgress } from '@/components/profile/ProfileLevelProgress'
-import { MyQuests } from '@/components/profile/MyQuests'
-import { MyOrganizations } from '@/components/profile/MyOrganizations'
+import { ProfileTourProvider } from '@/components/tour'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import { ProtectedRoute } from '@/provider/ProtectedRoute'
@@ -52,9 +53,11 @@ export default function ProfilePage() {
 		<ProtectedRoute>
 			<div className='min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-6 sm:py-12 px-4 mt-16'>
 				<div className='max-w-4xl mx-auto space-y-4 sm:space-y-8'>
-					<ProfileHeader user={user} onLogout={handleLogout} />
+					<div className='profile-header-container'>
+						<ProfileHeader user={user} onLogout={handleLogout} />
+					</div>
 
-					<div className='bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8'>
+					<div className='profile-level-container bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8'>
 						<ProfileLevelProgress
 							level={user.level.level}
 							experience={user.level.experience}
@@ -62,15 +65,18 @@ export default function ProfilePage() {
 						/>
 					</div>
 
-					<ProfileAchievements userId={user.id} />
+					<div className='profile-achievements-container'>
+						<ProfileAchievements userId={user.id} />
+					</div>
 
-					<MyQuests />
-
-					<MyOrganizations />
-
-					<ActiveQuests />
+					<div className='profile-quests-container'>
+						<MyQuests />
+						<MyOrganizations />
+						<ActiveQuests />
+					</div>
 				</div>
 			</div>
+			<ProfileTourProvider />
 		</ProtectedRoute>
 	)
 }
