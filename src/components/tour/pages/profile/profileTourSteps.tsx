@@ -6,7 +6,7 @@ export const profileTourSteps: Step[] = [
 		content: (
 			<div>
 				<div className='text-xs text-slate-500 mb-2 font-medium'>
-					Шаг 1 из 5
+					Шаг 1 из 7
 				</div>
 				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
 					👤 Ваш профиль
@@ -38,7 +38,7 @@ export const profileTourSteps: Step[] = [
 		content: (
 			<div>
 				<div className='text-xs text-slate-500 mb-2 font-medium'>
-					Шаг 2 из 5
+					Шаг 2 из 7
 				</div>
 				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
 					📊 Прогресс уровня
@@ -61,7 +61,7 @@ export const profileTourSteps: Step[] = [
 		content: (
 			<div>
 				<div className='text-xs text-slate-500 mb-2 font-medium'>
-					Шаг 3 из 5
+					Шаг 3 из 7
 				</div>
 				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
 					🏆 Достижения
@@ -84,28 +84,68 @@ export const profileTourSteps: Step[] = [
 		disableBeacon: true,
 	},
 	{
-		target: '.profile-quests-container',
+		target: '.profile-my-quests-container',
 		content: (
 			<div>
 				<div className='text-xs text-slate-500 mb-2 font-medium'>
-					Шаг 4 из 5
+					Шаг 4 из 7
 				</div>
 				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
-					🎯 Мои квесты и организации
+					🎯 Мои квесты
 				</h3>
 				<p className='text-slate-700 mb-2'>
-					Управляйте своими активностями:
+					Здесь отображаются квесты, которые вы создали:
 				</p>
 				<ul className='text-sm text-slate-600 space-y-1 list-disc list-inside'>
-					<li>
-						<strong>Мои квесты</strong> - квесты, которые вы создали
-					</li>
-					<li>
-						<strong>Мои организации</strong> - организации, которыми вы управляете
-					</li>
-					<li>
-						<strong>Активные квесты</strong> - квесты, в которых вы участвуете
-					</li>
+					<li>Просматривайте все ваши созданные квесты</li>
+					<li>Отслеживайте их статус и прогресс</li>
+					<li>Управляйте своими квестами</li>
+				</ul>
+			</div>
+		),
+		placement: 'top',
+		disableBeacon: true,
+	},
+	{
+		target: '.profile-my-organizations-container',
+		content: (
+			<div>
+				<div className='text-xs text-slate-500 mb-2 font-medium'>
+					Шаг 5 из 7
+				</div>
+				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
+					🏢 Мои организации
+				</h3>
+				<p className='text-slate-700 mb-2'>
+					Организации, которыми вы управляете:
+				</p>
+				<ul className='text-sm text-slate-600 space-y-1 list-disc list-inside'>
+					<li>Просматривайте все ваши организации</li>
+					<li>Управляйте их настройками и информацией</li>
+					<li>Создавайте новые организации</li>
+				</ul>
+			</div>
+		),
+		placement: 'top',
+		disableBeacon: true,
+	},
+	{
+		target: '.profile-active-quests-container',
+		content: (
+			<div>
+				<div className='text-xs text-slate-500 mb-2 font-medium'>
+					Шаг 6 из 7
+				</div>
+				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
+					⚡ Активные квесты
+				</h3>
+				<p className='text-slate-700 mb-2'>
+					Квесты, в которых вы участвуете:
+				</p>
+				<ul className='text-sm text-slate-600 space-y-1 list-disc list-inside'>
+					<li>Отслеживайте прогресс выполнения квестов</li>
+					<li>Просматривайте активные задания</li>
+					<li>Завершайте квесты и получайте награды</li>
 				</ul>
 			</div>
 		),
@@ -117,7 +157,7 @@ export const profileTourSteps: Step[] = [
 		content: (
 			<div>
 				<div className='text-xs text-slate-500 mb-2 font-medium'>
-					Шаг 5 из 5
+					Шаг 7 из 7
 				</div>
 				<h3 className='text-lg font-semibold text-slate-900 mb-2'>
 					✅ Готово!

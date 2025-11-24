@@ -69,9 +69,15 @@ export default function ProfilePage() {
 						<ProfileAchievements userId={user.id} />
 					</div>
 
-					<div className='profile-quests-container'>
+					<div className='profile-my-quests-container'>
 						<MyQuests />
+					</div>
+
+					<div className='profile-my-organizations-container'>
 						<MyOrganizations />
+					</div>
+
+					<div className='profile-active-quests-container'>
 						<ActiveQuests />
 					</div>
 				</div>
