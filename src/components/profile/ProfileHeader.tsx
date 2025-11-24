@@ -40,7 +40,51 @@ export const ProfileHeader = memo(function ProfileHeader({
 	// Сбрасываем состояние загрузки при изменении аватара
 	useEffect(() => {
 		if (user.avatar) {
-			setIsAvatarLoading(true)
+			// Проверяем, загружено ли изображение уже в кеше
+			const img = new Image()
+			let isMounted = true
+
+			const handleLoad = () => {
+				if (isMounted) {
+					setIsAvatarLoading(false)
+					setHasAvatarError(false)
+				}
+			}
+
+			const handleError = () => {
+				if (isMounted) {
+					setIsAvatarLoading(false)
+					setHasAvatarError(true)
+				}
+			}
+
+			img.onload = handleLoad
+			img.onerror = handleError
+			img.src = user.avatar
+
+			if (img.complete) {
+				// Изображение уже загружено в кеше
+				// Используем setTimeout, чтобы избежать проблем с синхронным обновлением состояния
+				setTimeout(() => {
+					if (isMounted) {
+						setIsAvatarLoading(false)
+						setHasAvatarError(false)
+					}
+				}, 0)
+			} else {
+				// Изображение нужно загрузить
+				setIsAvatarLoading(true)
+				setHasAvatarError(false)
+			}
+
+			return () => {
+				isMounted = false
+				img.onload = null
+				img.onerror = null
+			}
+		} else {
+			// Если аватара нет, сбрасываем состояние загрузки
+			setIsAvatarLoading(false)
 			setHasAvatarError(false)
 		}
 	}, [user.avatar])
@@ -151,7 +195,8 @@ export const ProfileHeader = memo(function ProfileHeader({
 					.filter((size): size is number => size !== null)
 
 				// Используем максимальный размер + 1, или 4 если нет существующих
-				const nextSize = existingSizes.length > 0 ? Math.max(...existingSizes) + 1 : 4
+				const nextSize =
+					existingSizes.length > 0 ? Math.max(...existingSizes) + 1 : 4
 
 				// Создаем новый объект avatarUrls с новым изображением
 				// Формат ключей: "size_4", "size_5" и т.д.
