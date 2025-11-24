@@ -1,4 +1,3 @@
-import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/useUser'
 import { usePWAInstall } from '@/pwa/usePWAInstall'
@@ -93,9 +92,7 @@ export const Header = () => {
 									Установить
 								</Button>
 							)}
-							{user ? (
-								<NotificationBell />
-							) : (
+							{!user && (
 								<Button asChild variant='outline' size='sm'>
 									<Link to='/login'>Войти</Link>
 								</Button>
@@ -103,9 +100,8 @@ export const Header = () => {
 						</div>
 					</div>
 
-					{/* Мобильная кнопка меню и уведомления */}
+					{/* Мобильная кнопка меню */}
 					<div className='flex lg:hidden items-center gap-2'>
-						{user && <NotificationBell />}
 						<button
 							type='button'
 							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

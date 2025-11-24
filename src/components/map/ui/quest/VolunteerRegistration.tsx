@@ -4,7 +4,6 @@ import type { QuestStage } from '../../types/quest-types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useUser } from '@/hooks/useUser'
-import { useNotifications } from '@/hooks/useNotifications'
 import { formatDate } from '@/utils/format'
 
 interface VolunteerRegistrationProps {
@@ -21,7 +20,6 @@ export function VolunteerRegistration({
 	onClose,
 }: VolunteerRegistrationProps) {
 	const { user } = useUser()
-	const { addNotification } = useNotifications()
 	const [formData, setFormData] = useState({
 		name: user?.name || '',
 		phone: '',
@@ -39,13 +37,6 @@ export function VolunteerRegistration({
 		e.preventDefault()
 		if (formData.name && formData.phone) {
 			onRegister(stage.id, formData)
-			addNotification({
-				type: 'volunteer_registered',
-				title: 'Вы зарегистрированы!',
-				message: `Вы успешно зарегистрировались на событие "${stage.title}" в квесте "${questTitle}"`,
-				questId: '',
-				icon: '👷',
-			})
 			onClose()
 		}
 	}

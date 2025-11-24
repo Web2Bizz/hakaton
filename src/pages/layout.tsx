@@ -1,6 +1,5 @@
 import { Header, SupportButton } from '@/components'
 import { Toaster } from '@/components/ui/sonner'
-import { NotificationProvider } from '@/contexts/NotificationContext'
 import { UserProvider } from '@/contexts/UserContext'
 import { PWAProvider } from '@/pwa/PWAContext'
 import { setupStore } from '@/store/store'
@@ -30,14 +29,12 @@ export default function Layout({ children }: Readonly<LayoutProps>) {
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
 				<UserProvider>
-					<NotificationProvider>
-						<PWAProvider>
-							<Header />
-							<main>{children}</main>
-							<SupportButton />
-							<Toaster />
-						</PWAProvider>
-					</NotificationProvider>
+					<PWAProvider>
+						<Header />
+						<main>{children}</main>
+						<SupportButton />
+						<Toaster />
+					</PWAProvider>
 				</UserProvider>
 			</PersistGate>
 		</Provider>

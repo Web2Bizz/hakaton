@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button'
 import { logger } from '@/utils/logger'
-import { useNotifications } from '@/hooks/useNotifications'
 import { Check, Copy, Share2, X } from 'lucide-react'
 import { useState } from 'react'
 import type { Quest } from '../../types/quest-types'
@@ -47,7 +46,6 @@ export function AmbassadorShare({
 	onClose,
 	onShare,
 }: AmbassadorShareProps) {
-	const { addNotification } = useNotifications()
 	const [copied, setCopied] = useState(false)
 
 	const shareUrl = `${window.location.origin}/map?quest=${quest.id}`
@@ -67,13 +65,6 @@ export function AmbassadorShare({
 			await navigator.clipboard.writeText(shareUrl)
 			setCopied(true)
 			setTimeout(() => setCopied(false), 2000)
-			addNotification({
-				type: 'quest_update',
-				title: 'Ссылка скопирована!',
-				message: 'Теперь вы можете поделиться квестом',
-				questId: quest.id,
-				icon: '📋',
-			})
 		} catch (err) {
 			logger.error('Failed to copy:', err)
 		}

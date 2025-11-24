@@ -3,7 +3,6 @@ import { ImageGallery } from '@/components/ui/ImageGallery'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/hooks/useAuth'
-import { useNotifications } from '@/hooks/useNotifications'
 import { useQuestActions } from '@/hooks/useQuestActions'
 import { useUser } from '@/hooks/useUser'
 import { useAssignAchievementMutation } from '@/store/entities'
@@ -133,7 +132,6 @@ export function QuestDetails({
 	} = useUser()
 	const { isAuthenticated } = useAuth()
 	const { checkQuestCompletion } = useQuestActions()
-	const { addNotification } = useNotifications()
 	const [assignAchievement] = useAssignAchievementMutation()
 	const [activeTab, setActiveTab] = useState<'stages' | 'updates'>('stages')
 	const [showVolunteerRegistration, setShowVolunteerRegistration] = useState<{
@@ -184,10 +182,10 @@ export function QuestDetails({
 	// Используем поле isParticipating из API
 	const isParticipating = transformedQuest?.isParticipating ?? false
 
-	// Отслеживаем уже обработанные квесты, чтобы не отправлять уведомления повторно
+	// Отслеживаем уже обработанные квесты, чтобы не показывать toast повторно
 	const processedQuestRef = useRef<string | null>(null)
 
-	// Проверка завершения квеста и отправка уведомлений
+	// Проверка завершения квеста и разблокировки достижений
 	useEffect(() => {
 		if (!transformedQuest || !isParticipating) return
 
@@ -200,86 +198,26 @@ export function QuestDetails({
 				return
 			}
 
-			// Проверяем, было ли уже отправлено уведомление о завершении этого квеста
-			// Проверяем существующие уведомления в localStorage
-			const existingNotifications = JSON.parse(
-				localStorage.getItem('ecoquest_notifications') || '[]'
-			) as Array<{ type: string; questId?: string; achievementId?: string }>
-
-			const hasQuestNotification = existingNotifications.some(
-				n => n.type === 'quest_completed' && n.questId === transformedQuest.id
+			// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
+			processedQuestRef.current = questKey
+			checkQuestCompletion(
+				transformedQuest,
+				// Callback для завершения квеста (не используется, но нужен для API)
+				() => {},
+				// Callback для уведомления о разблокировке достижения
+				achievement => {
+					// Показываем toast уведомление
+					toast.success('🏆 Достижение разблокировано!', {
+						description: `${achievement.icon} "${achievement.title}"`,
+						duration: 5000,
+					})
+				}
 			)
-
-			// Уведомление о завершении квеста (отправляем только один раз)
-			if (!hasQuestNotification) {
-				// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
-				processedQuestRef.current = questKey
-				checkQuestCompletion(
-					transformedQuest,
-					// Callback для уведомления о завершении квеста
-					completedQuest => {
-						// Дополнительная проверка перед добавлением
-						const currentNotifications = JSON.parse(
-							localStorage.getItem('ecoquest_notifications') || '[]'
-						) as Array<{ type: string; questId?: string }>
-
-						const alreadyExists = currentNotifications.some(
-							n =>
-								n.type === 'quest_completed' && n.questId === completedQuest.id
-						)
-
-						if (!alreadyExists) {
-							addNotification({
-								type: 'quest_completed',
-								title: '🎉 Квест завершен!',
-								message: `Квест "${completedQuest.title}" успешно завершен!`,
-								questId: completedQuest.id,
-								icon: '🎉',
-								actionUrl: `/map?quest=${completedQuest.id}`,
-							})
-						}
-					},
-					// Callback для уведомления о разблокировке достижения
-					achievement => {
-						// Проверяем, было ли уже отправлено уведомление об этом достижении
-						const currentNotifications = JSON.parse(
-							localStorage.getItem('ecoquest_notifications') || '[]'
-						) as Array<{ type: string; achievementId?: string }>
-
-						const alreadyExists = currentNotifications.some(
-							n =>
-								n.type === 'achievement_unlocked' &&
-								n.achievementId === achievement.id
-						)
-
-						if (!alreadyExists) {
-							addNotification({
-								type: 'achievement_unlocked',
-								title: '🏆 Достижение разблокировано!',
-								message: `${achievement.icon} "${achievement.title}" - Вы получили пользовательское достижение за завершение квеста!`,
-								questId: transformedQuest.id,
-								achievementId: achievement.id,
-								icon: achievement.icon,
-								actionUrl: '/profile',
-							})
-
-							// Показываем toast уведомление
-							toast.success('🏆 Достижение разблокировано!', {
-								description: `${achievement.icon} "${achievement.title}"`,
-								duration: 5000,
-							})
-						}
-					}
-				)
-			} else {
-				// Если уведомление уже существует, тоже помечаем как обработанное
-				processedQuestRef.current = questKey
-			}
 		} else {
 			// Если квест не завершен, сбрасываем флаг обработки
 			processedQuestRef.current = null
 		}
-	}, [transformedQuest, isParticipating, checkQuestCompletion, addNotification])
+	}, [transformedQuest, isParticipating, checkQuestCompletion])
 
 	// Если quest undefined, возвращаем null (во время анимации закрытия или когда не выбран)
 	if (!transformedQuest) {
@@ -298,15 +236,6 @@ export function QuestDetails({
 		// Автоматически добавляем пользователя в квест
 		await participateInQuest(transformedQuest.id)
 		checkAndUnlockAchievements()
-
-		// Добавляем уведомление об успешном участии
-		addNotification({
-			type: 'quest_update',
-			title: 'Добро пожаловать в квест!',
-			message: `Вы успешно присоединились к квесту "${transformedQuest.title}"`,
-			questId: transformedQuest.id,
-			icon: '🎯',
-		})
 
 		if (onParticipate) {
 			onParticipate(transformedQuest.id)
@@ -331,15 +260,6 @@ export function QuestDetails({
 
 		// Выходим из квеста
 		await leaveQuest(transformedQuest.id)
-
-		// Добавляем уведомление
-		addNotification({
-			type: 'quest_update',
-			title: 'Вы вышли из квеста',
-			message: `Вы покинули квест "${transformedQuest.title}"`,
-			questId: transformedQuest.id,
-			icon: '👋',
-		})
 	}
 
 	const handleVolunteerRegister = (
@@ -349,17 +269,6 @@ export function QuestDetails({
 	) => {
 		// Здесь будет API вызов для регистрации
 		// _data будет использоваться для будущей реализации API
-		addNotification({
-			type: 'volunteer_registered',
-			title: 'Регистрация успешна!',
-			message: `Вы зарегистрировались на событие "${
-				transformedQuest?.stages.find((s: QuestStage) => s.id === stageId)
-					?.title
-			}"`,
-			questId: transformedQuest!.id,
-			stageId,
-			icon: '👷',
-		})
 	}
 
 	const handleShare = (platform: string) => {
@@ -401,15 +310,7 @@ export function QuestDetails({
 					})
 						.unwrap()
 						.then(() => {
-							// Показываем уведомление о достижении
-							addNotification({
-								type: 'achievement_unlocked',
-								title: '🎉 Достижение разблокировано!',
-								message:
-									'Социальный амбассадор - Поделились квестом в социальных сетях',
-								questId: transformedQuest.id,
-								icon: '🏆',
-							})
+							// Достижение разблокировано
 						})
 						.catch(error => {
 							// Логируем ошибку, но не показываем пользователю, чтобы не мешать UX
@@ -423,15 +324,6 @@ export function QuestDetails({
 				toast.success('🙏 Спасибо за распространение!', {
 					description: `Ваш репост поможет квесту "${transformedQuest.title}" найти больше участников! Вы получили опыт за помощь.`,
 					duration: 5000,
-				})
-
-				// Также добавляем в систему уведомлений
-				addNotification({
-					type: 'quest_update',
-					title: '🙏 Спасибо за распространение!',
-					message: `Ваш репост поможет квесту "${transformedQuest.title}" найти больше участников! Вы получили опыт за помощь.`,
-					questId: transformedQuest.id,
-					icon: '📢',
 				})
 			}
 			// При повторном шаринге ничего не делаем - просто открывается окно поделиться

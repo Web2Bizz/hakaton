@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { useNotifications } from '@/hooks/useNotifications'
 import { useQuestActions } from '@/hooks/useQuestActions'
 import { useUser } from '@/hooks/useUser'
 import { useGetUserQuestsQuery } from '@/store/entities/quest'
@@ -11,7 +10,6 @@ import { toast } from 'sonner'
 export function ActiveQuests() {
 	const { user } = useUser()
 	const { checkQuestCompletion } = useQuestActions()
-	const { addNotification } = useNotifications()
 
 	// Загружаем квесты пользователя с сервера
 	const { data: userQuestsResponse } = useGetUserQuestsQuery(user?.id ?? '', {
@@ -28,17 +26,12 @@ export function ActiveQuests() {
 		return quests.filter(q => q.status !== 'archived')
 	}, [userQuestsResponse])
 
-	// Отслеживаем уже обработанные квесты, чтобы не отправлять уведомления повторно
+	// Отслеживаем уже обработанные квесты, чтобы не показывать toast повторно
 	const processedQuestsRef = useRef<Set<string>>(new Set())
 
-	// Проверка завершения квестов и отправка уведомлений
+	// Проверка завершения квестов и разблокировки достижений
 	useEffect(() => {
 		if (!user || participatingQuests.length === 0) return
-
-		// Получаем существующие уведомления из localStorage
-		const existingNotifications = JSON.parse(
-			localStorage.getItem('ecoquest_notifications') || '[]'
-		) as Array<{ type: string; questId?: string; achievementId?: string }>
 
 		participatingQuests.forEach(quest => {
 			// Проверяем завершение квеста (когда куратор нажал кнопку "Завершить квест")
@@ -50,80 +43,24 @@ export function ActiveQuests() {
 					return
 				}
 
-				// Проверяем, было ли уже отправлено уведомление о завершении этого квеста
-				const hasQuestNotification = existingNotifications.some(
-					n => n.type === 'quest_completed' && n.questId === quest.id
+				// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
+				processedQuestsRef.current.add(questKey)
+				checkQuestCompletion(
+					quest,
+					// Callback для завершения квеста (не используется, но нужен для API)
+					() => {},
+					// Callback для уведомления о разблокировке достижения
+					achievement => {
+						// Показываем toast уведомление
+						toast.success('🏆 Достижение разблокировано!', {
+							description: `${achievement.icon} "${achievement.title}"`,
+							duration: 5000,
+						})
+					}
 				)
-
-				// Уведомление о завершении квеста (отправляем только один раз)
-				if (!hasQuestNotification) {
-					// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
-					processedQuestsRef.current.add(questKey)
-					checkQuestCompletion(
-						quest,
-						// Callback для уведомления о завершении квеста
-						completedQuest => {
-							// Дополнительная проверка перед добавлением
-							const currentNotifications = JSON.parse(
-								localStorage.getItem('ecoquest_notifications') || '[]'
-							) as Array<{ type: string; questId?: string }>
-
-							const alreadyExists = currentNotifications.some(
-								n =>
-									n.type === 'quest_completed' &&
-									n.questId === completedQuest.id
-							)
-
-							if (!alreadyExists) {
-								addNotification({
-									type: 'quest_completed',
-									title: '🎉 Квест завершен!',
-									message: `Квест "${completedQuest.title}" успешно завершен!`,
-									questId: completedQuest.id,
-									icon: '🎉',
-									actionUrl: `/map?quest=${completedQuest.id}`,
-								})
-							}
-						},
-						// Callback для уведомления о разблокировке достижения
-						achievement => {
-							// Проверяем, было ли уже отправлено уведомление об этом достижении
-							const currentNotifications = JSON.parse(
-								localStorage.getItem('ecoquest_notifications') || '[]'
-							) as Array<{ type: string; achievementId?: string }>
-
-							const alreadyExists = currentNotifications.some(
-								n =>
-									n.type === 'achievement_unlocked' &&
-									n.achievementId === achievement.id
-							)
-
-							if (!alreadyExists) {
-								addNotification({
-									type: 'achievement_unlocked',
-									title: '🏆 Достижение разблокировано!',
-									message: `${achievement.icon} "${achievement.title}" - Вы получили пользовательское достижение за завершение квеста!`,
-									questId: quest.id,
-									achievementId: achievement.id,
-									icon: achievement.icon,
-									actionUrl: '/profile',
-								})
-
-								// Показываем toast уведомление
-								toast.success('🏆 Достижение разблокировано!', {
-									description: `${achievement.icon} "${achievement.title}"`,
-									duration: 5000,
-								})
-							}
-						}
-					)
-				} else {
-					// Если уведомление уже существует, тоже помечаем как обработанное
-					processedQuestsRef.current.add(questKey)
-				}
 			}
 		})
-	}, [user, participatingQuests, checkQuestCompletion, addNotification])
+	}, [user, participatingQuests, checkQuestCompletion])
 
 	if (participatingQuests.length === 0) {
 		return (
