@@ -73,7 +73,7 @@ export const MapSearch = memo(function MapSearch({
 	}, [searchItems])
 
 	return (
-		<div className='absolute top-20 left-0 right-0 max-w-[80%] lg:max-w-[400px] z-10 ml-auto mr-auto items-center justify-center lg:left-5 lg:right-auto lg:w-full placeholder:truncate'>
+		<div className='map-search-container absolute top-20 left-0 right-0 max-w-[80%] lg:max-w-[400px] z-10 ml-auto mr-auto items-center justify-center lg:left-5 lg:right-auto lg:w-full placeholder:truncate'>
 			<AddressSearchInput
 				organizations={organizationsForSearch}
 				onAddressSelect={onAddressSelect}

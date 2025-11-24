@@ -7,11 +7,13 @@
  */
 
 import { MapComponent } from '@/components'
+import { MapTourProvider } from '@/components/map/tour'
 
 export const MapPage = () => {
 	return (
 		<div className='relative h-screen w-full z-10'>
 			<MapComponent />
+			<MapTourProvider />
 		</div>
 	)
 }
