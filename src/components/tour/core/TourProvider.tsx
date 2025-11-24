@@ -6,7 +6,7 @@ import type { Step } from 'react-joyride'
 import type { LucideIcon } from 'lucide-react'
 
 interface TourProviderProps {
-	readonly storageKey: string
+	readonly pageKey: string
 	readonly steps: Step[]
 	readonly modalTitle: string
 	readonly modalDescription: string
@@ -25,7 +25,7 @@ interface TourProviderProps {
 }
 
 export function TourProvider({
-	storageKey,
+	pageKey,
 	steps,
 	modalTitle,
 	modalDescription,
@@ -44,7 +44,7 @@ export function TourProvider({
 		handlePostpone,
 		handleTourComplete,
 		handleTourSkip,
-	} = useTour({ storageKey, showDelay })
+	} = useTour({ pageKey, showDelay })
 
 	// Отключаем скролл на body во время тура, чтобы избежать мерцания
 	useEffect(() => {

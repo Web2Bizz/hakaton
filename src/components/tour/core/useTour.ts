@@ -1,18 +1,44 @@
 import { useCallback, useEffect, useState } from 'react'
 
+const STORAGE_KEY = 'tour_status'
+
 type TourStatus = 'not_shown' | 'accepted' | 'declined' | 'completed'
 
+interface TourStatusMap {
+	[key: string]: TourStatus
+}
+
 interface UseTourOptions {
-	readonly storageKey: string
+	readonly pageKey: string
 	readonly showDelay?: number
 }
 
-export function useTour({ storageKey, showDelay = 1000 }: UseTourOptions) {
+function getTourStatuses(): TourStatusMap {
+	try {
+		const data = localStorage.getItem(STORAGE_KEY)
+		return data ? JSON.parse(data) : {}
+	} catch {
+		return {}
+	}
+}
+
+function setTourStatus(pageKey: string, status: TourStatus): void {
+	const statuses = getTourStatuses()
+	statuses[pageKey] = status
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(statuses))
+}
+
+function getTourStatus(pageKey: string): TourStatus | null {
+	const statuses = getTourStatuses()
+	return statuses[pageKey] || null
+}
+
+export function useTour({ pageKey, showDelay = 1000 }: UseTourOptions) {
 	const [showModal, setShowModal] = useState(false)
 	const [runTour, setRunTour] = useState(false)
 
 	useEffect(() => {
-		const status = localStorage.getItem(storageKey) as TourStatus | null
+		const status = getTourStatus(pageKey)
 		// Показываем модальное окно только если тур еще не был показан
 		if (!status || status === 'not_shown') {
 			// Небольшая задержка перед показом модального окна
@@ -25,15 +51,15 @@ export function useTour({ storageKey, showDelay = 1000 }: UseTourOptions) {
 	}, [])
 
 	const handleAccept = useCallback(() => {
-		localStorage.setItem(storageKey, 'accepted')
+		setTourStatus(pageKey, 'accepted')
 		setShowModal(false)
 		setRunTour(true)
-	}, [storageKey])
+	}, [pageKey])
 
 	const handleDecline = useCallback(() => {
-		localStorage.setItem(storageKey, 'declined')
+		setTourStatus(pageKey, 'declined')
 		setShowModal(false)
-	}, [storageKey])
+	}, [pageKey])
 
 	const handlePostpone = useCallback(() => {
 		// Просто закрываем модальное окно без сохранения статуса
@@ -42,14 +68,14 @@ export function useTour({ storageKey, showDelay = 1000 }: UseTourOptions) {
 	}, [])
 
 	const handleTourComplete = useCallback(() => {
-		localStorage.setItem(storageKey, 'completed')
+		setTourStatus(pageKey, 'completed')
 		setRunTour(false)
-	}, [storageKey])
+	}, [pageKey])
 
 	const handleTourSkip = useCallback(() => {
-		localStorage.setItem(storageKey, 'completed')
+		setTourStatus(pageKey, 'completed')
 		setRunTour(false)
-	}, [storageKey])
+	}, [pageKey])
 
 	return {
 		showModal,
