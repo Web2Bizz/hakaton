@@ -7,6 +7,7 @@
  */
 
 import { AddOrganizationForm, AddQuestForm } from '@/components/forms'
+import { AddOrganizationTourProvider } from '@/components/tour'
 import { Spinner } from '@/components/ui/spinner'
 import { MAX_ORGANIZATIONS_PER_USER, MAX_QUESTS_PER_USER } from '@/constants'
 import { useUser } from '@/hooks/useUser'
@@ -94,7 +95,7 @@ export default function AddOrganizationPage() {
 					</div>
 
 					{/* Переключатель типа формы */}
-					<div className='mb-6 flex gap-2 bg-white p-1 rounded-lg border border-slate-200'>
+					<div className='add-organization-tabs-container mb-6 flex gap-2 bg-white p-1 rounded-lg border border-slate-200'>
 						<button
 							type='button'
 							onClick={() => setFormType('organization')}
@@ -130,6 +131,22 @@ export default function AddOrganizationPage() {
 						</button>
 					</div>
 
+					{/* Контейнер для информации об ограничениях */}
+					<div className='add-organization-limits-container mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4'>
+						<div className='flex items-start gap-3'>
+							<div className='text-blue-600 text-xl'>ℹ️</div>
+							<div className='flex-1'>
+								<h3 className='text-sm font-semibold text-blue-900 mb-1'>
+									Ограничения на создание
+								</h3>
+								<p className='text-xs text-blue-700'>
+									Максимум {MAX_ORGANIZATIONS_PER_USER} организация и{' '}
+									{MAX_QUESTS_PER_USER} квестов на пользователя
+								</p>
+							</div>
+						</div>
+					</div>
+
 					{/* Форма */}
 					<div className='bg-white rounded-lg shadow-sm border border-slate-200 p-6 md:p-8'>
 						{formType === 'organization' ? (
@@ -143,6 +160,7 @@ export default function AddOrganizationPage() {
 					</div>
 				</div>
 			</div>
+			<AddOrganizationTourProvider />
 		</ProtectedRoute>
 	)
 }
