@@ -37,7 +37,13 @@ export interface UpdateUserRequest {
 // Типы для ответов API
 export interface AuthResponse {
 	access_token: string
+	refresh_token?: string
 	user: UserShortData
+}
+
+export interface RefreshTokenResponse {
+	access_token: string
+	refresh_token?: string
 }
 
 export type UserShortData = {

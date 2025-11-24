@@ -1,36 +1,19 @@
-import { API_BASE_URL } from '@/constants'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseQueryWithReauth } from '@/store/baseQueryWithReauth'
+import { createApi } from '@reduxjs/toolkit/query/react'
 import type {
 	AuthResponse,
 	ForgotPasswordRequest,
 	LoginRequest,
+	RefreshTokenResponse,
 	RegisterRequest,
 	ResetPasswordRequest,
 	UpdateUserRequest,
 	UserFullData,
 } from './type'
 
-// Функция для получения токена из localStorage
-const getToken = () => {
-	if (globalThis.window !== undefined) {
-		return localStorage.getItem('authToken') || null
-	}
-	return null
-}
-
 export const authService = createApi({
 	reducerPath: 'authApi',
-
-	baseQuery: fetchBaseQuery({
-		baseUrl: API_BASE_URL,
-		prepareHeaders: headers => {
-			const token = getToken()
-			if (token) {
-				headers.set('authorization', `Bearer ${token}`)
-			}
-			return headers
-		},
-	}),
+	baseQuery: baseQueryWithReauth,
 	tagTypes: ['Auth', 'User'],
 	endpoints: builder => ({
 		// POST /v1/auth/register - Регистрация нового пользователя
@@ -69,6 +52,18 @@ export const authService = createApi({
 		resetPassword: builder.mutation<{ message: string }, ResetPasswordRequest>({
 			query: data => ({
 				url: '/v1/auth/reset-password',
+				method: 'POST',
+				body: data,
+			}),
+		}),
+
+		// POST /v1/auth/refresh - Обновление токена
+		refreshToken: builder.mutation<
+			RefreshTokenResponse,
+			{ refresh_token: string }
+		>({
+			query: data => ({
+				url: '/v1/auth/refresh',
 				method: 'POST',
 				body: data,
 			}),

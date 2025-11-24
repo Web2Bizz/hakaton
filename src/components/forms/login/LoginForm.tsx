@@ -11,12 +11,11 @@ import {
 } from '@/components/ui'
 import { useUser } from '@/hooks/useUser'
 import { useLazyGetUserQuery, useLoginMutation } from '@/store/entities'
-import { saveToken, transformUserFromAPI } from '@/utils/auth'
+import { saveRefreshToken, saveToken, transformUserFromAPI } from '@/utils/auth'
 import { getErrorMessage } from '@/utils/error'
 import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -32,7 +31,6 @@ export function LoginForm() {
 	const { user, setUser } = useUser()
 	const [loginMutation, { isLoading: isLoggingIn }] = useLoginMutation()
 	const [getUser, { isLoading: isFetchingUser }] = useLazyGetUserQuery()
-	const [showPassword, setShowPassword] = useState(false)
 
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -62,6 +60,8 @@ export function LoginForm() {
 				password: data.password,
 			})
 
+			console.log('result', result)
+
 			if (result.error) {
 				logger.error('Login error:', result.error)
 				const errorMessage = getErrorMessage(
@@ -73,14 +73,18 @@ export function LoginForm() {
 			}
 
 			// Проверяем наличие данных
+			console.log('result.data', result.data)
 			if (!result.data) {
 				toast.error('Ошибка входа. Попробуйте еще раз.')
 				return
 			}
 
-			// Сохраняем токен
+			// Сохраняем токены
 			if (result.data.access_token) {
 				saveToken(result.data.access_token)
+			}
+			if (result.data.refresh_token) {
+				saveRefreshToken(result.data.refresh_token)
 			}
 
 			// Получаем полные данные пользователя по userId
@@ -164,28 +168,11 @@ export function LoginForm() {
 									<FormItem>
 										<FormLabel>Пароль</FormLabel>
 										<FormControl>
-											<div className='relative'>
-												<Input
-													type={showPassword ? 'text' : 'password'}
-													placeholder='••••••••'
-													className='pr-10'
-													{...field}
-												/>
-												<button
-													type='button'
-													onClick={() => setShowPassword(!showPassword)}
-													className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 transition-colors'
-													aria-label={
-														showPassword ? 'Скрыть пароль' : 'Показать пароль'
-													}
-												>
-													{showPassword ? (
-														<EyeOff className='h-4 w-4' />
-													) : (
-														<Eye className='h-4 w-4' />
-													)}
-												</button>
-											</div>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
 										</FormControl>
 										<div className='flex items-center justify-between'>
 											<FormMessage />

@@ -20,7 +20,7 @@ function getAvatarUrl(
 	if (avatarUrls && Object.keys(avatarUrls).length > 0) {
 		// Обрабатываем оба формата: Record<string, string> (ключи "size_4") и Record<number, string> (для обратной совместимости)
 		const keys = Object.keys(avatarUrls)
-		
+
 		// Извлекаем размеры из ключей вида "size_4", "size_5" или числовых ключей
 		const sizes = keys
 			.map(key => {
@@ -45,7 +45,10 @@ function getAvatarUrl(
 				| string
 				| undefined
 			// Если значение уже является URL, используем его
-			if (urlValue && (urlValue.startsWith('http://') || urlValue.startsWith('https://'))) {
+			if (
+				urlValue &&
+				(urlValue.startsWith('http://') || urlValue.startsWith('https://'))
+			) {
 				return urlValue
 			}
 			// Иначе формируем URL по размеру (для обратной совместимости)
@@ -127,7 +130,7 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 }
 
 /**
- * Сохраняет токен в localStorage
+ * Сохраняет access token в localStorage
  */
 export function saveToken(token: string): void {
 	if (globalThis.window !== undefined) {
@@ -136,20 +139,40 @@ export function saveToken(token: string): void {
 }
 
 /**
- * Удаляет токен из localStorage
+ * Сохраняет refresh token в localStorage
  */
-export function removeToken(): void {
+export function saveRefreshToken(token: string): void {
 	if (globalThis.window !== undefined) {
-		localStorage.removeItem('authToken')
+		localStorage.setItem('refreshToken', token)
 	}
 }
 
 /**
- * Получает токен из localStorage
+ * Удаляет токены из localStorage
+ */
+export function removeToken(): void {
+	if (globalThis.window !== undefined) {
+		localStorage.removeItem('authToken')
+		localStorage.removeItem('refreshToken')
+	}
+}
+
+/**
+ * Получает access token из localStorage
  */
 export function getToken(): string | null {
 	if (globalThis.window !== undefined) {
 		return localStorage.getItem('authToken')
+	}
+	return null
+}
+
+/**
+ * Получает refresh token из localStorage
+ */
+export function getRefreshToken(): string | null {
+	if (globalThis.window !== undefined) {
+		return localStorage.getItem('refreshToken')
 	}
 	return null
 }

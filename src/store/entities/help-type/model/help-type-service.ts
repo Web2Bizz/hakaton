@@ -1,27 +1,10 @@
-import { API_BASE_URL } from '@/constants'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { baseQueryWithReauth } from '@/store/baseQueryWithReauth'
+import { createApi } from '@reduxjs/toolkit/query/react'
 import type { HelpTypeResponse } from './type'
-
-// Функция для получения токена из localStorage
-const getToken = () => {
-	if (globalThis.window !== undefined) {
-		return localStorage.getItem('authToken') || null
-	}
-	return null
-}
 
 export const helpTypeService = createApi({
 	reducerPath: 'helpTypeApi',
-	baseQuery: fetchBaseQuery({
-		baseUrl: API_BASE_URL,
-		prepareHeaders: headers => {
-			const token = getToken()
-			if (token) {
-				headers.set('authorization', `Bearer ${token}`)
-			}
-			return headers
-		},
-	}),
+	baseQuery: baseQueryWithReauth,
 	tagTypes: ['HelpType'],
 	endpoints: builder => ({
 		// GET /v1/help-types - Получить список видов помощи
@@ -33,4 +16,3 @@ export const helpTypeService = createApi({
 
 export const { useGetHelpTypesQuery, useLazyGetHelpTypesQuery } =
 	helpTypeService
-

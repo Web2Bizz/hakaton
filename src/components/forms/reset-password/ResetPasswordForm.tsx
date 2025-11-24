@@ -12,8 +12,7 @@ import {
 import { useResetPasswordMutation } from '@/store/entities'
 import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -36,8 +35,6 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
 export function ResetPasswordForm() {
 	const [resetPasswordMutation, { isLoading: isSubmitting }] =
 		useResetPasswordMutation()
-	const [showPassword, setShowPassword] = useState(false)
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
 	// Получаем токен из URL параметров
 	const urlParams = new URLSearchParams(globalThis.location.search)
@@ -146,28 +143,11 @@ export function ResetPasswordForm() {
 									<FormItem>
 										<FormLabel>Новый пароль *</FormLabel>
 										<FormControl>
-											<div className='relative'>
-												<Input
-													type={showPassword ? 'text' : 'password'}
-													placeholder='••••••••'
-													className='pr-10'
-													{...field}
-												/>
-												<button
-													type='button'
-													onClick={() => setShowPassword(!showPassword)}
-													className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 transition-colors'
-													aria-label={
-														showPassword ? 'Скрыть пароль' : 'Показать пароль'
-													}
-												>
-													{showPassword ? (
-														<EyeOff className='h-4 w-4' />
-													) : (
-														<Eye className='h-4 w-4' />
-													)}
-												</button>
-											</div>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -181,32 +161,11 @@ export function ResetPasswordForm() {
 									<FormItem>
 										<FormLabel>Подтвердите пароль *</FormLabel>
 										<FormControl>
-											<div className='relative'>
-												<Input
-													type={showConfirmPassword ? 'text' : 'password'}
-													placeholder='••••••••'
-													className='pr-10'
-													{...field}
-												/>
-												<button
-													type='button'
-													onClick={() =>
-														setShowConfirmPassword(!showConfirmPassword)
-													}
-													className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 transition-colors'
-													aria-label={
-														showConfirmPassword
-															? 'Скрыть пароль'
-															: 'Показать пароль'
-													}
-												>
-													{showConfirmPassword ? (
-														<EyeOff className='h-4 w-4' />
-													) : (
-														<Eye className='h-4 w-4' />
-													)}
-												</button>
-											</div>
+											<Input
+												type='password'
+												placeholder='••••••••'
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
