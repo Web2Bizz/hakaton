@@ -1,36 +1,39 @@
 import { useCallback, useEffect, useState } from 'react'
 
-const STORAGE_KEY = 'map_tour_status'
-
 type TourStatus = 'not_shown' | 'accepted' | 'declined' | 'completed'
 
-export function useMapTour() {
+interface UseTourOptions {
+	readonly storageKey: string
+	readonly showDelay?: number
+}
+
+export function useTour({ storageKey, showDelay = 1000 }: UseTourOptions) {
 	const [showModal, setShowModal] = useState(false)
 	const [runTour, setRunTour] = useState(false)
 
 	useEffect(() => {
-		const status = localStorage.getItem(STORAGE_KEY) as TourStatus | null
+		const status = localStorage.getItem(storageKey) as TourStatus | null
 		// Показываем модальное окно только если тур еще не был показан
 		if (!status || status === 'not_shown') {
 			// Небольшая задержка перед показом модального окна
 			const timer = setTimeout(() => {
 				setShowModal(true)
-			}, 1000)
+			}, showDelay)
 			return () => clearTimeout(timer)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	const handleAccept = useCallback(() => {
-		localStorage.setItem(STORAGE_KEY, 'accepted')
+		localStorage.setItem(storageKey, 'accepted')
 		setShowModal(false)
 		setRunTour(true)
-	}, [])
+	}, [storageKey])
 
 	const handleDecline = useCallback(() => {
-		localStorage.setItem(STORAGE_KEY, 'declined')
+		localStorage.setItem(storageKey, 'declined')
 		setShowModal(false)
-	}, [])
+	}, [storageKey])
 
 	const handlePostpone = useCallback(() => {
 		// Просто закрываем модальное окно без сохранения статуса
@@ -39,14 +42,14 @@ export function useMapTour() {
 	}, [])
 
 	const handleTourComplete = useCallback(() => {
-		localStorage.setItem(STORAGE_KEY, 'completed')
+		localStorage.setItem(storageKey, 'completed')
 		setRunTour(false)
-	}, [])
+	}, [storageKey])
 
 	const handleTourSkip = useCallback(() => {
-		localStorage.setItem(STORAGE_KEY, 'completed')
+		localStorage.setItem(storageKey, 'completed')
 		setRunTour(false)
-	}, [])
+	}, [storageKey])
 
 	return {
 		showModal,
@@ -58,3 +61,4 @@ export function useMapTour() {
 		handleTourSkip,
 	}
 }
+

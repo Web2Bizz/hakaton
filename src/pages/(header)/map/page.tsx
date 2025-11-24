@@ -7,7 +7,7 @@
  */
 
 import { MapComponent } from '@/components'
-import { MapTourProvider } from '@/components/map/tour'
+import { MapTourProvider } from '@/components/tour'
 
 export const MapPage = () => {
 	return (

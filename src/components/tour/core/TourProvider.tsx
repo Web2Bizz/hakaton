@@ -1,9 +1,41 @@
-import { useEffect } from 'react'
-import { MapTour } from './MapTour'
+import { useEffect, type ReactNode } from 'react'
+import { Tour } from './Tour'
 import { TourModal } from './TourModal'
-import { useMapTour } from './useMapTour'
+import { useTour } from './useTour'
+import type { Step } from 'react-joyride'
+import type { LucideIcon } from 'lucide-react'
 
-export function MapTourProvider() {
+interface TourProviderProps {
+	readonly storageKey: string
+	readonly steps: Step[]
+	readonly modalTitle: string
+	readonly modalDescription: string
+	readonly modalIcon: LucideIcon
+	readonly acceptButtonText?: string
+	readonly postponeButtonText?: string
+	readonly showDelay?: number
+	readonly locale?: {
+		back?: string
+		close?: string
+		last?: string
+		next?: string
+		skip?: string
+	}
+	readonly styles?: Record<string, unknown>
+}
+
+export function TourProvider({
+	storageKey,
+	steps,
+	modalTitle,
+	modalDescription,
+	modalIcon,
+	acceptButtonText,
+	postponeButtonText,
+	showDelay,
+	locale,
+	styles,
+}: TourProviderProps) {
 	const {
 		showModal,
 		runTour,
@@ -12,7 +44,7 @@ export function MapTourProvider() {
 		handlePostpone,
 		handleTourComplete,
 		handleTourSkip,
-	} = useMapTour()
+	} = useTour({ storageKey, showDelay })
 
 	// Отключаем скролл на body во время тура, чтобы избежать мерцания
 	useEffect(() => {
@@ -43,18 +75,27 @@ export function MapTourProvider() {
 		<>
 			{showModal && (
 				<TourModal
+					title={modalTitle}
+					description={modalDescription}
+					icon={modalIcon}
 					onAccept={handleAccept}
 					onDecline={handleDecline}
 					onPostpone={handlePostpone}
+					acceptButtonText={acceptButtonText}
+					postponeButtonText={postponeButtonText}
 				/>
 			)}
 			{runTour && (
-				<MapTour
+				<Tour
+					steps={steps}
 					runTour={runTour}
 					onComplete={handleTourComplete}
 					onSkip={handleTourSkip}
+					locale={locale}
+					styles={styles}
 				/>
 			)}
 		</>
 	)
 }
+
