@@ -17,7 +17,6 @@ export default defineConfig({
 		}),
 		tailwindcss(),
 		VitePWA({
-			registerType: 'prompt', // Используем prompt вместо autoUpdate, так как у нас кастомный SW
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
 			},

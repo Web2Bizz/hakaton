@@ -1,4 +1,3 @@
-import { logger } from '@/utils/logger'
 import React, {
 	createContext,
 	useContext,
@@ -36,31 +35,10 @@ interface PWAProviderProps {
 export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 	const [isInstalled, setIsInstalled] = useState<boolean>(false)
 	const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine)
-	const [registration, setRegistration] =
+	const [registration] =
 		useState<ServiceWorkerRegistration | null>(null)
 	const [installPrompt, setInstallPrompt] = useState<InstallPrompt>(null)
 	const prevIsOfflineRef = useRef<boolean>(!navigator.onLine)
-
-	// Регистрация Service Worker
-	useEffect(() => {
-		let registration: ServiceWorkerRegistration | null = null
-
-		const registerSW = async (): Promise<void> => {
-			if ('serviceWorker' in navigator) {
-				try {
-					// Регистрация Service Worker без автоматических обновлений
-					registration = await navigator.serviceWorker.register('/pwa/sw.js', {
-						updateViaCache: 'none',
-					})
-					setRegistration(registration)
-				} catch (error) {
-					logger.error('[PWA] SW registration failed: ', error)
-				}
-			}
-		}
-
-		registerSW()
-	}, [])
 
 	useEffect(() => {
 		const checkInstalled = (): void => {
