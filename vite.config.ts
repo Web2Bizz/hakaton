@@ -13,7 +13,7 @@ export default defineConfig({
 			baseUrl: 'https://it-hackathon-team05.mephi.ru',
 			disallowPaths: ['/health', '/api', '/sw.js', '/registerSW.js'],
 			enableSEO: true,
-			basePath: '/client',
+			basePath: '/',
 		}),
 		tailwindcss(),
 		VitePWA({
