@@ -1,30 +1,15 @@
 import type { Organization } from '@/components/map/types/types'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { useUser } from '@/hooks/useUser'
-import { useGetOrganizationsQuery } from '@/store/entities/organization'
+import { useGetMyOrganizationsQuery } from '@/store/entities/organization'
 import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
 import { logger } from '@/utils/logger'
-import { ArrowRight, Building2, Heart, Map, MapPin } from 'lucide-react'
-import { useMemo } from 'react'
+import { ArrowRight, Building2, Clock, Heart, Map, MapPin } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export function MyOrganizations() {
-	const { user } = useUser()
 	const navigate = useNavigate()
-	const { data: organizations = [], isLoading } = useGetOrganizationsQuery()
-
-	// Фильтруем только мои организации (созданные пользователем)
-	const myOrganizations = useMemo(() => {
-		if (!user?.createdOrganizationId) return []
-		return organizations.filter(org => {
-			const orgId = typeof org.id === 'string' ? org.id : String(org.id)
-			return (
-				orgId === user.createdOrganizationId ||
-				org.id === user.createdOrganizationId
-			)
-		})
-	}, [organizations, user?.createdOrganizationId])
+	const { data: myOrganizations = [], isLoading } = useGetMyOrganizationsQuery()
 
 	if (isLoading) {
 		return (
@@ -99,11 +84,25 @@ interface OrganizationCardProps {
 }
 
 function OrganizationCard({ organization }: OrganizationCardProps) {
+	const isPendingModeration = organization.isApproved === false
+
 	return (
-		<article className='group relative p-4 sm:p-6 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all bg-gradient-to-br from-white to-blue-50/30'>
+		<article
+			className={`group relative p-4 sm:p-6 rounded-xl border transition-all bg-gradient-to-br from-white to-blue-50/30 ${
+				isPendingModeration
+					? 'border-amber-300 hover:border-amber-400 bg-gradient-to-br from-amber-50/30 to-blue-50/30'
+					: 'border-slate-200 hover:border-blue-300'
+			} hover:shadow-lg`}
+		>
 			<div className='flex flex-col sm:flex-row items-start gap-4'>
 				{/* Иконка */}
-				<div className='w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg flex-shrink-0'>
+				<div
+					className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 ${
+						isPendingModeration
+							? 'bg-gradient-to-br from-amber-500 to-amber-600'
+							: 'bg-gradient-to-br from-blue-500 to-cyan-600'
+					}`}
+				>
 					<Building2 className='h-8 w-8 text-white' />
 				</div>
 
@@ -113,6 +112,12 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 						<span className='text-xs font-semibold text-blue-600 uppercase tracking-wider'>
 							{organization.city?.name || 'Город не указан'}
 						</span>
+						{organization.isApproved === false && (
+							<span className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200'>
+								<Clock className='h-3 w-3' />
+								На модерации
+							</span>
+						)}
 					</div>
 					<h3 className='text-lg font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors'>
 						{organization.name}

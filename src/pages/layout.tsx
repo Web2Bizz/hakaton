@@ -1,4 +1,4 @@
-import { Header, SupportButton } from '@/components'
+import { Header } from '@/components'
 import { Toaster } from '@/components/ui/sonner'
 import { UserProvider } from '@/contexts/UserContext'
 import { PWAProvider } from '@/pwa/PWAContext'
@@ -32,7 +32,7 @@ export default function Layout({ children }: Readonly<LayoutProps>) {
 					<PWAProvider>
 						<Header />
 						<main>{children}</main>
-						<SupportButton />
+						{/* <SupportButton /> */}
 						<Toaster />
 					</PWAProvider>
 				</UserProvider>

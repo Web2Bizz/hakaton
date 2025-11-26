@@ -40,6 +40,7 @@ export interface Organization {
 	updatedAt?: string
 	city: City
 	helpTypes: HelpType[]
+	isApproved?: boolean
 }
 
 // Re-export для обратной совместимости (старые типы)

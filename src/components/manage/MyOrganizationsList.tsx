@@ -1,29 +1,14 @@
 import type { Organization } from '@/components/map/types/types'
 import { Spinner } from '@/components/ui/spinner'
-import { useUser } from '@/hooks/useUser'
-import { useGetOrganizationsQuery } from '@/store/entities/organization'
+import { useGetMyOrganizationsQuery } from '@/store/entities/organization'
 import { getOrganizationCoordinates } from '@/utils/cityCoordinates'
 import { logger } from '@/utils/logger'
-import { ArrowRight, Building2, Heart, Map, MapPin } from 'lucide-react'
-import { useMemo } from 'react'
+import { ArrowRight, Building2, Clock, Heart, Map, MapPin } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function MyOrganizationsList() {
-	const { user } = useUser()
 	const navigate = useNavigate()
-	const { data: organizations = [], isLoading } = useGetOrganizationsQuery()
-
-	// Фильтруем только мои организации (созданные пользователем)
-	const myOrganizations = useMemo(() => {
-		if (!user?.createdOrganizationId) return []
-		return organizations.filter(org => {
-			const orgId = typeof org.id === 'string' ? org.id : String(org.id)
-			return (
-				orgId === user.createdOrganizationId ||
-				org.id === user.createdOrganizationId
-			)
-		})
-	}, [organizations, user?.createdOrganizationId])
+	const { data: myOrganizations = [], isLoading } = useGetMyOrganizationsQuery()
 
 	if (isLoading) {
 		return (
@@ -82,24 +67,62 @@ interface OrganizationCardProps {
 }
 
 function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
+	const isPendingModeration = organization.isApproved === false
+
+	const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		// Игнорируем клик, если кликнули на кнопку внутри
+		if (
+			(e.target as HTMLElement).closest('button') ||
+			(e.target as HTMLElement).tagName === 'BUTTON'
+		) {
+			return
+		}
+		onClick?.()
+	}
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			onClick?.()
+		}
+	}
+
 	return (
-		<button
-			type='button'
-			onClick={onClick}
-			className='group relative bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left w-full flex flex-col h-full'
+		<div
+			role='button'
+			tabIndex={0}
+			onClick={handleCardClick}
+			onKeyDown={handleKeyDown}
+			className={`group relative bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left w-full flex flex-col h-full cursor-pointer ${
+				isPendingModeration
+					? 'border-amber-300 hover:border-amber-400'
+					: 'border-slate-200'
+			}`}
 		>
 			{/* Градиентная полоса сверху */}
-			<div className='h-1.5 bg-gradient-to-r from-blue-500 to-cyan-600' />
+			<div
+				className={`h-1.5 ${
+					isPendingModeration
+						? 'bg-gradient-to-r from-amber-500 to-amber-600'
+						: 'bg-gradient-to-r from-blue-500 to-cyan-600'
+				}`}
+			/>
 
 			<div className='p-6 flex flex-col flex-1'>
 				{/* Header */}
 				<div className='flex items-start justify-between gap-3 mb-4'>
 					<div className='flex-1 min-w-0'>
-						<div className='flex items-center gap-2 mb-2'>
+						<div className='flex items-center gap-2 mb-2 flex-wrap'>
 							<MapPin className='h-4 w-4 text-blue-600 flex-shrink-0' />
 							<span className='text-xs font-semibold text-blue-600 uppercase tracking-wider truncate'>
 								{organization.city?.name || 'Город не указан'}
 							</span>
+							{organization.isApproved === false && (
+								<span className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200'>
+									<Clock className='h-3 w-3' />
+									На модерации
+								</span>
+							)}
 						</div>
 						<h3 className='text-lg font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors'>
 							{organization.name}
@@ -202,6 +225,6 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 
 			{/* Hover эффект */}
 			<div className='absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none' />
-		</button>
+		</div>
 	)
 }

@@ -21,7 +21,22 @@ export const organizationService = createApi({
 	endpoints: builder => ({
 		// GET /v1/organizations - Получить список всех организаций
 		getOrganizations: builder.query<Organization[], void>({
-			query: () => '/v1/organizations',
+			query: () => '/v1/organizations?onlyApproved=true',
+			providesTags: ['OrganizationList'],
+		}),
+
+		// GET /v1/organizations/my - Получить организации пользователя
+		getMyOrganizations: builder.query<Organization[], void>({
+			query: () => '/v1/organizations/my',
+			transformResponse: (
+				response: { data?: Organization[] } | Organization[]
+			) => {
+				// Обрабатываем оба формата ответа: { data: [...] } или [...]
+				if (Array.isArray(response)) {
+					return response
+				}
+				return response.data || []
+			},
 			providesTags: ['OrganizationList'],
 		}),
 
@@ -86,6 +101,7 @@ export const organizationService = createApi({
 			}),
 			invalidatesTags: (_result, _error, { organizationId }) => [
 				{ type: 'Organization', id: String(organizationId) },
+				{ type: 'OrganizationUpdate', id: `list-${organizationId}` },
 				'OrganizationUpdate',
 			],
 		}),
@@ -135,7 +151,13 @@ export const organizationService = createApi({
 					| { type: 'Organization'; id: string }
 				> = [{ type: 'OrganizationUpdate', id: String(id) }]
 				if (data.organizationId) {
-					tags.push({ type: 'Organization', id: String(data.organizationId) })
+					tags.push(
+						{ type: 'Organization', id: String(data.organizationId) },
+						{
+							type: 'OrganizationUpdate',
+							id: `list-${data.organizationId}`,
+						}
+					)
 				}
 				return tags
 			},
@@ -150,10 +172,8 @@ export const organizationService = createApi({
 				url: `/v1/organization-updates/${id}`,
 				method: 'DELETE',
 			}),
-			invalidatesTags: (_result, _error, id) => [
-				{ type: 'OrganizationUpdate', id: String(id) },
-				'OrganizationUpdate',
-			],
+			// Инвалидируем все теги OrganizationUpdate, чтобы обновить все списки
+			invalidatesTags: () => ['OrganizationUpdate'],
 		}),
 	}),
 })
@@ -161,6 +181,8 @@ export const organizationService = createApi({
 export const {
 	useGetOrganizationsQuery,
 	useLazyGetOrganizationsQuery,
+	useGetMyOrganizationsQuery,
+	useLazyGetMyOrganizationsQuery,
 	useGetOrganizationQuery,
 	useLazyGetOrganizationQuery,
 	useCreateOrganizationMutation,

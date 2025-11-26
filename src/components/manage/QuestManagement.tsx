@@ -162,25 +162,6 @@ export function QuestManagement({
 					if (userResult && setUser) {
 						const transformedUser = transformUserFromAPI(userResult)
 						setUser(transformedUser)
-
-						// Проверяем новые достижения
-						const currentAchievements = transformedUser.achievements || []
-						const newAchievements = currentAchievements.filter(
-							a => !previousAchievementIds.has(String(a.id))
-						)
-
-						// Показываем тостер для каждого нового достижения
-						for (const achievement of newAchievements) {
-							const achievementData =
-								allAchievements[achievement.id as keyof typeof allAchievements]
-							const title = achievementData?.title || achievement.title
-							const icon = achievementData?.icon || achievement.icon
-
-							toast.success('🏆 Достижение разблокировано!', {
-								description: `${icon} "${title}"`,
-								duration: 5000,
-							})
-						}
 					}
 
 					// Также проверяем достижения через API

@@ -13,7 +13,6 @@ import { ImageGallery } from '@/components/ui/ImageGallery'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/hooks/useAuth'
-import { useQuestActions } from '@/hooks/useQuestActions'
 import { useUser } from '@/hooks/useUser'
 import {
 	useAssignAchievementMutation,
@@ -35,7 +34,7 @@ import {
 	Users,
 	X,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import type { QuestStage } from '../../types/quest-types'
 import { AmbassadorShare } from './AmbassadorShare'
@@ -146,7 +145,6 @@ export function QuestDetails({
 		checkAndUnlockAchievements,
 	} = useUser()
 	const { isAuthenticated } = useAuth()
-	const { checkQuestCompletion } = useQuestActions()
 	const [assignAchievement] = useAssignAchievementMutation()
 	const [getUser] = useLazyGetUserQuery()
 	const [activeTab, setActiveTab] = useState<'stages' | 'updates'>('stages')
@@ -198,43 +196,6 @@ export function QuestDetails({
 
 	// Используем поле isParticipating из API
 	const isParticipating = transformedQuest?.isParticipating ?? false
-
-	// Отслеживаем уже обработанные квесты, чтобы не показывать toast повторно
-	const processedQuestRef = useRef<string | null>(null)
-
-	// Проверка завершения квеста и разблокировки достижений
-	useEffect(() => {
-		if (!transformedQuest || !isParticipating) return
-
-		// Проверяем завершение квеста (когда куратор нажал кнопку "Завершить квест")
-		if (transformedQuest.status === 'completed') {
-			const questKey = `quest_completed_${transformedQuest.id}`
-
-			// Пропускаем, если уже обработали этот квест
-			if (processedQuestRef.current === questKey) {
-				return
-			}
-
-			// Помечаем квест как обработанный сразу, чтобы не обрабатывать его повторно
-			processedQuestRef.current = questKey
-			checkQuestCompletion(
-				transformedQuest,
-				// Callback для завершения квеста (не используется, но нужен для API)
-				() => {},
-				// Callback для уведомления о разблокировке достижения
-				achievement => {
-					// Показываем toast уведомление
-					toast.success('🏆 Достижение разблокировано!', {
-						description: `${achievement.icon} "${achievement.title}"`,
-						duration: 5000,
-					})
-				}
-			)
-		} else {
-			// Если квест не завершен, сбрасываем флаг обработки
-			processedQuestRef.current = null
-		}
-	}, [transformedQuest, isParticipating, checkQuestCompletion])
 
 	// Если quest undefined, возвращаем null (во время анимации закрытия или когда не выбран)
 	if (!transformedQuest) {
