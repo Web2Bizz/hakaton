@@ -30,7 +30,6 @@ export function OrganizationEditForm({
 		handleCityChange,
 		handleDelete,
 	} = useOrganizationEditForm(organizationId, () => {
-		toast.success('Организация успешно обновлена!')
 		navigate('/manage')
 	})
 

@@ -68,7 +68,7 @@ export function useOrganizationEditForm(
 
 	// Загружаем данные существующей организации для редактирования
 	useEffect(() => {
-		if (existingOrg && !form.formState.isDirty && !isLoadingOrganization) {
+		if (existingOrg && !isLoadingOrganization) {
 			const organizationTypeId =
 				existingOrg.organizationTypes?.[0]?.id ||
 				(existingOrg as Organization & { type?: { id: number } }).type?.id ||
@@ -88,6 +88,17 @@ export function useOrganizationEditForm(
 				]
 			}
 
+			// Обрабатываем goals и needs - если они пустые или undefined, устанавливаем массив с одной пустой строкой
+			const goalsToLoad =
+				existingOrg.goals && Array.isArray(existingOrg.goals) && existingOrg.goals.length > 0
+					? existingOrg.goals.filter(g => g && g.trim() !== '')
+					: ['']
+			
+			const needsToLoad =
+				existingOrg.needs && Array.isArray(existingOrg.needs) && existingOrg.needs.length > 0
+					? existingOrg.needs.filter(n => n && n.trim() !== '')
+					: ['']
+
 			form.reset({
 				name: existingOrg.name || '',
 				cityId: existingOrg.city?.id || 0,
@@ -100,22 +111,19 @@ export function useOrganizationEditForm(
 				summary: existingOrg.summary || '',
 				description: existingOrg.description || '',
 				mission: existingOrg.mission || '',
-				goals:
-					existingOrg.goals && existingOrg.goals.length > 0
-						? existingOrg.goals
-						: [''],
-				needs:
-					existingOrg.needs && existingOrg.needs.length > 0
-						? existingOrg.needs
-						: [''],
+				goals: goalsToLoad.length > 0 ? goalsToLoad : [''],
+				needs: needsToLoad.length > 0 ? needsToLoad : [''],
 				address: existingOrg.address || '',
 				contacts: contactsToLoad,
 				latitude: existingOrg.latitude?.toString() || '',
 				longitude: existingOrg.longitude?.toString() || '',
 				gallery: existingOrg.gallery || [],
+			}, {
+				keepDirty: false,
+				keepErrors: false,
 			})
 		}
-	}, [existingOrg, cities, form, isLoadingOrganization, user?.email])
+	}, [existingOrg, isLoadingOrganization, user?.email, form])
 
 	const onSubmit = async (data: OrganizationFormData) => {
 		if (!data.latitude || !data.longitude) {

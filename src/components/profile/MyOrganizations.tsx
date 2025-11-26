@@ -73,7 +73,16 @@ export function MyOrganizations() {
 			</div>
 
 			<div className='space-y-4'>
-				<OrganizationCard organization={displayedOrganization} />
+				<OrganizationCard
+					organization={displayedOrganization}
+					onClick={() => {
+						const orgId =
+							typeof displayedOrganization.id === 'string'
+								? displayedOrganization.id
+								: String(displayedOrganization.id)
+						navigate(`/organizations/${orgId}/manage`)
+					}}
+				/>
 			</div>
 		</div>
 	)
@@ -81,14 +90,24 @@ export function MyOrganizations() {
 
 interface OrganizationCardProps {
 	organization: Organization
+	onClick: () => void
 }
 
-function OrganizationCard({ organization }: OrganizationCardProps) {
+function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 	const isPendingModeration = organization.isApproved === false
 
 	return (
 		<article
-			className={`group relative p-4 sm:p-6 rounded-xl border transition-all bg-gradient-to-br from-white to-blue-50/30 ${
+			onClick={onClick}
+			onKeyDown={e => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault()
+					onClick()
+				}
+			}}
+			role='button'
+			tabIndex={0}
+			className={`group relative p-4 sm:p-6 rounded-xl border transition-all bg-gradient-to-br from-white to-blue-50/30 cursor-pointer ${
 				isPendingModeration
 					? 'border-amber-300 hover:border-amber-400 bg-gradient-to-br from-amber-50/30 to-blue-50/30'
 					: 'border-slate-200 hover:border-blue-300'
@@ -190,7 +209,7 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 									logger.error('Error getting organization coordinates:', error)
 								}
 
-								window.location.href = `/map?organization=${orgId}`
+								globalThis.location.href = `/map?organization=${orgId}`
 							}}
 							className='flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50'
 						>
@@ -200,9 +219,13 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
 						<Button
 							variant='outline'
 							size='sm'
+							onClick={e => {
+								e.stopPropagation()
+								onClick()
+							}}
 							className='flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50'
 						>
-							Подробнее
+							Управлять
 							<ArrowRight className='h-4 w-4 ml-2' />
 						</Button>
 					</div>
