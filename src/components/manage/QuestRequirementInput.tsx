@@ -371,23 +371,6 @@ export function QuestRequirementInput({
 
 					<div>
 						<label
-							htmlFor={`participant-select-items-${stepIndex}`}
-							className='block text-sm font-medium text-slate-700 mb-2'
-						>
-							Участник квеста
-						</label>
-						<Select
-							id={`participant-select-items-${stepIndex}`}
-							options={userOptions}
-							value={selectedUserId}
-							onChange={e => setSelectedUserId(e.target.value)}
-							placeholder='Выберите участника'
-							className='w-full'
-						/>
-					</div>
-
-					<div>
-						<label
 							htmlFor={`items-input-${stepIndex}`}
 							className='block text-sm font-medium text-slate-700 mb-2'
 						>

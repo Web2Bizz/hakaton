@@ -32,9 +32,20 @@ export function QuestRequirementManager({
 	onAddAmount,
 	onGenerateQRCode,
 }: QuestRequirementManagerProps) {
-	const requirementType: RequirementType = getRequirementType(
-		requirement.targetValue
-	)
+	// Используем type из step, если он есть, иначе определяем по значению (для обратной совместимости)
+	let requirementType: RequirementType
+	if (step.type) {
+		// Маппинг новых значений на старые для компонента
+		if (step.type === 'finance') {
+			requirementType = 'financial'
+		} else if (step.type === 'contributers') {
+			requirementType = 'volunteers'
+		} else {
+			requirementType = 'items'
+		}
+	} else {
+		requirementType = getRequirementType(requirement.targetValue)
+	}
 
 	return (
 		<div className='border-2 border-slate-200 rounded-xl p-6 bg-gradient-to-br from-white to-slate-50/50 shadow-lg hover:shadow-xl transition-all duration-300'>
