@@ -3,7 +3,6 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import { defineConfig } from 'vite'
-import { VitePWA } from 'vite-plugin-pwa'
 import { w2bViteFileBasedRouting } from 'w2b-vite-filebased-routing/core'
 
 export default defineConfig({
@@ -16,16 +15,16 @@ export default defineConfig({
 			basePath: '/',
 		}),
 		tailwindcss(),
-		VitePWA({
-			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-			},
-			includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
-			manifest: false, // Отключаем автоматическую генерацию manifest
-			devOptions: {
-				enabled: false, // Отключаем dev service worker, чтобы убрать сообщения в консоли
-			},
-		}),
+		// VitePWA({
+		// 	workbox: {
+		// 		globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+		// 	},
+		// 	includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+		// 	manifest: false, // Отключаем автоматическую генерацию manifest
+		// 	devOptions: {
+		// 		enabled: false, // Отключаем dev service worker, чтобы убрать сообщения в консоли
+		// 	},
+		// }),
 	],
 	resolve: {
 		alias: {
