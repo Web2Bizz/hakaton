@@ -144,10 +144,10 @@ export function QuestStageForm({
 												<input
 													type='radio'
 													name={`requirementType-${index}`}
-													value='none'
-													checked={field.value === 'none'}
+													value='no_required'
+													checked={field.value === 'no_required'}
 													onChange={() => {
-														field.onChange('none')
+														field.onChange('no_required')
 														form.setValue(`stages.${index}.requirementValue`, undefined)
 													}}
 													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
@@ -160,9 +160,9 @@ export function QuestStageForm({
 												<input
 													type='radio'
 													name={`requirementType-${index}`}
-													value='financial'
-													checked={field.value === 'financial'}
-													onChange={() => field.onChange('financial')}
+													value='finance'
+													checked={field.value === 'finance'}
+													onChange={() => field.onChange('finance')}
 													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
 												/>
 												<span className='text-xs text-slate-700'>
@@ -173,9 +173,9 @@ export function QuestStageForm({
 												<input
 													type='radio'
 													name={`requirementType-${index}`}
-													value='volunteers'
-													checked={field.value === 'volunteers'}
-													onChange={() => field.onChange('volunteers')}
+													value='contributers'
+													checked={field.value === 'contributers'}
+													onChange={() => field.onChange('contributers')}
 													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
 												/>
 												<span className='text-xs text-slate-700'>
@@ -186,9 +186,9 @@ export function QuestStageForm({
 												<input
 													type='radio'
 													name={`requirementType-${index}`}
-													value='items'
-													checked={field.value === 'items'}
-													onChange={() => field.onChange('items')}
+													value='material'
+													checked={field.value === 'material'}
+													onChange={() => field.onChange('material')}
 													className='w-4 h-4 border-slate-300 text-blue-600 focus:ring-blue-500'
 												/>
 												<span className='text-xs text-slate-700'>
@@ -202,7 +202,7 @@ export function QuestStageForm({
 							)}
 						/>
 
-						{requirementType !== 'none' && (
+						{requirementType !== 'no_required' && (
 							<div className='ml-6 space-y-2'>
 								<FormField
 									control={form.control}
@@ -217,9 +217,9 @@ export function QuestStageForm({
 													value={field.value || ''}
 													onChange={e => field.onChange(Number(e.target.value))}
 													placeholder={
-														requirementType === 'financial'
+														requirementType === 'finance'
 															? 'Сумма (руб.)'
-															: requirementType === 'volunteers'
+															: requirementType === 'contributers'
 																? 'Количество волонтеров'
 																: 'Количество'
 													}

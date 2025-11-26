@@ -37,10 +37,22 @@ export function transformFormDataToCreateRequest(
 				progress: stage.progress,
 			}
 
-			// Добавляем requirement если есть требования
+			// Добавляем type если есть требования
+			if (stage.requirementType && stage.requirementType !== 'no_required') {
+				const requirementType = stage.requirementType
+				if (
+					requirementType === 'finance' ||
+					requirementType === 'contributers' ||
+					requirementType === 'material'
+				) {
+					step.type = requirementType
+				}
+			}
+
+			// Добавляем requirement если есть требования и значение
 			if (
 				stage.requirementType &&
-				stage.requirementType !== 'none' &&
+				stage.requirementType !== 'no_required' &&
 				stage.requirementValue
 			) {
 				step.requirement = {
@@ -121,10 +133,22 @@ export function transformFormDataToUpdateRequest(
 				progress: stage.progress,
 			}
 
-			// Добавляем requirement если есть требования
+			// Добавляем type если есть требования
+			if (stage.requirementType && stage.requirementType !== 'no_required') {
+				const requirementType = stage.requirementType
+				if (
+					requirementType === 'finance' ||
+					requirementType === 'contributers' ||
+					requirementType === 'material'
+				) {
+					step.type = requirementType
+				}
+			}
+
+			// Добавляем requirement если есть требования и значение
 			if (
 				stage.requirementType &&
-				stage.requirementType !== 'none' &&
+				stage.requirementType !== 'no_required' &&
 				stage.requirementValue
 			) {
 				step.requirement = {
@@ -218,9 +242,7 @@ export function transformApiResponseToFormData(
 		description: step.description,
 		status: step.status,
 		progress: step.progress,
-		requirementType: step.requirement
-			? ('financial' as const)
-			: ('none' as const),
+		requirementType: step.type || ('no_required' as const),
 		requirementValue: step.requirement?.targetValue,
 		itemName: undefined,
 		deadline: step.deadline || undefined,

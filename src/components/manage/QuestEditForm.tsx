@@ -1,18 +1,18 @@
-import { Button } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
-import { Spinner } from '@/components/ui/spinner'
-import { useGetCitiesQuery } from '@/store/entities/city'
-import { useState } from 'react'
-import { DangerZone } from '@/components/forms/shared/DangerZone'
-import { LocationPicker } from '@/components/forms/shared/LocationPicker'
 import { QuestAchievementSection } from '@/components/forms/quest/sections/QuestAchievementSection'
 import { QuestBasicInfo } from '@/components/forms/quest/sections/QuestBasicInfo'
 import { QuestContactsSection } from '@/components/forms/quest/sections/QuestContactsSection'
 import { QuestLocationSection } from '@/components/forms/quest/sections/QuestLocationSection'
 import { QuestStagesSection } from '@/components/forms/quest/sections/QuestStagesSection'
-import { useQuestEditForm } from './hooks/useQuestEditForm'
+import { DangerZone } from '@/components/forms/shared/DangerZone'
+import { LocationPicker } from '@/components/forms/shared/LocationPicker'
+import { Button } from '@/components/ui/button'
+import { Form } from '@/components/ui/form'
+import { Spinner } from '@/components/ui/spinner'
+import { useGetCitiesQuery } from '@/store/entities/city'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useQuestEditForm } from './hooks/useQuestEditForm'
 
 interface QuestEditFormProps {
 	questId: number
@@ -30,8 +30,7 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 		handleCityChange,
 		handleDelete,
 	} = useQuestEditForm(questId, () => {
-		toast.success('Квест успешно обновлен!')
-		navigate('/manage')
+		navigate('/manage?tab=quests')
 	})
 
 	const [showLocationPicker, setShowLocationPicker] = useState(false)
@@ -52,7 +51,7 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 	const handleDeleteWithRedirect = async () => {
 		await handleDelete()
 		toast.success('Квест успешно удален')
-		navigate('/manage')
+		navigate('/manage?tab=quests')
 	}
 
 	if (isLoadingQuest) {
@@ -180,4 +179,3 @@ export function QuestEditForm({ questId }: QuestEditFormProps) {
 		</>
 	)
 }
-

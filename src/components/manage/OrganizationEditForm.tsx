@@ -30,7 +30,7 @@ export function OrganizationEditForm({
 		handleCityChange,
 		handleDelete,
 	} = useOrganizationEditForm(organizationId, () => {
-		navigate('/manage')
+		navigate('/manage?tab=organizations')
 	})
 
 	const [showLocationPicker, setShowLocationPicker] = useState(false)
@@ -50,7 +50,7 @@ export function OrganizationEditForm({
 	const handleDeleteWithRedirect = async () => {
 		await handleDelete()
 		toast.success('Организация успешно удалена')
-		navigate('/manage')
+		navigate('/manage?tab=organizations')
 	}
 
 	if (isLoadingOrganization) {

@@ -42,7 +42,7 @@ export function useQuestForm(onSuccess?: (questId: string) => void) {
 					description: '',
 					status: 'pending',
 					progress: 0,
-					requirementType: 'none',
+					requirementType: 'no_required',
 					requirementValue: undefined,
 					itemName: undefined,
 					deadline: undefined,

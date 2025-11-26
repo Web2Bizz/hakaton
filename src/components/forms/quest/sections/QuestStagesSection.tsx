@@ -26,7 +26,7 @@ export function QuestStagesSection() {
 							description: '',
 							status: 'pending' as const,
 							progress: 0,
-							requirementType: 'none' as const,
+							requirementType: 'no_required' as const,
 							requirementValue: undefined,
 							itemName: undefined,
 							deadline: undefined,

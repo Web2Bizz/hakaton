@@ -58,6 +58,7 @@ export interface QuestStep {
 	description: string
 	status: 'pending' | 'in_progress' | 'completed'
 	progress: number // 0-100
+	type?: 'finance' | 'contributers' | 'material'
 	requirement?: QuestStepRequirement
 	deadline?: string // ISO date string
 }
