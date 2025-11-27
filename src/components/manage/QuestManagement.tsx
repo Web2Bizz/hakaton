@@ -251,23 +251,23 @@ export function QuestManagement({
 	}
 
 	return (
-		<div className={`space-y-6 ${isArchived ? 'opacity-75' : ''}`}>
-			<div className='mb-6'>
+		<div className={`space-y-4 sm:space-y-6 ${isArchived ? 'opacity-75' : ''}`}>
+			<div className='mb-4 sm:mb-6'>
 				<h3
-					className={`text-2xl font-bold mb-2 ${
+					className={`text-xl sm:text-2xl font-bold mb-2 ${
 						isArchived ? 'text-slate-600' : 'text-slate-900'
 					}`}
 				>
 					Управление требованиями выполнения
 				</h3>
-				<p className='text-slate-600 text-sm'>
+				<p className='text-slate-600 text-xs sm:text-sm'>
 					Отслеживайте прогресс и управляйте вкладами участников в каждый этап
 					квеста
 				</p>
 			</div>
 
 			{currentQuest.steps?.length > 0 ? (
-				<div className='space-y-6'>
+				<div className='space-y-4 sm:space-y-6'>
 					{currentQuest.steps.map((step, stepIndex) => {
 						if (!step.requirement) {
 							// Не показываем сообщение для архивированных квестов
@@ -277,12 +277,12 @@ export function QuestManagement({
 							return (
 								<div
 									key={stepIndex}
-									className='border rounded-lg p-4 border-slate-200 bg-slate-50'
+									className='border rounded-lg p-3 sm:p-4 border-slate-200 bg-slate-50'
 								>
-									<h4 className='font-semibold mb-2 text-slate-900'>
+									<h4 className='font-semibold mb-2 text-sm sm:text-base text-slate-900'>
 										{step.title}
 									</h4>
-									<p className='text-sm text-slate-600'>
+									<p className='text-xs sm:text-sm text-slate-600'>
 										У этого этапа нет требований выполнения
 									</p>
 								</div>
@@ -305,13 +305,17 @@ export function QuestManagement({
 				</div>
 			) : (
 				<div
-					className={`border rounded-lg p-8 text-center ${
+					className={`border rounded-lg p-6 sm:p-8 text-center ${
 						isArchived
 							? 'bg-slate-100 border-slate-300'
 							: 'bg-slate-50 border-slate-200'
 					}`}
 				>
-					<p className={isArchived ? 'text-slate-500' : 'text-slate-600'}>
+					<p
+						className={`text-sm sm:text-base ${
+							isArchived ? 'text-slate-500' : 'text-slate-600'
+						}`}
+					>
 						У этого квеста пока нет этапов с требованиями выполнения
 					</p>
 				</div>

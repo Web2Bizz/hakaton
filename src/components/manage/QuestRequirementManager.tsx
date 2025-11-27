@@ -48,25 +48,31 @@ export function QuestRequirementManager({
 	}
 
 	return (
-		<div className='border-2 border-slate-200 rounded-xl p-6 bg-gradient-to-br from-white to-slate-50/50 shadow-lg hover:shadow-xl transition-all duration-300'>
-			<div className='flex items-start justify-between mb-6'>
-				<div className='flex-1'>
-					<div className='flex items-center gap-3 mb-2'>
-						<div className='p-2 bg-slate-100 rounded-lg'>
-							<span className='text-xl font-bold text-slate-700'>
+		<div className='border-2 border-slate-200 rounded-lg sm:rounded-xl p-4 sm:p-6 bg-gradient-to-br from-white to-slate-50/50 shadow-lg hover:shadow-xl transition-all duration-300'>
+			<div className='flex items-start justify-between mb-4 sm:mb-6'>
+				<div className='flex-1 min-w-0'>
+					<div className='flex items-start gap-2 sm:gap-3 mb-2'>
+						<div className='p-1.5 sm:p-2 bg-slate-100 rounded-lg flex-shrink-0'>
+							<span className='text-lg sm:text-xl font-bold text-slate-700'>
 								{stepIndex + 1}
 							</span>
 						</div>
-						<div>
-							<h4 className='font-bold text-lg text-slate-900'>{step.title}</h4>
-							<p className='text-sm text-slate-600 mt-1'>{step.description}</p>
+						<div className='min-w-0 flex-1'>
+							<h4 className='font-bold text-base sm:text-lg text-slate-900 break-words'>
+								{step.title}
+							</h4>
+							{step.description && (
+								<p className='text-xs sm:text-sm text-slate-600 mt-1 break-words'>
+									{step.description}
+								</p>
+							)}
 						</div>
 					</div>
-					<div className='flex items-center gap-6 text-sm mt-4'>
+					<div className='flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs sm:text-sm mt-3 sm:mt-4'>
 						<div className='flex items-center gap-2'>
-							<span className='text-slate-600'>Статус:</span>
+							<span className='text-slate-600 whitespace-nowrap'>Статус:</span>
 							<span
-								className={`px-3 py-1 rounded-full font-medium text-xs ${
+								className={`px-2 sm:px-3 py-1 rounded-full font-medium text-xs whitespace-nowrap ${
 									step.status === 'completed'
 										? 'bg-green-100 text-green-700'
 										: step.status === 'in_progress'
@@ -82,14 +88,16 @@ export function QuestRequirementManager({
 							</span>
 						</div>
 						<div className='flex items-center gap-2'>
-							<span className='text-slate-600'>Прогресс:</span>
+							<span className='text-slate-600 whitespace-nowrap'>
+								Прогресс:
+							</span>
 							<span className='font-bold text-slate-900'>{step.progress}%</span>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div className='space-y-4'>
+			<div className='space-y-3 sm:space-y-4'>
 				<QuestRequirementInput
 					requirement={requirement}
 					stepIndex={stepIndex}

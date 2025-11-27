@@ -69,13 +69,13 @@ export function MyQuestsList() {
 	}
 
 	return (
-		<div className='space-y-6'>
+		<div className='space-y-4 sm:space-y-6'>
 			{/* Фильтры */}
 			<div className='flex flex-wrap gap-2'>
 				<button
 					type='button'
 					onClick={() => setFilter('all')}
-					className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+					className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
 						filter === 'all'
 							? 'bg-orange-500 text-white shadow-md'
 							: 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
@@ -86,7 +86,7 @@ export function MyQuestsList() {
 				<button
 					type='button'
 					onClick={() => setFilter('active')}
-					className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+					className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
 						filter === 'active'
 							? 'bg-orange-500 text-white shadow-md'
 							: 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
@@ -97,7 +97,7 @@ export function MyQuestsList() {
 				<button
 					type='button'
 					onClick={() => setFilter('completed')}
-					className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+					className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
 						filter === 'completed'
 							? 'bg-green-500 text-white shadow-md'
 							: 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
@@ -108,14 +108,16 @@ export function MyQuestsList() {
 				<button
 					type='button'
 					onClick={() => setFilter('archived')}
-					className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+					className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 ${
 						filter === 'archived'
 							? 'bg-slate-600 text-white shadow-md'
 							: 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
 					}`}
 				>
-					<Archive className='h-4 w-4' />
-					Архив ({allQuests.filter(q => q.status === 'archived').length})
+					<Archive className='h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0' />
+					<span className='whitespace-nowrap'>
+						Архив ({allQuests.filter(q => q.status === 'archived').length})
+					</span>
 				</button>
 			</div>
 
@@ -147,7 +149,7 @@ export function MyQuestsList() {
 					</div>
 				</div>
 			) : (
-				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
 					{myQuests.map(quest => (
 						<QuestCard
 							key={quest.id}
@@ -232,10 +234,10 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 			{/* Градиентная полоса сверху */}
 			<div className={`h-1.5 bg-gradient-to-r ${progressColor}`} />
 
-			<div className='p-6 flex flex-col h-full'>
+			<div className='p-4 sm:p-6 flex flex-col h-full'>
 				{/* Header */}
 				<div className='flex  flex-1'>
-					<div className='flex  items-start justify-between gap-3 mb-4'>
+					<div className='flex  items-start justify-between gap-3 mb-3 sm:mb-4'>
 						<div className='flex-1 min-w-0'>
 							<div className='flex items-center gap-2 mb-2'>
 								<MapPin className={`h-4 w-4 ${cityColor} flex-shrink-0`} />
@@ -332,9 +334,9 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 
 							window.location.href = `/map?quest=${questId}`
 						}}
-						className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${mapButtonBg}`}
+						className={`w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium rounded-lg transition-colors cursor-pointer h-12 sm:h-auto ${mapButtonBg}`}
 					>
-						<Map className='h-4 w-4' />
+						<Map className='h-5 w-5 sm:h-4 sm:w-4' />
 						Показать на карте
 					</button>
 				</div>
