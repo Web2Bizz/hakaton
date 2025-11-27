@@ -41,7 +41,7 @@ export function MyOrganizationsList() {
 	}
 
 	return (
-		<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+		<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
 			{myOrganizations.map(organization => {
 				const orgId =
 					typeof organization.id === 'string'
@@ -108,9 +108,9 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 				}`}
 			/>
 
-			<div className='p-6 flex flex-col flex-1'>
+			<div className='p-4 sm:p-6 flex flex-col flex-1'>
 				{/* Header */}
-				<div className='flex items-start justify-between gap-3 mb-4'>
+				<div className='flex items-start justify-between gap-3 mb-3 sm:mb-4'>
 					<div className='flex-1 min-w-0'>
 						<div className='flex items-center gap-2 mb-2 flex-wrap'>
 							<MapPin className='h-4 w-4 text-blue-600 flex-shrink-0' />
@@ -215,9 +215,9 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 
 							globalThis.location.href = `/map?organization=${orgId}`
 						}}
-						className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors'
+						className='w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors h-12 sm:h-auto'
 					>
-						<Map className='h-4 w-4' />
+						<Map className='h-5 w-5 sm:h-4 sm:w-4' />
 						Показать на карте
 					</button>
 				</div>

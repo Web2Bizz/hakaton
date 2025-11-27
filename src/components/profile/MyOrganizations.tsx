@@ -184,7 +184,6 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 					<div className='flex flex-col sm:flex-row gap-2'>
 						<Button
 							variant='outline'
-							size='sm'
 							onClick={e => {
 								e.stopPropagation()
 								const orgId =
@@ -211,22 +210,21 @@ function OrganizationCard({ organization, onClick }: OrganizationCardProps) {
 
 								globalThis.location.href = `/map?organization=${orgId}`
 							}}
-							className='flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50'
+							className='flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm text-blue-600 border-blue-200 hover:bg-blue-50'
 						>
-							<Map className='h-4 w-4 mr-2' />
+							<Map className='h-5 w-5 sm:h-4 sm:w-4 mr-2' />
 							Показать на карте
 						</Button>
 						<Button
 							variant='outline'
-							size='sm'
 							onClick={e => {
 								e.stopPropagation()
 								onClick()
 							}}
-							className='flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50'
+							className='flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm text-blue-600 border-blue-200 hover:bg-blue-50'
 						>
 							Управлять
-							<ArrowRight className='h-4 w-4 ml-2' />
+							<ArrowRight className='h-5 w-5 sm:h-4 sm:w-4 ml-2' />
 						</Button>
 					</div>
 				</div>
