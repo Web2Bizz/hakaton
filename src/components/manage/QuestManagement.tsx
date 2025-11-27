@@ -35,7 +35,8 @@ export function QuestManagement({
 	const { data: quest, isLoading, refetch } = useGetQuestQuery(questId)
 	const [updateQuest, { isLoading: isUpdating }] = useUpdateQuestMutation()
 	const [completeQuest] = useCompleteQuestMutation()
-	const [generateCheckInToken] = useGenerateCheckInTokenMutation()
+	const [generateCheckInToken, { isLoading: isGeneratingQR }] =
+		useGenerateCheckInTokenMutation()
 	const { user, setUser } = useUser()
 	const [getUser] = useLazyGetUserQuery()
 	const [getUserAchievements] = useLazyGetUserAchievementsByUserIdQuery()
@@ -319,6 +320,7 @@ export function QuestManagement({
 								questId={questId}
 								onAddAmount={handleAddAmount}
 								onGenerateQRCode={generateQRCode}
+								isGeneratingQR={isGeneratingQR}
 							/>
 						)
 					})}
@@ -369,6 +371,7 @@ export function QuestManagement({
 				isOpen={showQRCode}
 				onClose={() => setShowQRCode(false)}
 				qrCodeData={qrCodeData}
+				isLoading={isGeneratingQR}
 			/>
 		</div>
 	)

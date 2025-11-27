@@ -1,13 +1,20 @@
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { QRCodeDisplay } from './QRCodeDisplay'
 
 interface QRCodeModalProps {
 	isOpen: boolean
 	onClose: () => void
 	qrCodeData: string
+	isLoading?: boolean
 }
 
-export function QRCodeModal({ isOpen, onClose, qrCodeData }: QRCodeModalProps) {
+export function QRCodeModal({
+	isOpen,
+	onClose,
+	qrCodeData,
+	isLoading = false,
+}: QRCodeModalProps) {
 	if (!isOpen) return null
 
 	return (
@@ -20,19 +27,34 @@ export function QRCodeModal({ isOpen, onClose, qrCodeData }: QRCodeModalProps) {
 					<button
 						type='button'
 						onClick={onClose}
-						className='text-slate-500 hover:text-slate-900'
+						disabled={isLoading}
+						className='text-slate-500 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed'
 					>
 						✕
 					</button>
 				</div>
 				<div className='flex flex-col items-center space-y-4'>
-					<div className='bg-white p-4 rounded-lg border-2 border-slate-200'>
-						<QRCodeDisplay data={qrCodeData} />
+					<div className='bg-white p-4 rounded-lg border-2 border-slate-200 min-h-[256px] min-w-[256px] flex items-center justify-center'>
+						{isLoading ? (
+							<div className='flex flex-col items-center space-y-3'>
+								<Spinner />
+								<p className='text-sm text-slate-600'>Генерация QR кода...</p>
+							</div>
+						) : (
+							<QRCodeDisplay data={qrCodeData} />
+						)}
 					</div>
-					<p className='text-sm text-slate-600 text-center'>
-						Отсканируйте этот QR код, чтобы отметить присутствие волонтера
-					</p>
-					<Button type='button' variant='outline' onClick={onClose}>
+					{!isLoading && (
+						<p className='text-sm text-slate-600 text-center'>
+							Отсканируйте этот QR код, чтобы отметить присутствие волонтера
+						</p>
+					)}
+					<Button
+						type='button'
+						variant='outline'
+						onClick={onClose}
+						disabled={isLoading}
+					>
 						Закрыть
 					</Button>
 				</div>

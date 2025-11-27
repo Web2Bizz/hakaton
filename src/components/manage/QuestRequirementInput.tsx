@@ -13,7 +13,7 @@ import type { QuestStepRequirement } from '@/store/entities/quest/model/type'
 import { getErrorMessage } from '@/utils/error'
 import { formatCurrency } from '@/utils/format'
 import { logger } from '@/utils/logger'
-import { Check, Plus, QrCode, Users } from 'lucide-react'
+import { Check, Plus, QrCode, Search, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -33,6 +33,7 @@ interface QuestRequirementInputProps {
 		isAnonymous?: boolean
 	) => void
 	readonly onGenerateQRCode?: (stepIndex: number) => void
+	readonly isGeneratingQR?: boolean
 }
 
 export function QuestRequirementInput({
@@ -44,6 +45,7 @@ export function QuestRequirementInput({
 	questId,
 	onAddAmount,
 	onGenerateQRCode,
+	isGeneratingQR,
 }: QuestRequirementInputProps) {
 	const { participants, isLoading: isLoadingParticipants } =
 		useQuestParticipants(questId)
@@ -70,6 +72,7 @@ export function QuestRequirementInput({
 		new Set()
 	)
 	const [amount, setAmount] = useState<string>('')
+	const [searchQuery, setSearchQuery] = useState<string>('')
 	
 	// Инициализируем markedVolunteerIds с уже отмеченными пользователями (заблокированные)
 	useEffect(() => {
@@ -100,6 +103,20 @@ export function QuestRequirementInput({
 		],
 		[participants]
 	)
+
+	// Фильтруем участников по поисковому запросу
+	const filteredParticipants = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return participants
+		}
+
+		const query = searchQuery.toLowerCase().trim()
+		return participants.filter(participant => {
+			const name = participant.name.toLowerCase()
+			const email = participant.email?.toLowerCase() || ''
+			return name.includes(query) || email.includes(query)
+		})
+	}, [participants, searchQuery])
 
 	const isAnonymous = selectedUserId === 'anonymous'
 	const actualUserId = isAnonymous ? undefined : selectedUserId || undefined
@@ -382,13 +399,26 @@ export function QuestRequirementInput({
 						<p className='block text-xs sm:text-sm font-medium text-slate-700 mb-2 sm:mb-3'>
 							Выберите участников для отметки:
 						</p>
+						{/* Поле поиска */}
+						<div className='mb-3'>
+							<div className='relative'>
+								<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400' />
+								<Input
+									type='text'
+									placeholder='Поиск по имени или email...'
+									value={searchQuery}
+									onChange={e => setSearchQuery(e.target.value)}
+									className='pl-10 w-full text-sm'
+								/>
+							</div>
+						</div>
 						<div className='bg-white/60 rounded-lg p-3 sm:p-4 space-y-2 max-h-48 overflow-y-auto relative min-h-[100px]'>
 							{isLoadingParticipants || isLoadingMarkedVolunteers ? (
 								<div className='absolute inset-0 flex items-center justify-center'>
 									<Spinner />
 								</div>
-							) : participants.length > 0 ? (
-								participants.map(participant => {
+							) : filteredParticipants.length > 0 ? (
+								filteredParticipants.map(participant => {
 									const isMarked = markedVolunteerIds.has(participant.id)
 									const isSelected = isMarked || selectedVolunteers.has(participant.id)
 									const isDisabled = isMarked
@@ -432,6 +462,10 @@ export function QuestRequirementInput({
 										</label>
 									)
 								})
+							) : searchQuery.trim() ? (
+								<p className='text-xs sm:text-sm text-slate-500 text-center py-3 sm:py-4'>
+									Участники не найдены по запросу "{searchQuery}"
+								</p>
 							) : (
 								<p className='text-xs sm:text-sm text-slate-500 text-center py-3 sm:py-4'>
 									Нет участников квеста
@@ -466,11 +500,22 @@ export function QuestRequirementInput({
 								type='button'
 								variant='outline'
 								onClick={() => onGenerateQRCode(stepIndex)}
-								className='border-green-300 text-green-700 hover:bg-green-50 h-10 sm:h-auto text-sm sm:text-base'
+								disabled={isGeneratingQR}
+								className='border-green-300 text-green-700 hover:bg-green-50 h-10 sm:h-auto text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed'
 							>
-								<QrCode className='h-4 w-4 mr-2' />
-								<span className='hidden sm:inline'>QR код</span>
-								<span className='sm:hidden'>QR</span>
+								{isGeneratingQR ? (
+									<>
+										<Spinner className='h-4 w-4 mr-2' />
+										<span className='hidden sm:inline'>Генерация...</span>
+										<span className='sm:hidden'>...</span>
+									</>
+								) : (
+									<>
+										<QrCode className='h-4 w-4 mr-2' />
+										<span className='hidden sm:inline'>QR код</span>
+										<span className='sm:hidden'>QR</span>
+									</>
+								)}
 							</Button>
 						)}
 					</div>

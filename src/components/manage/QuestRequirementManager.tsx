@@ -21,6 +21,7 @@ interface QuestRequirementManagerProps {
 		isAnonymous?: boolean
 	) => void
 	readonly onGenerateQRCode?: (stepIndex: number) => void
+	readonly isGeneratingQR?: boolean
 }
 
 export function QuestRequirementManager({
@@ -31,6 +32,7 @@ export function QuestRequirementManager({
 	questId,
 	onAddAmount,
 	onGenerateQRCode,
+	isGeneratingQR,
 }: QuestRequirementManagerProps) {
 	// Используем type из step, если он есть, иначе определяем по значению (для обратной совместимости)
 	let requirementType: RequirementType
@@ -107,6 +109,7 @@ export function QuestRequirementManager({
 					questId={questId}
 					onAddAmount={onAddAmount}
 					onGenerateQRCode={onGenerateQRCode}
+					isGeneratingQR={isGeneratingQR}
 				/>
 			</div>
 		</div>
