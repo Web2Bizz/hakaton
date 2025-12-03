@@ -144,18 +144,22 @@ export const baseQueryWithReauth = async (
 					logger.info('[baseQueryWithReauth] Повторный запрос успешен')
 				}
 			} else {
-				// Если refresh не удался, очищаем токены
+				// Если refresh не удался, очищаем токены и возвращаем оригинальную ошибку
 				logger.error(
 					'[baseQueryWithReauth] Не удалось обновить токен, очищаем токены'
 				)
 				removeToken()
+				// Возвращаем оригинальную ошибку 401
+				return result
 			}
 		} else {
-			// Если нет refresh token, очищаем токены
+			// Если нет refresh token, очищаем токены и возвращаем оригинальную ошибку
 			logger.warn(
 				'[baseQueryWithReauth] Refresh token отсутствует, очищаем токены'
 			)
 			removeToken()
+			// Возвращаем оригинальную ошибку 401
+			return result
 		}
 	} else if (result?.error) {
 		logger.error('[baseQueryWithReauth] Ошибка запроса:', result.error)
