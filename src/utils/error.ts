@@ -12,13 +12,13 @@ export function getErrorMessage(
 	error: unknown,
 	defaultMessage: string = 'Произошла ошибка'
 ): string {
-	if (!error) {
-		return defaultMessage
-	}
-
-	// Если это строка, возвращаем её
+	// Если это строка, возвращаем её (включая пустую строку)
 	if (typeof error === 'string') {
 		return error
+	}
+
+	if (!error) {
+		return defaultMessage
 	}
 
 	// Если это объект с полем message

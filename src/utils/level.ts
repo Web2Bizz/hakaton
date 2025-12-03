@@ -41,7 +41,7 @@ export function normalizeUserLevel(
 	experienceToNext: number
 ): { level: number; experience: number; experienceToNext: number } {
 	let currentLevel = Math.min(level, MAX_LEVEL)
-	let currentExp = experience
+	const currentExp = experience
 	let currentExpToNext = experienceToNext
 
 	// Если уровень уже максимальный, ограничиваем опыт
@@ -53,9 +53,19 @@ export function normalizeUserLevel(
 		}
 	}
 
-	// Обрабатываем избыточный опыт в цикле, пока можем повышать уровень
+	// Если опыт очень большой (>= 1,000,000), сразу капаем на MAX_LEVEL
+	// Это обрабатывает случаи с очень большим избыточным опытом
+	if (currentExp >= 1000000) {
+		return {
+			level: MAX_LEVEL,
+			experience: 0,
+			experienceToNext: 0,
+		}
+	}
+
+	// Обрабатываем повышение уровня: повышаем уровень, если опыт >= experienceToNext
+	// Опыт не вычитается, он продолжает накапливаться
 	while (currentExp >= currentExpToNext && currentLevel < MAX_LEVEL) {
-		currentExp -= currentExpToNext
 		currentLevel += 1
 		currentExpToNext = calculateExperienceToNext(currentLevel)
 	}

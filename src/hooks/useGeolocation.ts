@@ -67,13 +67,26 @@ export function useGeolocation(
 
 	// Проверка поддержки геолокации в браузере
 	const isGeolocationSupported = useCallback(() => {
-		return 'geolocation' in navigator
+		return 'geolocation' in navigator && navigator.geolocation !== undefined
 	}, [])
 
 	// Обработчик успешного получения позиции
 	const handleSuccess = useCallback(
 		(pos: GeolocationPosition, retryCallback?: () => void) => {
-			const accuracy = pos.accuracy ?? Infinity
+			// Если accuracy не указан (undefined), не делаем retry, так как точность неизвестна
+			if (pos.accuracy === undefined) {
+				setPosition({
+					latitude: pos.latitude,
+					longitude: pos.longitude,
+					accuracy: pos.accuracy,
+				})
+				setError(null)
+				setIsLoading(false)
+				retryCountRef.current = 0
+				return
+			}
+
+			const accuracy = pos.accuracy
 
 			// Если точность недостаточна и есть попытки, повторяем запрос
 			if (

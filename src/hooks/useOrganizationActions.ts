@@ -50,14 +50,14 @@ export function useOrganizationActions() {
 	)
 
 	const canCreateQuest = useCallback(() => {
-		return !user?.createdQuestId
+		return !!user && !user.createdQuestId
 	}, [user])
 
 	const canCreateOrganization = useCallback(() => {
 		if (MAX_ORGANIZATIONS_PER_USER === 1) {
-			return !user?.createdOrganizationId
+			return !!user && !user.createdOrganizationId
 		}
-		return !user?.createdOrganizationId
+		return !!user && !user.createdOrganizationId
 	}, [user])
 
 	const deleteQuest = useCallback(

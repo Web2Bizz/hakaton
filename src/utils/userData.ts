@@ -26,18 +26,28 @@ export function getUserCreatedOrganizations(): Organization[] {
 
 export function getUserQuest(questId: string): Quest | null {
 	const quests = getUserCreatedQuests()
-	return quests.find(q => q.id === questId) || null
+	return quests.find(q => String(q.id) === questId) || null
 }
 
 export function getUserOrganization(organizationId: string): Organization | null {
 	const organizations = getUserCreatedOrganizations()
-	return organizations.find(o => o.id === organizationId) || null
+	return organizations.find(o => String(o.id) === organizationId) || null
 }
 
 export function updateUserQuest(quest: Quest): void {
 	try {
 		const existingQuests = getUserCreatedQuests()
-		const updatedQuests = existingQuests.map(q => (q.id === quest.id ? quest : q))
+		const existingIndex = existingQuests.findIndex(q => String(q.id) === String(quest.id))
+		
+		let updatedQuests: Quest[]
+		if (existingIndex >= 0) {
+			// Обновляем существующий квест
+			updatedQuests = existingQuests.map(q => (String(q.id) === String(quest.id) ? quest : q))
+		} else {
+			// Добавляем новый квест
+			updatedQuests = [...existingQuests, quest]
+		}
+		
 		const questsJson = JSON.stringify(updatedQuests)
 		
 		// Проверяем размер перед сохранением
@@ -60,9 +70,21 @@ export function updateUserQuest(quest: Quest): void {
 export function updateUserOrganization(organization: Organization): void {
 	try {
 		const existingOrganizations = getUserCreatedOrganizations()
-		const updatedOrganizations = existingOrganizations.map(o =>
-			o.id === organization.id ? organization : o
+		const existingIndex = existingOrganizations.findIndex(
+			o => o.id === organization.id
 		)
+		
+		let updatedOrganizations: Organization[]
+		if (existingIndex >= 0) {
+			// Обновляем существующую организацию
+			updatedOrganizations = existingOrganizations.map(o =>
+				o.id === organization.id ? organization : o
+			)
+		} else {
+			// Добавляем новую организацию
+			updatedOrganizations = [...existingOrganizations, organization]
+		}
+		
 		localStorage.setItem('user_created_organizations', JSON.stringify(updatedOrganizations))
 	} catch (error) {
 		logger.error('Error updating organization:', error)

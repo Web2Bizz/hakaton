@@ -1,4 +1,4 @@
-import type { Quest, QuestStage } from '@/components/map/types/quest-types'
+import type { Quest } from '@/components/map/types/quest-types'
 import type { Quest as ApiQuest } from '@/store/entities/quest/model/type'
 import {
 	calculateQuestProgress,
@@ -10,7 +10,7 @@ import {
 	transformApiQuestToComponentQuest,
 	transformApiQuestsToComponentQuests,
 } from '@/utils/quest'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('quest utils', () => {
 	describe('calculateQuestProgress', () => {

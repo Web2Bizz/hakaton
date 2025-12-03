@@ -363,8 +363,13 @@ export function useQuestActions() {
 				icon: string
 			}) => void
 		) => {
+			// Не выполняем действия, если user = null
+			if (!user || !customAchievement || questProgress < 100) {
+				return
+			}
+
 			setUser(currentUser => {
-				if (!currentUser || !customAchievement || questProgress < 100) {
+				if (!currentUser) {
 					return currentUser
 				}
 
@@ -423,6 +428,11 @@ export function useQuestActions() {
 				icon: string
 			}) => void
 		) => {
+			// Не выполняем действия, если user = null
+			if (!user) {
+				return
+			}
+
 			setUser(currentUser => {
 				if (!currentUser) return currentUser
 

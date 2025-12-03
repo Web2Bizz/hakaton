@@ -1,5 +1,5 @@
 import { compressImage } from '@/utils/image'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('image utils', () => {
 	// Мокируем FileReader
@@ -43,11 +43,16 @@ describe('image utils', () => {
 		mockImage.width = 0
 		mockImage.height = 0
 
-		// Мокируем FileReader
-		global.FileReader = vi.fn(() => mockFileReader) as unknown as typeof FileReader
+		// Мокируем FileReader как конструктор
+		// Используем функцию-конструктор, которая возвращает мок-объект
+		global.FileReader = function FileReader() {
+			return mockFileReader
+		} as unknown as typeof FileReader
 
-		// Мокируем Image
-		global.Image = vi.fn(() => mockImage) as unknown as typeof Image
+		// Мокируем Image как конструктор
+		global.Image = function Image() {
+			return mockImage
+		} as unknown as typeof Image
 
 		// Мокируем createElement для canvas
 		global.document.createElement = vi.fn((tagName: string) => {

@@ -97,7 +97,9 @@ export function transformUserFromAPI(apiUser: UserFullData): User {
 
 	return {
 		id: apiUser.id,
-		name: `${apiUser.firstName} ${apiUser.lastName}`.trim() || apiUser.email,
+		name:
+			`${apiUser.firstName?.trim() || ''} ${apiUser.lastName?.trim() || ''}`.trim() ||
+			apiUser.email,
 		email: apiUser.email,
 		avatar: avatarUrl,
 		level: {

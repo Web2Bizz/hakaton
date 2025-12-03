@@ -26,7 +26,13 @@ export function useLocalStorage<T>(
 					const valueToStore = value instanceof Function ? value(prevValue) : value
 					
 					if (typeof window !== 'undefined') {
-						window.localStorage.setItem(key, JSON.stringify(valueToStore))
+						// JSON.stringify(undefined) возвращает undefined, а не строку
+						// localStorage.setItem требует строку, поэтому обрабатываем undefined отдельно
+						if (valueToStore === undefined) {
+							window.localStorage.removeItem(key)
+						} else {
+							window.localStorage.setItem(key, JSON.stringify(valueToStore))
+						}
 					}
 					
 					return valueToStore

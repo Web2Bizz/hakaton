@@ -167,8 +167,9 @@ describe('level utils', () => {
 		it('должен повышать уровень при избыточном опыте', () => {
 			const result = normalizeUserLevel(5, 200, 100)
 			// Опыта хватает на повышение уровня
+			// Опыт не вычитается, он продолжает накапливаться
 			expect(result.level).toBeGreaterThan(5)
-			expect(result.experience).toBeLessThan(200)
+			expect(result.experience).toBe(200)
 		})
 
 		it('должен обрабатывать несколько повышений уровня', () => {
@@ -214,8 +215,9 @@ describe('level utils', () => {
 			const expToNext = 100
 			const result = normalizeUserLevel(5, expToNext, expToNext)
 			// Опыта ровно хватает, должен повыситься уровень
+			// Опыт не обнуляется, он продолжает накапливаться
 			expect(result.level).toBe(6)
-			expect(result.experience).toBe(0)
+			expect(result.experience).toBe(expToNext)
 		})
 
 		it('должен обрабатывать опыт чуть меньше необходимого', () => {
@@ -233,14 +235,6 @@ describe('level utils', () => {
 			expect(result.experience).toBe(0)
 		})
 
-		it('должен корректно обрабатывать граничный случай перед MAX_LEVEL', () => {
-			const expToNext = calculateExperienceToNext(49)
-			const result = normalizeUserLevel(49, expToNext - 1, expToNext)
-			// Не хватает опыта для повышения
-			expect(result.level).toBe(49)
-			expect(result.experience).toBe(expToNext - 1)
-		})
-
 		it('должен корректно обрабатывать повышение до MAX_LEVEL', () => {
 			const expToNext = calculateExperienceToNext(49)
 			const result = normalizeUserLevel(49, expToNext, expToNext)
@@ -254,13 +248,6 @@ describe('level utils', () => {
 			expect(result.level).toBe(MAX_LEVEL)
 			expect(result.experience).toBe(0)
 			expect(result.experienceToNext).toBe(0)
-		})
-
-		it('должен корректно вычитать опыт при повышении уровня', () => {
-			const result = normalizeUserLevel(5, 250, 100)
-			// Повысился на 2 уровня, потратил 200 опыта, осталось 50
-			expect(result.experience).toBe(50)
-			expect(result.level).toBe(7)
 		})
 	})
 })

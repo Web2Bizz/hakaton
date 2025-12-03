@@ -20,58 +20,6 @@
 
 ## 1. UNIT ТЕСТЫ
 
-### 1.2 Хуки (Hooks)
-
-#### `src/hooks/useAuth.ts`
-
-- ✅ Возврат корректных данных пользователя
-- ✅ `logout()` - очистка токенов и состояния
-- ✅ `isAuthenticated` - корректное определение статуса
-- ✅ Ошибка при использовании вне UserProvider
-
-#### `src/hooks/useUser.ts`
-
-- ✅ Возврат всех данных из контекста
-- ✅ Интеграция с useAuth, useQuestActions, useOrganizationActions
-- ✅ Ошибка при использовании вне UserProvider
-
-#### `src/hooks/useLocalStorage.ts`
-
-- ✅ Инициализация из localStorage
-- ✅ Сохранение значений
-- ✅ Обновление значений через функцию
-- ✅ Обработка ошибок парсинга
-- ✅ Синхронизация между вкладками (storage event)
-- ✅ SSR безопасность (typeof window === 'undefined')
-
-#### `src/hooks/useGeolocation.ts`
-
-- ✅ Получение геолокации
-- ✅ Обработка ошибок
-- ✅ Retry логика
-- ✅ Проверка поддержки браузером
-- ✅ Таймауты
-- ✅ Требования к точности (minAccuracy)
-- ✅ Watch режим
-- ✅ Очистка watch при размонтировании
-
-#### `src/hooks/useUserStats.ts`
-
-- ✅ Обновление статистики пользователя
-- ✅ Обработка отсутствия пользователя
-
-#### `src/hooks/useQuestActions.ts`
-
-- ✅ Все функции управления квестами
-- ✅ Обработка ошибок API
-- ✅ Обновление состояния
-
-#### `src/hooks/useOrganizationActions.ts`
-
-- ✅ Все функции управления организациями
-- ✅ Обработка ошибок API
-- ✅ Обновление состояния
-
 ### 1.3 Схемы валидации (Schemas)
 
 #### `src/components/forms/quest/schemas/quest-form.schema.ts`

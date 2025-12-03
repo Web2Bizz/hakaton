@@ -16,7 +16,7 @@ export function calculateQuestProgress(quest: Quest): number {
 export function getQuestProgressColor(
 	progress: number
 ): Quest['progressColor'] {
-	if (progress === 100) return 'victory'
+	if (progress >= 100) return 'victory'
 	if (progress >= 76) return 'green'
 	if (progress >= 51) return 'yellow'
 	if (progress >= 26) return 'orange'

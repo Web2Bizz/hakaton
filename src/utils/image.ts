@@ -21,7 +21,8 @@ export function compressImage(
 				let height = img.height
 
 				// Вычисляем новые размеры
-				if (width > height) {
+				// Квадратные изображения обрабатываются как горизонтальные
+				if (width >= height) {
 					if (width > maxWidth) {
 						height = (height * maxWidth) / width
 						width = maxWidth

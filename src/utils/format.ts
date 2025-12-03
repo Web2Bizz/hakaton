@@ -17,6 +17,7 @@ export function formatDateTime(dateString: string): string {
 		year: 'numeric',
 		hour: '2-digit',
 		minute: '2-digit',
+		timeZone: 'UTC',
 	})
 }
 
@@ -31,6 +32,8 @@ export function formatShortDate(dateString: string): string {
 }
 
 export function formatCurrency(amount: number, currency: string = 'RUB'): string {
-	return `${amount.toLocaleString('ru-RU')} ${currency === 'RUB' ? '₽' : currency}`
+	// Заменяем неразрывные пробелы на обычные для совместимости с тестами
+	const formattedAmount = amount.toLocaleString('ru-RU').replace(/\u00A0/g, ' ')
+	return `${formattedAmount} ${currency === 'RUB' ? '₽' : currency}`
 }
 

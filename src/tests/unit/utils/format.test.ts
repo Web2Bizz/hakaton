@@ -58,7 +58,7 @@ describe('format utils', () => {
 			const dateString = '2024-01-15'
 			const result = formatDate(dateString)
 			// Проверяем, что формат соответствует русской локали
-			expect(result).toMatch(/\d+\s+\w+\s+\d{4}/)
+			expect(result).toMatch('15 января 2024 г.')
 		})
 
 		it('должен обрабатывать дату начала года', () => {
@@ -212,4 +212,3 @@ describe('format utils', () => {
 		})
 	})
 })
-
