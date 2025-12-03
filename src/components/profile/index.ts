@@ -6,4 +6,6 @@ export { MyQuests } from './MyQuests'
 export { MyOrganizations } from './MyOrganizations'
 export { ProfileStats } from './ProfileStats'
 export { ProfileAchievements } from './ProfileAchievements'
+export { QuestCard } from './QuestCard'
+export { MyQuestsEmpty } from './MyQuestsEmpty'
 
