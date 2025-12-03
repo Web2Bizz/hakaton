@@ -79,17 +79,21 @@ export function transformFormDataToCreateRequest(
 	const longitude = Number.parseFloat(data.longitude)
 
 	const cityId =
-		typeof data.cityId === 'object' &&
-		data.cityId !== null &&
-		'id' in data.cityId &&
-		typeof (data.cityId as { id: unknown }).id === 'number'
+		data.cityId === null
+			? Number.NaN
+			: typeof data.cityId === 'object' &&
+			  data.cityId !== null &&
+			  'id' in data.cityId &&
+			  typeof (data.cityId as { id: unknown }).id === 'number'
 			? Number((data.cityId as { id: number }).id)
 			: Number(data.cityId)
 	const organizationTypeId =
-		typeof data.organizationTypeId === 'object' &&
-		data.organizationTypeId !== null &&
-		'id' in data.organizationTypeId &&
-		typeof (data.organizationTypeId as { id: unknown }).id === 'number'
+		data.organizationTypeId === null
+			? Number.NaN
+			: typeof data.organizationTypeId === 'object' &&
+			  data.organizationTypeId !== null &&
+			  'id' in data.organizationTypeId &&
+			  typeof (data.organizationTypeId as { id: unknown }).id === 'number'
 			? Number((data.organizationTypeId as { id: number }).id)
 			: Number(data.organizationTypeId)
 
@@ -180,17 +184,21 @@ export function transformFormDataToUpdateRequest(
 	const longitude = Number.parseFloat(data.longitude)
 
 	const cityId =
-		typeof data.cityId === 'object' &&
-		data.cityId !== null &&
-		'id' in data.cityId &&
-		typeof (data.cityId as { id: unknown }).id === 'number'
+		data.cityId === null
+			? Number.NaN
+			: typeof data.cityId === 'object' &&
+			  data.cityId !== null &&
+			  'id' in data.cityId &&
+			  typeof (data.cityId as { id: unknown }).id === 'number'
 			? Number((data.cityId as { id: number }).id)
 			: Number(data.cityId)
 	const organizationTypeId =
-		typeof data.organizationTypeId === 'object' &&
-		data.organizationTypeId !== null &&
-		'id' in data.organizationTypeId &&
-		typeof (data.organizationTypeId as { id: unknown }).id === 'number'
+		data.organizationTypeId === null
+			? Number.NaN
+			: typeof data.organizationTypeId === 'object' &&
+			  data.organizationTypeId !== null &&
+			  'id' in data.organizationTypeId &&
+			  typeof (data.organizationTypeId as { id: unknown }).id === 'number'
 			? Number((data.organizationTypeId as { id: number }).id)
 			: Number(data.organizationTypeId)
 
