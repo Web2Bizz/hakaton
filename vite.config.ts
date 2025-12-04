@@ -40,6 +40,8 @@ export default defineConfig({
 		alias: {
 			'@': path.resolve(__dirname, './src'),
 		},
+		// Приоритет TypeScript файлов над JavaScript при разрешении модулей
+		extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
 	},
 	build: {
 		rollupOptions: {

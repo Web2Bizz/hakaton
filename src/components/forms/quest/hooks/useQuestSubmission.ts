@@ -135,39 +135,45 @@ export function useQuestSubmission({
 
 			toast.success('Квест успешно создан!')
 
-			if (!user?.id) {
-				throw new Error('ID пользователя не найден')
-			}
-
-			// Обновляем пользователя с ID квеста
-			try {
-				const questIdNumber = Number(questId)
-				const updateResult = await updateUserMutation({
-					userId: String(user.id),
-					data: { questId: questIdNumber },
-				}).unwrap()
-
-				if (updateResult && setUser) {
-					const updatedUser = transformUserFromAPI(updateResult)
-					setUser(updatedUser)
-				}
-			} catch (error) {
-				logger.error('Error updating user questId:', error)
-				if (error && typeof error === 'object' && 'data' in error) {
-					logger.error('Error details:', error.data)
-				}
-				toast.error('Не удалось обновить ID квеста у пользователя')
-			}
-
+			// Обновляем локальное состояние пользователя с ID квеста
+			// Это критично для работы приложения
 			setUserQuestId(questId)
+
+			// Пытаемся обновить пользователя на сервере с ID квеста
+			// Это не критично - квест уже создан, поэтому ошибка не должна блокировать процесс
+			if (user?.id) {
+				try {
+					const questIdNumber = Number(questId)
+					const updateResult = await updateUserMutation({
+						userId: String(user.id),
+						data: { questId: questIdNumber },
+					}).unwrap()
+
+					if (updateResult && setUser) {
+						const updatedUser = transformUserFromAPI(updateResult)
+						setUser(updatedUser)
+					}
+				} catch (error) {
+					// Логируем ошибку, но не показываем пользователю, так как квест уже создан
+					logger.warn(
+						'Не удалось обновить questId у пользователя на сервере:',
+						error
+					)
+					if (error && typeof error === 'object' && 'data' in error) {
+						logger.warn('Детали ошибки:', error.data)
+					}
+					// Не показываем ошибку пользователю, так как квест уже успешно создан
+					// и локальное состояние уже обновлено через setUserQuestId
+				}
+			}
 
 			// Сохраняем координаты для зума на карте
 			if (data.latitude && data.longitude) {
 				localStorage.setItem(
 					'zoomToCoordinates',
 					JSON.stringify({
-						lat: parseFloat(data.latitude),
-						lng: parseFloat(data.longitude),
+						lat: Number.parseFloat(data.latitude),
+						lng: Number.parseFloat(data.longitude),
 						zoom: 15,
 					})
 				)

@@ -78,24 +78,33 @@ export function transformFormDataToCreateRequest(
 	const latitude = Number.parseFloat(data.latitude)
 	const longitude = Number.parseFloat(data.longitude)
 
-	const cityId =
-		data.cityId === null
-			? Number.NaN
-			: typeof data.cityId === 'object' &&
-			  data.cityId !== null &&
-			  'id' in data.cityId &&
-			  typeof (data.cityId as { id: unknown }).id === 'number'
-			? Number((data.cityId as { id: number }).id)
-			: Number(data.cityId)
-	const organizationTypeId =
-		data.organizationTypeId === null
-			? Number.NaN
-			: typeof data.organizationTypeId === 'object' &&
-			  data.organizationTypeId !== null &&
-			  'id' in data.organizationTypeId &&
-			  typeof (data.organizationTypeId as { id: unknown }).id === 'number'
-			? Number((data.organizationTypeId as { id: number }).id)
-			: Number(data.organizationTypeId)
+	let cityId: number
+	if (data.cityId === null) {
+		cityId = Number.NaN
+	} else if (
+		typeof data.cityId === 'object' &&
+		data.cityId !== null &&
+		'id' in data.cityId &&
+		typeof (data.cityId as { id: unknown }).id === 'number'
+	) {
+		cityId = Number((data.cityId as { id: number }).id)
+	} else {
+		cityId = Number(data.cityId)
+	}
+
+	let organizationTypeId: number
+	if (data.organizationTypeId === null) {
+		organizationTypeId = Number.NaN
+	} else if (
+		typeof data.organizationTypeId === 'object' &&
+		data.organizationTypeId !== null &&
+		'id' in data.organizationTypeId &&
+		typeof (data.organizationTypeId as { id: unknown }).id === 'number'
+	) {
+		organizationTypeId = Number((data.organizationTypeId as { id: number }).id)
+	} else {
+		organizationTypeId = Number(data.organizationTypeId)
+	}
 
 	const request: CreateQuestRequest = {
 		title: data.title,
@@ -121,7 +130,10 @@ export function transformFormDataToCreateRequest(
 			description: data.customAchievement.description,
 			icon: data.customAchievement.icon,
 		}
-		logger.debug('Adding achievement object to create request:', request.achievement)
+		logger.debug(
+			'Adding achievement object to create request:',
+			request.achievement
+		)
 	} else {
 		logger.debug('No customAchievement in data')
 	}
@@ -183,24 +195,33 @@ export function transformFormDataToUpdateRequest(
 	const latitude = Number.parseFloat(data.latitude)
 	const longitude = Number.parseFloat(data.longitude)
 
-	const cityId =
-		data.cityId === null
-			? Number.NaN
-			: typeof data.cityId === 'object' &&
-			  data.cityId !== null &&
-			  'id' in data.cityId &&
-			  typeof (data.cityId as { id: unknown }).id === 'number'
-			? Number((data.cityId as { id: number }).id)
-			: Number(data.cityId)
-	const organizationTypeId =
-		data.organizationTypeId === null
-			? Number.NaN
-			: typeof data.organizationTypeId === 'object' &&
-			  data.organizationTypeId !== null &&
-			  'id' in data.organizationTypeId &&
-			  typeof (data.organizationTypeId as { id: unknown }).id === 'number'
-			? Number((data.organizationTypeId as { id: number }).id)
-			: Number(data.organizationTypeId)
+	let cityId: number
+	if (data.cityId === null) {
+		cityId = Number.NaN
+	} else if (
+		typeof data.cityId === 'object' &&
+		data.cityId !== null &&
+		'id' in data.cityId &&
+		typeof (data.cityId as { id: unknown }).id === 'number'
+	) {
+		cityId = Number((data.cityId as { id: number }).id)
+	} else {
+		cityId = Number(data.cityId)
+	}
+
+	let organizationTypeId: number
+	if (data.organizationTypeId === null) {
+		organizationTypeId = Number.NaN
+	} else if (
+		typeof data.organizationTypeId === 'object' &&
+		data.organizationTypeId !== null &&
+		'id' in data.organizationTypeId &&
+		typeof (data.organizationTypeId as { id: unknown }).id === 'number'
+	) {
+		organizationTypeId = Number((data.organizationTypeId as { id: number }).id)
+	} else {
+		organizationTypeId = Number(data.organizationTypeId)
+	}
 
 	const request: UpdateQuestRequest = {
 		title: data.title,
