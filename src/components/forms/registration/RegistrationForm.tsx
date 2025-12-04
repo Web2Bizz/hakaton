@@ -41,11 +41,13 @@ const registrationSchema = z
 import { getErrorMessage } from '@/utils'
 import { logger } from '@/utils/logger'
 
-const getRegistrationErrorMessage = (res: { data?: { message?: string } }) => {
-	logger.error('Registration error:', res)
-	return toast.error(
-		res.data?.message || 'Ошибка регистрации. Попробуйте еще раз.'
+const getRegistrationErrorMessage = (error: unknown) => {
+	logger.error('Registration error:', error)
+	const errorMessage = getErrorMessage(
+		error,
+		'Ошибка регистрации. Попробуйте еще раз.'
 	)
+	return toast.error(errorMessage)
 }
 
 type RegistrationFormData = z.infer<typeof registrationSchema>
@@ -91,9 +93,7 @@ export function RegistrationForm() {
 			})
 
 			if (result.error) {
-				getRegistrationErrorMessage(
-					result.error as { data?: { message?: string } }
-				)
+				getRegistrationErrorMessage(result.error)
 				return
 			}
 
