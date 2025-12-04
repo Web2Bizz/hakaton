@@ -1,3 +1,4 @@
+import { getToken } from '@/utils/auth'
 import { baseQueryWithReauth } from '@/store/baseQueryWithReauth'
 import { createApi } from '@reduxjs/toolkit/query/react'
 import type {
@@ -114,9 +115,15 @@ export const questService = createApi({
 			providesTags: ['QuestList'],
 		}),
 
-		// GET /v2/quests/:id - Получить детальную информацию о квесте
+		// GET /v2/quests/:id или /v1/quests/:id - Получить детальную информацию о квесте
+		// Использует v2 для авторизованных пользователей, v1 для неавторизованных
 		getQuest: builder.query<Quest, number | string>({
-			query: id => `/v2/quests/${id}`,
+			query: id => {
+				const token = getToken()
+				// Если пользователь авторизован, используем v2, иначе v1
+				const version = token ? 'v2' : 'v1'
+				return `/${version}/quests/${id}`
+			},
 			providesTags: (_result, _error, id) => [
 				{ type: 'Quest', id: String(id) },
 			],
