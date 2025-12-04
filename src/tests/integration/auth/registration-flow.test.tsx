@@ -2,6 +2,7 @@
 import { RegistrationForm } from '@/components/forms/registration'
 import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockAuthResponse } from '../utils/mocks/fixtures'
 import { server } from '../utils/mocks/server'

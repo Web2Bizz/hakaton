@@ -2,6 +2,7 @@
 import { LoginForm } from '@/components/forms/login'
 import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { server } from '../utils/mocks/server'
 import { renderWithProviders, userEvent } from '../utils/test-utils'

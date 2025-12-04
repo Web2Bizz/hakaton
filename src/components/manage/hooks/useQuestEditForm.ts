@@ -18,16 +18,15 @@ import {
 	useDeleteAchievementMutation,
 	useUpdateAchievementMutation,
 } from '@/store/entities/achievement'
-import { useGetCitiesQuery } from '@/store/entities/city'
 import type { CityResponse } from '@/store/entities/city'
+import { useGetCitiesQuery } from '@/store/entities/city'
 import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
 import { useUploadImagesMutation } from '@/store/entities/upload'
 import { transformUserFromAPI } from '@/utils/auth'
 import { getErrorMessage } from '@/utils/error'
 import { logger } from '@/utils/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type React from 'react'
-import { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -41,8 +40,9 @@ export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 		}
 	)
 
-	const { data: cities = [] } = useGetCitiesQuery()
-	const { data: organizationTypes = [] } = useGetOrganizationTypesQuery()
+	// cities и organizationTypes используются только в handleCityChange, не в useEffect
+	const { data: _cities = [] } = useGetCitiesQuery()
+	const { data: _organizationTypes = [] } = useGetOrganizationTypesQuery()
 
 	const [updateQuestMutation, { isLoading: isUpdating }] =
 		useUpdateQuestMutation()
@@ -94,11 +94,31 @@ export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 		mode: 'onChange',
 	})
 
-	useEffect(() => {
-		if (questResponse && !form.formState.isDirty && !isLoadingQuest) {
-			const formData = transformApiResponseToFormData(questResponse)
-			form.reset(formData as QuestFormData)
+	// ПРОБЛЕМА: form в зависимостях вызывает бесконечные перерендеры
+	// form - это объект, который меняется при каждом рендере
+	// Используем useRef для отслеживания, был ли квест уже загружен
+	const questLoadedRef = useRef<number | null>(null)
 
+	useEffect(() => {
+		// Загружаем данные квеста в форму только один раз
+		// questLoadedRef защищает от повторной загрузки
+		if (
+			questResponse &&
+			!isLoadingQuest &&
+			questLoadedRef.current !== questResponse.id
+		) {
+			const formData = transformApiResponseToFormData(questResponse)
+
+			// Сначала устанавливаем questLoadedRef, чтобы предотвратить повторную загрузку
+			questLoadedRef.current = questResponse.id
+
+			// Сбрасываем форму с новыми данными
+			form.reset(formData as QuestFormData, {
+				keepDirty: false,
+				keepErrors: false,
+			})
+
+			// Синхронизируем контакты с полями куратора
 			const contacts = formData.contacts || []
 			const curatorContact = contacts.find(
 				c => c && (c.name === 'Куратор' || c.name?.toLowerCase() === 'куратор')
@@ -110,23 +130,31 @@ export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 				c => c && (c.name === 'Email' || c.name?.toLowerCase() === 'email')
 			)
 
+			// Устанавливаем значения контактов
+			// shouldDirty: false предотвращает помечание формы как измененной
 			if (curatorContact?.value) {
 				form.setValue('curatorName', curatorContact.value, {
 					shouldValidate: false,
+					shouldDirty: false,
 				})
 			}
 			if (phoneContact?.value) {
 				form.setValue('curatorPhone', phoneContact.value, {
 					shouldValidate: false,
+					shouldDirty: false,
 				})
 			}
 			if (emailContact?.value) {
 				form.setValue('curatorEmail', emailContact.value, {
 					shouldValidate: false,
+					shouldDirty: false,
 				})
 			}
 		}
-	}, [questResponse, cities, organizationTypes, form, isLoadingQuest])
+		// Зависимости: только questResponse.id и isLoadingQuest
+		// form не включаем, чтобы избежать бесконечных перерендеров
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [questResponse?.id, isLoadingQuest])
 
 	useEffect(() => {
 		const subscription = form.watch((value, { name }) => {
@@ -210,7 +238,10 @@ export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 		})
 
 		return () => subscription.unsubscribe()
-	}, [form])
+		// ПРОБЛЕМА: form в зависимостях вызывает бесконечные перерендеры
+		// form.watch создает подписку, которая должна существовать на протяжении жизни компонента
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	const onSubmit = async (data: QuestFormData) => {
 		if (!data.latitude || !data.longitude) {

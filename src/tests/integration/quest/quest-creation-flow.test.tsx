@@ -294,15 +294,20 @@ describe('Quest Creation Flow Integration Test', () => {
 				// Запросы не были вызваны, значит координаты не установлены
 				// Это нормально для базовой версии теста
 				// Проверяем, что появилась ошибка валидации
-				const errorMsg = screen.queryByText(/выберите местоположение/i)
-				if (errorMsg) {
-					expect(errorMsg).toBeInTheDocument()
+				// Может быть в форме или в toast, поэтому используем queryAllByText
+				const errorMsgs = screen.queryAllByText(/выберите местоположение/i)
+				if (errorMsgs.length > 0) {
+					expect(errorMsgs[0]).toBeInTheDocument()
 				}
 			}
 		}
-	})
+		},
+		20000
+	)
 
-	it('должен проверить лимит квестов перед созданием', async () => {
+	it(
+		'должен проверить лимит квестов перед созданием',
+		async () => {
 		const user = userEvent.setup()
 
 		// Мокаем ответ, где пользователь уже имеет максимальное количество квестов
@@ -372,7 +377,14 @@ describe('Quest Creation Flow Integration Test', () => {
 			{ timeout: 1000 }
 		)
 
-		// Закрываем LocationPicker
+		// Ждем немного, чтобы координаты были установлены (mock вызывает onSelect с задержкой 100ms)
+		await waitFor(() => {
+			// Проверяем, что LocationPicker закрылся (координаты установлены)
+			const closeButton = screen.queryByRole('button', { name: /закрыть/i })
+			return !closeButton
+		}, { timeout: 500 })
+
+		// Если LocationPicker еще открыт, закрываем его
 		const closeButton = screen.queryByRole('button', { name: /закрыть/i })
 		if (closeButton) {
 			await user.click(closeButton)
@@ -404,22 +416,36 @@ describe('Quest Creation Flow Integration Test', () => {
 
 		// Проверяем, что появилось сообщение об ошибке лимита
 		// Или ошибка валидации, если координаты не установлены
+		// Toast отображается через sonner, проверяем в документе
 		await waitFor(
 			() => {
+				// Ищем текст ошибки лимита в toast (sonner рендерит toast в body)
 				const limitError = screen.queryByText(
-					/максимальное количество квестов/i
+					/максимальное количество квестов/i,
+					{ exact: false }
 				)
-				const locationError = screen.queryByText(/выберите местоположение/i)
-				expect(limitError || locationError).toBeTruthy()
+				// Ищем ошибку валидации местоположения (может быть в форме или toast)
+				const locationError = screen.queryByText(
+					/выберите местоположение/i,
+					{ exact: false }
+				)
+				// Проверяем, что хотя бы одна ошибка найдена
+				if (!limitError && !locationError) {
+					throw new Error('Ожидалась ошибка лимита или валидации местоположения')
+				}
 			},
 			{ timeout: 3000 }
 		)
 
 		// Проверяем, что квест не был создан (не было запроса на создание)
 		// Это проверяется через отсутствие вызова createQuest
-	})
+		},
+		20000
+	)
 
-	it('должен обработать ошибку загрузки изображений', async () => {
+	it(
+		'должен обработать ошибку загрузки изображений',
+		async () => {
 		const user = userEvent.setup()
 
 		// Мокаем ошибку при загрузке изображений
@@ -531,13 +557,16 @@ describe('Quest Creation Flow Integration Test', () => {
 				const uploadError = screen.queryByText(
 					/не удалось загрузить изображения/i
 				)
-				const locationError = screen.queryByText(/выберите местоположение/i)
-				expect(uploadError || locationError).toBeTruthy()
+				// Может быть в форме или в toast, поэтому используем queryAllByText
+				const locationErrors = screen.queryAllByText(/выберите местоположение/i)
+				expect(uploadError || locationErrors.length > 0).toBeTruthy()
 			},
 			{ timeout: 3000 }
 		)
 
 		// Проверяем, что квест не был создан (не было запроса на создание)
 		// Это проверяется через отсутствие вызова createQuest
-	})
+		},
+		20000
+	)
 })

@@ -79,6 +79,19 @@ export const handlers = [
 		})
 	}),
 
+	// GET /v2/quests/:id
+	http.get(`${API_BASE_URL}/v2/quests/:id`, ({ request, params }) => {
+		// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+		const authHeader = request.headers.get('authorization')
+		if (!authHeader?.startsWith('Bearer ')) {
+			return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+		return HttpResponse.json({
+			...mockQuest,
+			id: Number(params.id),
+		})
+	}),
+
 	// POST /v1/quests
 	http.post(`${API_BASE_URL}/v1/quests`, async ({ request }) => {
 		const body = (await request.json()) as Record<string, unknown>
@@ -89,8 +102,13 @@ export const handlers = [
 		})
 	}),
 
-	// PUT /v1/quests/:id
-	http.put(`${API_BASE_URL}/v1/quests/:id`, async ({ request }) => {
+	// PATCH /v1/quests/:id (используется PATCH, а не PUT)
+	http.patch(`${API_BASE_URL}/v1/quests/:id`, async ({ request }) => {
+		// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+		const authHeader = request.headers.get('authorization')
+		if (!authHeader?.startsWith('Bearer ')) {
+			return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
 		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockQuest,
@@ -139,6 +157,11 @@ export const handlers = [
 	// ==================== UPLOAD ====================
 	// POST /v1/upload/images
 	http.post(`${API_BASE_URL}/v1/upload/images`, async ({ request }) => {
+		// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+		const authHeader = request.headers.get('authorization')
+		if (!authHeader?.startsWith('Bearer ')) {
+			return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
 		// Симулируем загрузку изображений
 		const formData = await request.formData()
 		const images = formData.getAll('images')
@@ -173,5 +196,53 @@ export const handlers = [
 	// GET /v1/categories
 	http.get(`${API_BASE_URL}/v1/categories`, () => {
 		return HttpResponse.json([mockCategory])
+	}),
+
+	// ==================== ACHIEVEMENTS ====================
+	// POST /v1/achievements
+	http.post(`${API_BASE_URL}/v1/achievements`, async ({ request }) => {
+		// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+		const authHeader = request.headers.get('authorization')
+		if (!authHeader?.startsWith('Bearer ')) {
+			return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+		const body = (await request.json()) as Record<string, unknown>
+		return HttpResponse.json({
+			id: 1,
+			title: (body.title as string) || 'Test Achievement',
+			description: (body.description as string) || 'Test Description',
+			icon: (body.icon as string) || '🏆',
+			rarity: (body.rarity as string) || 'common',
+		})
+	}),
+
+	// PUT /v1/achievements/:id
+	http.put(
+		`${API_BASE_URL}/v1/achievements/:id`,
+		async ({ request, params }) => {
+			// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+			const authHeader = request.headers.get('authorization')
+			if (!authHeader?.startsWith('Bearer ')) {
+				return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+			}
+			const body = (await request.json()) as Record<string, unknown>
+			return HttpResponse.json({
+				id: Number(params.id),
+				title: (body.title as string) || 'Test Achievement',
+				description: (body.description as string) || 'Test Description',
+				icon: (body.icon as string) || '🏆',
+				rarity: (body.rarity as string) || 'common',
+			})
+		}
+	),
+
+	// DELETE /v1/achievements/:id
+	http.delete(`${API_BASE_URL}/v1/achievements/:id`, ({ request }) => {
+		// Проверяем наличие токена в заголовках (для защищенных эндпоинтов)
+		const authHeader = request.headers.get('authorization')
+		if (!authHeader?.startsWith('Bearer ')) {
+			return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+		return HttpResponse.json({ message: 'Achievement deleted' })
 	}),
 ]

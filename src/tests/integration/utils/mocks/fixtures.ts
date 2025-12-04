@@ -37,16 +37,23 @@ export const mockAuthResponse = {
 	user: mockUser,
 }
 
+export const mockCategory = {
+	id: 1,
+	name: 'environment',
+	displayName: 'Экология',
+}
+
 export const mockQuest = {
 	id: 1,
 	title: 'Test Quest',
-	description: 'Test Description',
+	description:
+		'Test Description with more than 20 characters to pass validation',
 	cityId: 1,
 	organizationTypeId: 1,
 	categoryIds: [1],
 	address: 'Test Address',
-	latitude: 55.7558,
-	longitude: 37.6173,
+	latitude: '55.7558', // Строка, как приходит с сервера
+	longitude: '37.6173', // Строка, как приходит с сервера
 	coverImage: 'https://example.com/image.jpg',
 	gallery: [],
 	contacts: [
@@ -54,7 +61,11 @@ export const mockQuest = {
 		{ name: 'Телефон', value: '+79991234567' },
 	],
 	steps: [],
+	categories: [mockCategory], // Массив категорий
 	status: 'active',
+	experienceReward: 100,
+	achievementId: null,
+	ownerId: 1,
 	createdAt: '2024-01-01T00:00:00Z',
 	updatedAt: '2024-01-01T00:00:00Z',
 }
@@ -95,12 +106,5 @@ export const mockHelpType = {
 	name: 'Экология',
 }
 
-export const mockCategory = {
-	id: 1,
-	name: 'environment',
-	displayName: 'Экология',
-}
-
 export const mockBase64Image =
 	'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k='
-

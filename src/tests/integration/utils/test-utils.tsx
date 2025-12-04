@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner'
 import { UserProvider } from '@/contexts/UserContext'
 import type { AppStore } from '@/store/store'
 import { setupStore } from '@/store/store'
@@ -24,7 +25,10 @@ export function renderWithProviders(
 		return (
 			<Provider store={store}>
 				<UserProvider>
-					<BrowserRouter>{children}</BrowserRouter>
+					<BrowserRouter>
+						{children}
+						<Toaster />
+					</BrowserRouter>
 				</UserProvider>
 			</Provider>
 		)
