@@ -20,7 +20,6 @@ import {
 } from '@/store/entities/achievement'
 import type { CityResponse } from '@/store/entities/city'
 import { useGetCitiesQuery } from '@/store/entities/city'
-import { useGetOrganizationTypesQuery } from '@/store/entities/organization-type'
 import { useUploadImagesMutation } from '@/store/entities/upload'
 import { transformUserFromAPI } from '@/utils/auth'
 import { getErrorMessage } from '@/utils/error'
@@ -39,10 +38,6 @@ export function useQuestEditForm(questId: number, onSuccess?: () => void) {
 			skip: !questId,
 		}
 	)
-
-	// cities и organizationTypes используются только в handleCityChange, не в useEffect
-	const { data: _cities = [] } = useGetCitiesQuery()
-	const { data: _organizationTypes = [] } = useGetOrganizationTypesQuery()
 
 	const [updateQuestMutation, { isLoading: isUpdating }] =
 		useUpdateQuestMutation()
