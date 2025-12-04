@@ -1,7 +1,7 @@
+/// <reference types="@testing-library/jest-dom" />
 import { LoginForm } from '@/components/forms/login'
 import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockAuthResponse } from '../utils/mocks/fixtures'
 import { server } from '../utils/mocks/server'

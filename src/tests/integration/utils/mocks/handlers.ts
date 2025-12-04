@@ -53,10 +53,10 @@ export const handlers = [
 
 	// PUT /v1/users/:userId
 	http.put(`${API_BASE_URL}/v1/users/:userId`, async ({ request }) => {
-		const body = await request.json()
+		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockUser,
-			...body,
+			...(body as Partial<typeof mockUser>),
 		})
 	}),
 
@@ -81,20 +81,20 @@ export const handlers = [
 
 	// POST /v1/quests
 	http.post(`${API_BASE_URL}/v1/quests`, async ({ request }) => {
-		const body = await request.json()
+		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockQuest,
-			...body,
+			...(body as Partial<typeof mockQuest>),
 			id: 2, // Новый ID для созданного квеста
 		})
 	}),
 
 	// PUT /v1/quests/:id
 	http.put(`${API_BASE_URL}/v1/quests/:id`, async ({ request }) => {
-		const body = await request.json()
+		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockQuest,
-			...body,
+			...(body as Partial<typeof mockQuest>),
 		})
 	}),
 
@@ -119,20 +119,20 @@ export const handlers = [
 
 	// POST /v1/organizations
 	http.post(`${API_BASE_URL}/v1/organizations`, async ({ request }) => {
-		const body = await request.json()
+		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockOrganization,
-			...body,
+			...(body as Partial<typeof mockOrganization>),
 			id: 2,
 		})
 	}),
 
 	// PUT /v1/organizations/:id
 	http.put(`${API_BASE_URL}/v1/organizations/:id`, async ({ request }) => {
-		const body = await request.json()
+		const body = (await request.json()) as Record<string, unknown>
 		return HttpResponse.json({
 			...mockOrganization,
-			...body,
+			...(body as Partial<typeof mockOrganization>),
 		})
 	}),
 
