@@ -91,6 +91,11 @@ export function UnifiedMapView({
 				scrollWheelZoom
 				zoomControl={false}
 				style={{ height: '100%', width: '100%' }}
+				maxBounds={[
+					[38, 15],
+					[82, 200],
+				]}
+				maxBoundsViscosity={1.0}
 			>
 				{searchCenter && (
 					<MapController center={searchCenter} zoom={searchZoom || 15} />

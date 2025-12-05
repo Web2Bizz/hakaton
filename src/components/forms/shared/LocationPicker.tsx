@@ -108,9 +108,15 @@ export function LocationPicker({
 				<div className='flex-1 relative'>
 					<MapContainer
 						center={mapCenter}
+						// center={[61.524, 105.3188]}
 						zoom={city ? 12 : 4}
 						scrollWheelZoom
 						style={{ height: '100%', width: '100%' }}
+						maxBounds={[
+							[38, 15],
+							[82, 200],
+						]}
+						maxBoundsViscosity={1.0}
 					>
 						<TileLayer
 							attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
