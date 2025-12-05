@@ -313,32 +313,34 @@ function QuestCard({ quest, onClick }: QuestCardProps) {
 							<ArrowRight className='h-4 w-4' />
 						</div>
 					</div>
-					<button
-						type='button'
-						onClick={e => {
-							e.stopPropagation()
-							const questId =
-								typeof quest.id === 'string' ? quest.id : String(quest.id)
+					{!isArchived && (
+						<button
+							type='button'
+							onClick={e => {
+								e.stopPropagation()
+								const questId =
+									typeof quest.id === 'string' ? quest.id : String(quest.id)
 
-							// Сохраняем координаты для зума на карте
-							if (quest.coordinates && quest.coordinates.length === 2) {
-								localStorage.setItem(
-									'zoomToCoordinates',
-									JSON.stringify({
-										lat: quest.coordinates[0],
-										lng: quest.coordinates[1],
-										zoom: 15,
-									})
-								)
-							}
+								// Сохраняем координаты для зума на карте
+								if (quest.coordinates && quest.coordinates.length === 2) {
+									localStorage.setItem(
+										'zoomToCoordinates',
+										JSON.stringify({
+											lat: quest.coordinates[0],
+											lng: quest.coordinates[1],
+											zoom: 15,
+										})
+									)
+								}
 
-							window.location.href = `/map?quest=${questId}`
-						}}
-						className={`w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium rounded-lg transition-colors cursor-pointer h-12 sm:h-auto ${mapButtonBg}`}
-					>
-						<Map className='h-5 w-5 sm:h-4 sm:w-4' />
-						Показать на карте
-					</button>
+								window.location.href = `/map?quest=${questId}`
+							}}
+							className={`w-full flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium rounded-lg transition-colors cursor-pointer h-12 sm:h-auto ${mapButtonBg}`}
+						>
+							<Map className='h-5 w-5 sm:h-4 sm:w-4' />
+							Показать на карте
+						</button>
+					)}
 				</div>
 			</div>
 
