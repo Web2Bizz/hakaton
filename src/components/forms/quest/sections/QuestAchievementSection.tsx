@@ -9,7 +9,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { useDeleteAchievementMutation } from '@/store/entities/achievement'
 import { logger } from '@/utils/logger'
-import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react'
+import EmojiPicker, {
+	type EmojiClickData,
+	Categories,
+} from 'emoji-picker-react'
 import { Trophy, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -181,46 +184,45 @@ export function QuestAchievementSection() {
 																field.onChange(emojiData.emoji)
 																setShowEmojiPicker(false)
 															}}
-															locale='ru'
 															searchPlaceHolder='Поиск эмодзи...'
 															previewConfig={{
 																showPreview: false,
 															}}
 															categories={[
 																{
-																	category: 'suggested',
+																	category: Categories.SUGGESTED,
 																	name: 'Недавние',
 																},
 																{
-																	category: 'smileys_people',
+																	category: Categories.SMILEYS_PEOPLE,
 																	name: 'Смайлы и люди',
 																},
 																{
-																	category: 'animals_nature',
+																	category: Categories.ANIMALS_NATURE,
 																	name: 'Животные и природа',
 																},
 																{
-																	category: 'food_drink',
+																	category: Categories.FOOD_DRINK,
 																	name: 'Еда и напитки',
 																},
 																{
-																	category: 'travel_places',
+																	category: Categories.TRAVEL_PLACES,
 																	name: 'Путешествия и места',
 																},
 																{
-																	category: 'activities',
+																	category: Categories.ACTIVITIES,
 																	name: 'Активности',
 																},
 																{
-																	category: 'objects',
+																	category: Categories.OBJECTS,
 																	name: 'Объекты',
 																},
 																{
-																	category: 'symbols',
+																	category: Categories.SYMBOLS,
 																	name: 'Символы',
 																},
 																{
-																	category: 'flags',
+																	category: Categories.FLAGS,
 																	name: 'Флаги',
 																},
 															]}
