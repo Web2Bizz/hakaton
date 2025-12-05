@@ -24,6 +24,27 @@ const ID_TO_CATEGORY_MAP: Record<number, string> = {
 	5: 'other',
 }
 
+/**
+ * Преобразует дату из формата "YYYY-MM-DD" в ISO datetime формат
+ * @param dateString - строка даты в формате "YYYY-MM-DD"
+ * @returns строка в формате ISO datetime (например, "2025-12-20T00:00:00.000Z")
+ */
+function convertDateToISODatetime(dateString: string | undefined): string | undefined {
+	if (!dateString) {
+		return undefined
+	}
+
+	// Если дата уже в формате ISO datetime, возвращаем как есть
+	if (dateString.includes('T')) {
+		return dateString
+	}
+
+	// Преобразуем "YYYY-MM-DD" в ISO datetime
+	// Создаем Date объект в UTC, чтобы избежать проблем с часовыми поясами
+	const date = new Date(dateString + 'T00:00:00.000Z')
+	return date.toISOString()
+}
+
 export function transformFormDataToCreateRequest(
 	data: QuestFormData
 ): CreateQuestRequest {
@@ -62,7 +83,7 @@ export function transformFormDataToCreateRequest(
 			}
 
 			if (stage.deadline) {
-				step.deadline = stage.deadline
+				step.deadline = convertDateToISODatetime(stage.deadline)
 			}
 
 			return step
@@ -179,7 +200,7 @@ export function transformFormDataToUpdateRequest(
 			}
 
 			if (stage.deadline) {
-				step.deadline = stage.deadline
+				step.deadline = convertDateToISODatetime(stage.deadline)
 			}
 
 			return step
@@ -279,7 +300,10 @@ export function transformApiResponseToFormData(
 		requirementType: step.type || ('no_required' as const),
 		requirementValue: step.requirement?.targetValue,
 		itemName: undefined,
-		deadline: step.deadline || undefined,
+		// Преобразуем ISO datetime обратно в формат "YYYY-MM-DD" для input type="date"
+		deadline: step.deadline
+			? new Date(step.deadline).toISOString().split('T')[0]
+			: undefined,
 	}))
 
 	const customAchievement =
