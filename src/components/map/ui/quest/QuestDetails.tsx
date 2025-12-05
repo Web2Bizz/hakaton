@@ -25,8 +25,9 @@ import {
 import { transformUserFromAPI } from '@/utils/auth'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { transformApiQuestToComponentQuest } from '@/utils/quest'
-import { CheckCircle2, Circle, Clock, LogOut, Share2, X } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, LogOut, Share2, Settings, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { QuestStage } from '../../types/quest-types'
 import { AmbassadorShare } from './AmbassadorShare'
@@ -137,6 +138,7 @@ export function QuestDetails({
 		checkAndUnlockAchievements,
 	} = useUser()
 	const { isAuthenticated } = useAuth()
+	const navigate = useNavigate()
 	const [assignAchievement] = useAssignAchievementMutation()
 	const [getUser] = useLazyGetUserQuery()
 	const [activeTab, setActiveTab] = useState<'stages' | 'updates'>('stages')
@@ -188,6 +190,14 @@ export function QuestDetails({
 
 	// Используем поле isParticipating из API
 	const isParticipating = transformedQuest?.isParticipating ?? false
+
+	// Проверяем, является ли текущий пользователь создателем квеста
+	const isOwner = useMemo(() => {
+		if (!user?.id || !quest?.ownerId) return false
+		// Преобразуем user.id (строка) в число для сравнения
+		const userId = Number.parseInt(user.id, 10)
+		return userId === quest.ownerId
+	}, [user?.id, quest?.ownerId])
 
 	// Если quest undefined, возвращаем null (во время анимации закрытия или когда не выбран)
 	if (!transformedQuest) {
@@ -435,8 +445,38 @@ export function QuestDetails({
 								</div>
 							</div>
 
-							{/* Кнопки участия */}
-							{!isParticipating ? (
+							{/* Кнопки участия / управления */}
+							{isOwner ? (
+								<div className='space-y-2'>
+									<div className='px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-center'>
+										<span className='text-sm font-semibold text-blue-700'>
+											👑 Вы создатель этого квеста
+										</span>
+									</div>
+									<Button
+										type='button'
+										onClick={() => {
+											const questId =
+												typeof transformedQuest.id === 'string'
+													? Number.parseInt(transformedQuest.id, 10)
+													: transformedQuest.id
+											navigate(`/quests/${questId}/manage`)
+										}}
+										className='w-full bg-gradient-to-br from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700'
+									>
+										<Settings className='h-4 w-4 mr-2' />
+										Управлять квестом
+									</Button>
+									<Button
+										type='button'
+										onClick={() => setShowAmbassadorShare(true)}
+										className='w-full bg-gradient-to-br from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-900'
+									>
+										<Share2 className='h-4 w-4 mr-2' />
+										Поделиться квестом
+									</Button>
+								</div>
+							) : !isParticipating ? (
 								<button
 									type='button'
 									onClick={handleParticipate}
