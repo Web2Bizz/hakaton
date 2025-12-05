@@ -1,9 +1,9 @@
 import { UserContext, UserProvider } from '@/contexts/UserContext'
 import type { User } from '@/types/user'
-import { renderHook, act, waitFor, render } from '@testing-library/react'
+import { getLevelTitle, normalizeUserLevel } from '@/utils/level'
+import { act, render, renderHook, waitFor } from '@testing-library/react'
 import React, { useContext } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { normalizeUserLevel, getLevelTitle } from '@/utils/level'
 
 // Мокируем утилиты для работы с уровнями
 vi.mock('@/utils/level', () => ({
@@ -12,9 +12,28 @@ vi.mock('@/utils/level', () => ({
 }))
 
 // Мокируем getToken для проверки токенов
-const mockGetToken = vi.hoisted(() => vi.fn<() => string | null>(() => 'valid-token'))
+const mockGetToken = vi.hoisted(() =>
+	vi.fn<() => string | null>(() => 'valid-token')
+)
+const mockTransformUserFromAPI = vi.hoisted(() => vi.fn())
 vi.mock('@/utils/auth', () => ({
 	getToken: mockGetToken,
+	transformUserFromAPI: mockTransformUserFromAPI,
+}))
+
+// Мокируем useLazyGetUserQuery
+const mockGetUser = vi.hoisted(() => vi.fn())
+vi.mock('@/store/entities', () => ({
+	useLazyGetUserQuery: () => [mockGetUser],
+}))
+
+// Мокируем logger
+vi.mock('@/utils/logger', () => ({
+	logger: {
+		debug: vi.fn(),
+		warn: vi.fn(),
+		error: vi.fn(),
+	},
 }))
 
 const mockNormalizeUserLevel = vi.mocked(normalizeUserLevel)
@@ -38,6 +57,16 @@ describe('UserContext', () => {
 			if (level >= 2) return 'Ученик'
 			return 'Новичок'
 		})
+		// По умолчанию getUser возвращает промис, который никогда не резолвится
+		// (чтобы не вызывать обновление данных в тестах, где это не нужно)
+		// RTK Query lazy query возвращает промис с методом unwrap, но мы мокируем просто промис
+		mockGetUser.mockReturnValue(
+			Promise.resolve({
+				data: undefined,
+				error: undefined,
+			})
+		)
+		mockTransformUserFromAPI.mockImplementation((user: any) => user)
 	})
 
 	const mockUser: User = {
@@ -78,9 +107,7 @@ describe('UserContext', () => {
 	describe('инициализация из localStorage', () => {
 		it('должен инициализироваться с null, если в localStorage нет данных', () => {
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			expect(result.current.user).toBeNull()
@@ -97,9 +124,7 @@ describe('UserContext', () => {
 			})
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -111,9 +136,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', 'invalid-json{')
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			// При ошибке парсинга должен вернуться null
@@ -124,9 +147,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', '')
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			expect(result.current.user).toBeNull()
@@ -147,9 +168,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -184,9 +203,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -207,9 +224,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -229,9 +244,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -244,9 +257,7 @@ describe('UserContext', () => {
 
 		it('не должен вызывать нормализацию, если пользователь отсутствует', async () => {
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -265,9 +276,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(userWithoutLevel))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -277,7 +286,7 @@ describe('UserContext', () => {
 			expect(mockNormalizeUserLevel).not.toHaveBeenCalled()
 		})
 
-		it('должен нормализовать уровень только при монтировании, а не при каждом изменении user', async () => {
+		it('должен нормализовать уровень при изменении user', async () => {
 			const normalizedLevel = {
 				level: 6,
 				experience: 120,
@@ -290,13 +299,23 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
+			// Ждем, пока нормализация вызовется при монтировании
+			// (может быть вызвана несколько раз из-за зависимостей useEffect)
 			await waitFor(() => {
-				expect(mockNormalizeUserLevel).toHaveBeenCalledTimes(1)
+				expect(mockNormalizeUserLevel).toHaveBeenCalled()
+			})
+
+			// Запоминаем количество вызовов до обновления пользователя
+			const callsBeforeUpdate = mockNormalizeUserLevel.mock.calls.length
+
+			// Мокируем нормализацию для обновленного пользователя
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
 			})
 
 			// Обновляем пользователя
@@ -307,9 +326,11 @@ describe('UserContext', () => {
 				})
 			})
 
-			// Нормализация не должна вызываться снова
+			// Нормализация должна вызываться снова при изменении user
 			await waitFor(() => {
-				expect(mockNormalizeUserLevel).toHaveBeenCalledTimes(1)
+				expect(mockNormalizeUserLevel.mock.calls.length).toBeGreaterThan(
+					callsBeforeUpdate
+				)
 			})
 		})
 
@@ -326,9 +347,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -350,9 +369,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -360,19 +377,22 @@ describe('UserContext', () => {
 				expect(result.current.user?.name).toBe(mockUser.name)
 				expect(result.current.user?.email).toBe(mockUser.email)
 				expect(result.current.user?.stats).toEqual(mockUser.stats)
-				expect(result.current.user?.achievements).toEqual(
-					mockUser.achievements
-				)
+				expect(result.current.user?.achievements).toEqual(mockUser.achievements)
 			})
 		})
 	})
 
 	describe('обновление пользователя', () => {
 		it('должен обновлять пользователя через setUser', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			act(() => {
@@ -386,10 +406,15 @@ describe('UserContext', () => {
 		})
 
 		it('должен поддерживать функциональное обновление через setUser', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			act(() => {
@@ -411,9 +436,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(mockUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			act(() => {
@@ -425,10 +448,15 @@ describe('UserContext', () => {
 		})
 
 		it('должен обновлять localStorage при изменении пользователя', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			act(() => {
@@ -454,9 +482,7 @@ describe('UserContext', () => {
 	describe('предоставление контекста', () => {
 		it('должен предоставлять user и setUser в контексте', () => {
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			expect(result.current).toHaveProperty('user')
@@ -465,10 +491,15 @@ describe('UserContext', () => {
 		})
 
 		it('должен обновлять значение контекста при изменении user', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			expect(result.current.user).toBeNull()
@@ -482,9 +513,7 @@ describe('UserContext', () => {
 
 		it('должен мемоизировать значение контекста', () => {
 			const { result, rerender } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			const firstValue = result.current
@@ -496,10 +525,15 @@ describe('UserContext', () => {
 		})
 
 		it('должен обновлять мемоизированное значение при изменении user', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			const firstValue = result.current
@@ -514,16 +548,19 @@ describe('UserContext', () => {
 		})
 
 		it('должен работать с несколькими потребителями контекста', () => {
+			// Мокируем нормализацию, чтобы вернуть те же значения
+			mockNormalizeUserLevel.mockReturnValue({
+				level: mockUser.level.level,
+				experience: mockUser.level.experience,
+				experienceToNext: mockUser.level.experienceToNext,
+			})
+
 			const { result: result1 } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			const { result: result2 } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			// Разные провайдеры - разные состояния
@@ -552,8 +589,8 @@ describe('UserContext', () => {
 				context2Value = useUserContext()
 				return (
 					<div>
-						<div data-testid="user1">{context1Value?.user?.name || 'null'}</div>
-						<div data-testid="user2">{context2Value?.user?.name || 'null'}</div>
+						<div data-testid='user1'>{context1Value?.user?.name || 'null'}</div>
+						<div data-testid='user2'>{context2Value?.user?.name || 'null'}</div>
 					</div>
 				)
 			}
@@ -605,9 +642,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(maxLevelUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -638,9 +673,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(level1User))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -671,9 +704,7 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(highExpUser))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			await waitFor(() => {
@@ -690,13 +721,10 @@ describe('UserContext', () => {
 			localStorage.setItem('ecoquest_user', JSON.stringify(userWithoutEmail))
 
 			const { result } = renderHook(() => useUserContext(), {
-				wrapper: ({ children }) => (
-					<UserProvider>{children}</UserProvider>
-				),
+				wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
 			})
 
 			expect(result.current.user?.email).toBeUndefined()
 		})
 	})
 })
-

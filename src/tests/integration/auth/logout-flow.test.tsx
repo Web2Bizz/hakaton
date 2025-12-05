@@ -4,6 +4,33 @@ import { waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithProviders } from '../utils/test-utils'
 
+// Мокируем useLazyGetUserQuery для UserContext
+const mockGetUser = vi.hoisted(() => vi.fn())
+vi.mock('@/store/entities', () => ({
+	useLazyGetUserQuery: () => [mockGetUser],
+}))
+
+// Мокируем getToken и transformUserFromAPI
+const mockGetToken = vi.hoisted(() => vi.fn(() => null))
+const mockTransformUserFromAPI = vi.hoisted(() => vi.fn((user: any) => user))
+vi.mock('@/utils/auth', async () => {
+	const actual = await vi.importActual('@/utils/auth')
+	return {
+		...actual,
+		getToken: mockGetToken,
+		transformUserFromAPI: mockTransformUserFromAPI,
+	}
+})
+
+// Мокируем logger
+vi.mock('@/utils/logger', () => ({
+	logger: {
+		debug: vi.fn(),
+		warn: vi.fn(),
+		error: vi.fn(),
+	},
+}))
+
 /**
  * Компонент для тестирования logout
  */
@@ -12,11 +39,11 @@ function LogoutTestComponent() {
 
 	return (
 		<div>
-			<div data-testid="user-status">
+			<div data-testid='user-status'>
 				{isAuthenticated ? 'authenticated' : 'not-authenticated'}
 			</div>
-			<div data-testid="user-id">{user?.id || 'no-user'}</div>
-			<button data-testid="logout-button" onClick={logout}>
+			<div data-testid='user-id'>{user?.id || 'no-user'}</div>
+			<button data-testid='logout-button' onClick={logout}>
 				Выйти
 			</button>
 		</div>
@@ -40,6 +67,20 @@ describe('Logout Flow Integration Test', () => {
 
 		// Очищаем все моки
 		vi.clearAllMocks()
+
+		// Мокаем getToken, чтобы он возвращал токен из localStorage
+		mockGetToken.mockImplementation(() => {
+			return localStorage.getItem('authToken')
+		})
+
+		// Мокаем getUser, чтобы он возвращал промис, который никогда не резолвится
+		// (чтобы не вызывать обновление данных в тестах, где это не нужно)
+		mockGetUser.mockReturnValue(
+			Promise.resolve({
+				data: undefined,
+				error: undefined,
+			})
+		)
 
 		// Мокаем globalThis.location.href
 		Object.defineProperty(globalThis, 'location', {
@@ -209,4 +250,3 @@ describe('Logout Flow Integration Test', () => {
 		)
 	})
 })
-
