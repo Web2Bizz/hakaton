@@ -91,9 +91,9 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 
 		// Преобразуем requirement в requirements
 		if (step.requirement) {
-			// Определяем тип требования на основе текущего значения
-			// Если targetValue большое (>= 1000), считаем это финансовым требованием
-			if (step.requirement.targetValue >= 1000) {
+			// Используем поле type из step для определения типа требования
+			// Если type не указан, используем fallback на основе targetValue для обратной совместимости
+			if (step.type === 'finance') {
 				stage.requirements = {
 					financial: {
 						collected: step.requirement.currentValue,
@@ -101,13 +101,40 @@ export function transformApiQuestToComponentQuest(apiQuest: ApiQuest): Quest {
 						currency: 'RUB',
 					},
 				}
-			} else {
-				// Иначе считаем это требованием по количеству (волонтеры или предметы)
+			} else if (step.type === 'contributers') {
 				stage.requirements = {
 					volunteers: {
 						registered: step.requirement.currentValue,
 						needed: step.requirement.targetValue,
 					},
+				}
+			} else if (step.type === 'material') {
+				// Для материалов используем дефолтное название, если itemName не приходит с бэкенда
+				stage.requirements = {
+					items: {
+						collected: step.requirement.currentValue,
+						needed: step.requirement.targetValue,
+						itemName: 'Предметы', // Дефолтное название, если не приходит с бэкенда
+					},
+				}
+			} else {
+				// Fallback для обратной совместимости: определяем тип по targetValue
+				if (step.requirement.targetValue >= 1000) {
+					stage.requirements = {
+						financial: {
+							collected: step.requirement.currentValue,
+							needed: step.requirement.targetValue,
+							currency: 'RUB',
+						},
+					}
+				} else {
+					// Иначе считаем это требованием по количеству (волонтеры)
+					stage.requirements = {
+						volunteers: {
+							registered: step.requirement.currentValue,
+							needed: step.requirement.targetValue,
+						},
+					}
 				}
 			}
 		}
