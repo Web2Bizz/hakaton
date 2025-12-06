@@ -44,6 +44,47 @@ export const questService = createApi({
 		getQuests: builder.query<QuestsListResponse, GetQuestsParams | void>({
 			query: params => {
 				if (!params) return '/v1/quests'
+
+				// Если есть ownerId, используем endpoint /quests/filter
+				if (params.ownerId) {
+					const searchParams = new URLSearchParams()
+					searchParams.append('ownerId', params.ownerId.toString())
+
+					// Добавляем остальные параметры, если они есть
+					if (params.cityId) {
+						searchParams.append('cityId', params.cityId.toString())
+					}
+					if (params.organizationTypeId) {
+						searchParams.append(
+							'organizationTypeId',
+							params.organizationTypeId.toString()
+						)
+					}
+					if (params.categoryIds && params.categoryIds.length > 0) {
+						for (const id of params.categoryIds) {
+							searchParams.append('categoryIds', id.toString())
+						}
+					}
+					if (params.status) {
+						searchParams.append('status', params.status)
+					}
+					if (params.search) {
+						searchParams.append('search', params.search)
+					}
+					if (params.page) {
+						searchParams.append('page', params.page.toString())
+					}
+					if (params.limit) {
+						searchParams.append('limit', params.limit.toString())
+					}
+					if (params.sort) {
+						searchParams.append('sort', params.sort)
+					}
+
+					return `/v1/quests/filter?${searchParams.toString()}`
+				}
+
+				// Для остальных случаев используем обычный endpoint
 				const searchParams = new URLSearchParams()
 				if (params.cityId) {
 					searchParams.append('cityId', params.cityId.toString())

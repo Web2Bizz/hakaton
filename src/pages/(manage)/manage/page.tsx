@@ -34,23 +34,29 @@ export default function ManagePage() {
 	const [isTabChanging, setIsTabChanging] = useState(false)
 
 	// Загружаем данные для статистики
-	const { data: questsResponse } = useGetQuestsQuery()
+	// Используем фильтр ownerId на сервере для получения только созданных квестов
+	const userIdNum = user?.id
+		? typeof user.id === 'string'
+			? Number.parseInt(user.id, 10)
+			: Number(user.id)
+		: undefined
+
+	const { data: questsResponse } = useGetQuestsQuery(
+		userIdNum
+			? {
+					ownerId: userIdNum,
+			  }
+			: undefined
+	)
 	const { data: organizations = [] } = useGetOrganizationsQuery()
 
 	// Статистика квестов (только созданные пользователем)
+	// Фильтрация по ownerId уже выполнена на сервере
 	const questsStats = useMemo(() => {
 		if (!questsResponse?.data?.quests || !user?.id)
 			return { total: 0, active: 0, completed: 0, archived: 0 }
 
-		// Фильтруем квесты, созданные текущим пользователем (по ownerId)
-		const userIdNum =
-			typeof user.id === 'string'
-				? Number.parseInt(user.id, 10)
-				: Number(user.id)
-
-		const createdQuests = questsResponse.data.quests.filter(
-			quest => quest.ownerId === userIdNum
-		)
+		const createdQuests = questsResponse.data.quests
 
 		return {
 			total: createdQuests.length,
@@ -58,7 +64,7 @@ export default function ManagePage() {
 			completed: createdQuests.filter(q => q.status === 'completed').length,
 			archived: createdQuests.filter(q => q.status === 'archived').length,
 		}
-	}, [questsResponse, user])
+	}, [questsResponse, user?.id])
 
 	// Статистика организаций
 	const orgsStats = useMemo(() => {

@@ -22,26 +22,29 @@ export function MyQuestsList() {
 	const navigate = useNavigate()
 	const [filter, setFilter] = useState<QuestFilter>('all')
 
-	// Загружаем все квесты для фильтрации по ownerId
-	const { data: questsResponse, isLoading } = useGetQuestsQuery()
+	// Загружаем квесты, созданные текущим пользователем, используя фильтр ownerId на сервере
+	const userIdNum = useMemo(() => {
+		if (!user?.id) return undefined
+		return typeof user.id === 'string'
+			? Number.parseInt(user.id, 10)
+			: Number(user.id)
+	}, [user?.id])
+
+	const { data: questsResponse, isLoading } = useGetQuestsQuery(
+		userIdNum
+			? {
+					ownerId: userIdNum,
+			  }
+			: undefined
+	)
 
 	// Преобразуем квесты с сервера в формат компонентов
-	// Фильтруем только квесты, созданные текущим пользователем
+	// Фильтрация по ownerId уже выполнена на сервере
 	const allQuests = useMemo(() => {
 		if (!questsResponse?.data?.quests || !user?.id) return []
 
-		// Фильтруем квесты, созданные текущим пользователем (по ownerId)
-		const userIdNum =
-			typeof user.id === 'string'
-				? Number.parseInt(user.id, 10)
-				: Number(user.id)
-
-		const createdQuests = questsResponse.data.quests.filter(
-			quest => quest.ownerId === userIdNum
-		)
-
-		logger.debug('Created quests:', createdQuests)
-		return transformApiQuestsToComponentQuests(createdQuests)
+		logger.debug('Created quests:', questsResponse.data.quests)
+		return transformApiQuestsToComponentQuests(questsResponse.data.quests)
 	}, [questsResponse, user?.id])
 
 	logger.debug('All quests:', allQuests)

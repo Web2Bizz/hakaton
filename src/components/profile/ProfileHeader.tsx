@@ -3,6 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import {
+	useGetQuestsQuery,
 	useGetUserAchievementsByUserIdQuery,
 	useLazyGetUserQuery,
 	useUpdateUserMutation,
@@ -42,9 +43,24 @@ export const ProfileHeader = memo(function ProfileHeader({
 		}
 	)
 
+	// Получаем квесты, созданные пользователем, используя фильтр ownerId на сервере
+	const userIdNum = useMemo(() => {
+		if (!user?.id) return undefined
+		return typeof user.id === 'string'
+			? Number.parseInt(user.id, 10)
+			: Number(user.id)
+	}, [user?.id])
+
+	const { data: questsResponse } = useGetQuestsQuery(
+		userIdNum
+			? {
+					ownerId: userIdNum,
+			  }
+			: undefined
+	)
+
 	// Подсчитываем количество разблокированных достижений из API
 	const unlockedAchievements = useMemo(() => {
-		console.log(achievementsResponse)
 		if (achievementsResponse?.data?.achievements) {
 			return achievementsResponse.data.achievements.filter(a => a.unlockedAt)
 				.length
@@ -52,6 +68,15 @@ export const ProfileHeader = memo(function ProfileHeader({
 		// Fallback на данные из user, если API еще не загрузился
 		return user.achievements.filter(a => a.unlockedAt !== undefined).length
 	}, [achievementsResponse, user.achievements])
+
+	// Подсчитываем количество квестов, созданных пользователем, из API
+	const totalQuests = useMemo(() => {
+		if (questsResponse?.data?.quests) {
+			return questsResponse.data.quests.length
+		}
+		// Fallback на данные из user.stats, если API еще не загрузился
+		return user.stats?.totalQuests ?? 0
+	}, [questsResponse, user.stats?.totalQuests])
 
 	// Сбрасываем состояние загрузки при изменении аватара
 	useEffect(() => {
@@ -404,7 +429,7 @@ export const ProfileHeader = memo(function ProfileHeader({
 							</span>
 						</div>
 						<p className='text-xl sm:text-2xl font-bold text-slate-900'>
-							{user.stats?.totalQuests ?? 0}
+							{totalQuests}
 						</p>
 					</div>
 

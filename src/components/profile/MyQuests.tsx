@@ -14,27 +14,33 @@ export function MyQuests() {
 	const { user } = useUser()
 	const navigate = useNavigate()
 
-	// Загружаем все квесты для фильтрации по ownerId
-	const { data: questsResponse, isLoading } = useGetQuestsQuery()
+	// Загружаем квесты, созданные текущим пользователем, используя фильтр ownerId на сервере
+	const userIdNum = useMemo(() => {
+		if (!user?.id) return undefined
+		return typeof user.id === 'string'
+			? Number.parseInt(user.id, 10)
+			: Number(user.id)
+	}, [user?.id])
+
+	const { data: questsResponse, isLoading } = useGetQuestsQuery(
+		userIdNum
+			? {
+					ownerId: userIdNum,
+			  }
+			: undefined
+	)
 
 	const myQuests = useMemo(() => {
 		logger.debug('questsResponse', questsResponse)
 		if (!questsResponse?.data?.quests || !user?.id) return []
 
-		// Фильтруем квесты, созданные текущим пользователем (по ownerId)
-		const userIdNum =
-			typeof user.id === 'string'
-				? Number.parseInt(user.id, 10)
-				: Number(user.id)
-
-		const createdQuests = questsResponse.data.quests.filter(
-			quest => quest.ownerId === userIdNum
-		)
-
 		// Преобразуем в формат компонентов и исключаем архивированные
-		const allQuests = transformApiQuestsToComponentQuests(createdQuests)
+		// Фильтрация по ownerId уже выполнена на сервере
+		const allQuests = transformApiQuestsToComponentQuests(
+			questsResponse.data.quests
+		)
 		return allQuests.filter(quest => quest.status !== 'archived')
-	}, [questsResponse, user])
+	}, [questsResponse, user?.id])
 
 	if (isLoading) {
 		return (

@@ -10,6 +10,7 @@ export interface GetQuestsParams {
 	page?: number
 	limit?: number
 	sort?: 'newest' | 'oldest' | 'progress' | 'popular'
+	ownerId?: number // Фильтр по создателю квеста
 }
 
 // Контакт для квеста
