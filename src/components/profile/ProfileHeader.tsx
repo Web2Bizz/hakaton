@@ -3,6 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useUser } from '@/hooks/useUser'
 import {
+	useGetUserAchievementsByUserIdQuery,
 	useLazyGetUserQuery,
 	useUpdateUserMutation,
 	useUploadImagesMutation,
@@ -12,7 +13,7 @@ import { logger } from '@/utils'
 import { transformUserFromAPI } from '@/utils/auth'
 import { compressImage } from '@/utils/image'
 import { Award, Camera, LogOut, Mail, Trophy } from 'lucide-react'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 interface ProfileHeaderProps {
@@ -33,9 +34,24 @@ export const ProfileHeader = memo(function ProfileHeader({
 	const [hasAvatarError, setHasAvatarError] = useState(false)
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
-	const unlockedAchievements = user.achievements.filter(
-		a => a.unlockedAt !== undefined
-	).length
+	// Получаем достижения пользователя через API
+	const { data: achievementsResponse } = useGetUserAchievementsByUserIdQuery(
+		user.id,
+		{
+			skip: !user.id,
+		}
+	)
+
+	// Подсчитываем количество разблокированных достижений из API
+	const unlockedAchievements = useMemo(() => {
+		console.log(achievementsResponse)
+		if (achievementsResponse?.data?.achievements) {
+			return achievementsResponse.data.achievements.filter(a => a.unlockedAt)
+				.length
+		}
+		// Fallback на данные из user, если API еще не загрузился
+		return user.achievements.filter(a => a.unlockedAt !== undefined).length
+	}, [achievementsResponse, user.achievements])
 
 	// Сбрасываем состояние загрузки при изменении аватара
 	useEffect(() => {
