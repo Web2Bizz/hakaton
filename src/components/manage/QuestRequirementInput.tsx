@@ -4,10 +4,10 @@ import { Select, type SelectOption } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuestParticipants } from '@/hooks/useQuestParticipants'
 import {
+	useAddQuestContributerMutation,
 	useAddQuestStepContributionMutation,
-	useGetMarkedVolunteersQuery,
+	useGetQuestContributersQuery,
 	useGetQuestQuery,
-	useMarkVolunteersMutation,
 } from '@/store/entities/quest'
 import type { QuestStepRequirement } from '@/store/entities/quest/model/type'
 import { getErrorMessage } from '@/utils/error'
@@ -51,19 +51,19 @@ export function QuestRequirementInput({
 		useQuestParticipants(questId)
 	const [addContribution, { isLoading: isAddingContribution }] =
 		useAddQuestStepContributionMutation()
-	const [markVolunteers, { isLoading: isMarkingVolunteers }] =
-		useMarkVolunteersMutation()
+	const [addQuestContributer, { isLoading: isMarkingVolunteers }] =
+		useAddQuestContributerMutation()
 	const { refetch: refetchQuest } = useGetQuestQuery(questId)
-	
+
 	// Загружаем уже отмеченных волонтеров только для этапа с типом "contributers"
 	const {
 		data: markedVolunteersData,
 		isLoading: isLoadingMarkedVolunteers,
 		refetch: refetchMarkedVolunteers,
-	} = useGetMarkedVolunteersQuery(questId, {
+	} = useGetQuestContributersQuery(questId, {
 		skip: type !== 'volunteers' || stepType !== 'contributers',
 	})
-	
+
 	const [selectedUserId, setSelectedUserId] = useState<string>('')
 	const [selectedVolunteers, setSelectedVolunteers] = useState<Set<string>>(
 		new Set()
@@ -73,7 +73,7 @@ export function QuestRequirementInput({
 	)
 	const [amount, setAmount] = useState<string>('')
 	const [searchQuery, setSearchQuery] = useState<string>('')
-	
+
 	// Инициализируем markedVolunteerIds с уже отмеченными пользователями (заблокированные)
 	useEffect(() => {
 		if (
@@ -81,7 +81,10 @@ export function QuestRequirementInput({
 			stepType === 'contributers' &&
 			!isLoadingMarkedVolunteers
 		) {
-			if (markedVolunteersData?.data && Array.isArray(markedVolunteersData.data)) {
+			if (
+				markedVolunteersData?.data &&
+				Array.isArray(markedVolunteersData.data)
+			) {
 				const markedIds = new Set(
 					markedVolunteersData.data.map(volunteer => String(volunteer.id))
 				)
@@ -179,7 +182,7 @@ export function QuestRequirementInput({
 		if (markedVolunteerIds.has(userId)) {
 			return
 		}
-		
+
 		setSelectedVolunteers(prev => {
 			const newSet = new Set(prev)
 			if (newSet.has(userId)) {
@@ -196,7 +199,7 @@ export function QuestRequirementInput({
 		const newVolunteers = Array.from(selectedVolunteers).filter(
 			id => !markedVolunteerIds.has(id)
 		)
-		
+
 		if (newVolunteers.length === 0) {
 			toast.info('Нет новых волонтеров для отметки')
 			return
@@ -212,7 +215,8 @@ export function QuestRequirementInput({
 				return
 			}
 
-			await markVolunteers({
+			// Отправляем массив userIds одним запросом
+			await addQuestContributer({
 				questId,
 				userIds,
 			}).unwrap()
@@ -420,9 +424,10 @@ export function QuestRequirementInput({
 							) : filteredParticipants.length > 0 ? (
 								filteredParticipants.map(participant => {
 									const isMarked = markedVolunteerIds.has(participant.id)
-									const isSelected = isMarked || selectedVolunteers.has(participant.id)
+									const isSelected =
+										isMarked || selectedVolunteers.has(participant.id)
 									const isDisabled = isMarked
-									
+
 									return (
 										<label
 											key={participant.id}
@@ -482,7 +487,9 @@ export function QuestRequirementInput({
 								isUpdating ||
 								isMarkingVolunteers ||
 								selectedVolunteers.size === 0 ||
-								Array.from(selectedVolunteers).every(id => markedVolunteerIds.has(id))
+								Array.from(selectedVolunteers).every(id =>
+									markedVolunteerIds.has(id)
+								)
 							}
 							className='flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-md h-10 sm:h-auto text-sm sm:text-base'
 						>

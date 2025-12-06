@@ -1,7 +1,10 @@
-import { getToken } from '@/utils/auth'
 import { baseQueryWithReauth } from '@/store/baseQueryWithReauth'
+import { getToken } from '@/utils/auth'
 import { createApi } from '@reduxjs/toolkit/query/react'
 import type {
+	AddQuestContributerParams,
+	AddQuestContributerRequest,
+	AddQuestContributerResponse,
 	AddQuestStepContributionParams,
 	AddQuestStepContributionRequest,
 	AddQuestStepContributionResponse,
@@ -10,6 +13,8 @@ import type {
 	CreateQuestRequest,
 	CreateQuestResponse,
 	CreateQuestUpdateRequest,
+	DeleteQuestContributerParams,
+	DeleteQuestContributerResponse,
 	DeleteQuestResponse,
 	DeleteQuestUpdateResponse,
 	GenerateCheckInTokenRequest,
@@ -17,12 +22,8 @@ import type {
 	GetQuestsParams,
 	JoinQuestResponse,
 	LeaveQuestResponse,
-	MarkVolunteersParams,
-	MarkVolunteersRequest,
-	MarkVolunteersResponse,
-	MarkedVolunteer,
-	MarkedVolunteersResponse,
 	Quest,
+	QuestContributersResponse,
 	QuestParticipant,
 	QuestParticipantsResponse,
 	QuestUpdate,
@@ -37,13 +38,7 @@ import type {
 export const questService = createApi({
 	reducerPath: 'questApi',
 	baseQuery: baseQueryWithReauth,
-	tagTypes: [
-		'Quest',
-		'QuestList',
-		'QuestUpdate',
-		'UserQuest',
-		'MarkedVolunteers',
-	],
+	tagTypes: ['Quest', 'QuestList', 'QuestUpdate', 'UserQuest'],
 	endpoints: builder => ({
 		// GET /quests - Получить список квестов с фильтрацией
 		getQuests: builder.query<QuestsListResponse, GetQuestsParams | void>({
@@ -433,53 +428,6 @@ export const questService = createApi({
 			],
 		}),
 
-		// GET /v1/quests/:questId/steps/contributers/volunteers - Получить отмеченных волонтеров для этапа квеста
-		getMarkedVolunteers: builder.query<
-			MarkedVolunteersResponse,
-			number | string
-		>({
-			query: questId => `/v1/quests/${questId}/steps/contributers/volunteers`,
-			transformResponse: (
-				response: MarkedVolunteer[] | MarkedVolunteersResponse
-			): MarkedVolunteersResponse => {
-				// Если ответ - это массив объектов напрямую
-				if (Array.isArray(response)) {
-					return {
-						data: response,
-					}
-				}
-				// Если ответ уже в формате { data: [...] }
-				if ('data' in response && Array.isArray(response.data)) {
-					return response
-				}
-				// Возвращаем пустой массив по умолчанию
-				return {
-					data: [],
-				}
-			},
-			providesTags: (_result, _error, questId) => [
-				{ type: 'MarkedVolunteers', id: String(questId) },
-			],
-		}),
-
-		// POST /v1/quests/:questId/steps/contributers/volunteers - Отметить волонтеров для этапа квеста
-		markVolunteers: builder.mutation<
-			MarkVolunteersResponse,
-			MarkVolunteersParams
-		>({
-			query: ({ questId, userIds }) => ({
-				url: `/v1/quests/${questId}/steps/contributers/volunteers`,
-				method: 'POST',
-				body: {
-					userIds,
-				} as MarkVolunteersRequest,
-			}),
-			invalidatesTags: (_result, _error, { questId }) => [
-				{ type: 'Quest', id: String(questId) },
-				{ type: 'MarkedVolunteers', id: String(questId) },
-			],
-		}),
-
 		// POST /v1/checkin/generate-token - Генерация токена для QR кода checkin
 		generateCheckInToken: builder.mutation<
 			GenerateCheckInTokenResponse,
@@ -502,6 +450,66 @@ export const questService = createApi({
 					token,
 				},
 			}),
+		}),
+
+		// GET /v1/quests/:questId/contributers - Получить список волонтеров квеста
+		getQuestContributers: builder.query<
+			QuestContributersResponse,
+			number | string
+		>({
+			query: questId => `/v1/quests/${questId}/contributers`,
+			transformResponse: (
+				response: QuestParticipant[] | QuestContributersResponse
+			): QuestContributersResponse => {
+				// Если ответ - это массив объектов напрямую
+				if (Array.isArray(response)) {
+					return {
+						data: response,
+					}
+				}
+				// Если ответ уже в формате { data: [...] }
+				if ('data' in response && Array.isArray(response.data)) {
+					return response
+				}
+				// Возвращаем пустой массив по умолчанию
+				return {
+					data: [],
+				}
+			},
+			providesTags: (_result, _error, questId) => [
+				{ type: 'Quest', id: String(questId) },
+			],
+		}),
+
+		// POST /v1/quests/:questId/contributers - Добавить волонтера в квест
+		addQuestContributer: builder.mutation<
+			AddQuestContributerResponse,
+			AddQuestContributerParams
+		>({
+			query: ({ questId, userIds }) => ({
+				url: `/v1/quests/${questId}/contributers`,
+				method: 'POST',
+				body: {
+					userIds,
+				} as AddQuestContributerRequest,
+			}),
+			invalidatesTags: (_result, _error, { questId }) => [
+				{ type: 'Quest', id: String(questId) },
+			],
+		}),
+
+		// DELETE /v1/quests/:questId/contributers/:userId - Удалить волонтера из квеста
+		deleteQuestContributer: builder.mutation<
+			DeleteQuestContributerResponse,
+			DeleteQuestContributerParams
+		>({
+			query: ({ questId, userId }) => ({
+				url: `/v1/quests/${questId}/contributers/${userId}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (_result, _error, { questId }) => [
+				{ type: 'Quest', id: String(questId) },
+			],
 		}),
 	}),
 })
@@ -529,10 +537,11 @@ export const {
 	useGetQuestUsersQuery,
 	useLazyGetQuestUsersQuery,
 	useAddQuestStepContributionMutation,
-	useGetMarkedVolunteersQuery,
-	useLazyGetMarkedVolunteersQuery,
-	useMarkVolunteersMutation,
 	useGenerateCheckInTokenMutation,
 	useCheckInQuery,
 	useLazyCheckInQuery,
+	useGetQuestContributersQuery,
+	useLazyGetQuestContributersQuery,
+	useAddQuestContributerMutation,
+	useDeleteQuestContributerMutation,
 } = questService

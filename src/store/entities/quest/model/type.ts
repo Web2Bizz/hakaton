@@ -325,3 +325,39 @@ export interface MarkedVolunteer {
 export interface MarkedVolunteersResponse {
 	data: MarkedVolunteer[]
 }
+
+// Ответ при получении волонтеров квеста (новый endpoint)
+export interface QuestContributersResponse {
+	data: QuestParticipant[]
+}
+
+// Запрос на добавление волонтера в квест
+export interface AddQuestContributerRequest {
+	userIds: number[]
+}
+
+// Параметры для добавления волонтера в квест
+export interface AddQuestContributerParams {
+	questId: number
+	userIds: number[]
+}
+
+// Ответ при добавлении волонтера в квест
+export interface AddQuestContributerResponse {
+	data: {
+		message?: string
+	}
+}
+
+// Параметры для удаления волонтера из квеста
+export interface DeleteQuestContributerParams {
+	questId: number
+	userId: number
+}
+
+// Ответ при удалении волонтера из квеста
+export interface DeleteQuestContributerResponse {
+	data: {
+		message?: string
+	}
+}
