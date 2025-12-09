@@ -1,3 +1,4 @@
+import { loadLeafletStyles } from '@/components/map/lib/loadLeafletStyles'
 import { Button } from '@/components/ui/button'
 import { useGetCitiesQuery } from '@/store/entities/city'
 import { getCityCoordinates } from '@/utils/cityCoordinates'
@@ -92,6 +93,11 @@ export function LocationPicker({
 		initialCoordinates || null
 	)
 	const [isMapReady, setIsMapReady] = useState(false)
+
+	// Загружаем стили Leaflet при монтировании компонента
+	useEffect(() => {
+		loadLeafletStyles()
+	}, [])
 
 	// Задержка рендеринга карты до полного открытия модалки
 	useEffect(() => {
