@@ -4,7 +4,13 @@ import { getCityCoordinates } from '@/utils/cityCoordinates'
 import L from 'leaflet'
 import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet'
+import {
+	MapContainer,
+	Marker,
+	TileLayer,
+	useMap,
+	useMapEvents,
+} from 'react-leaflet'
 
 // Иконка для выбранного местоположения
 const selectedMarkerIcon = L.divIcon({
@@ -42,6 +48,39 @@ function MapClickHandler({
 	return null
 }
 
+// Компонент для обновления размера карты в модалке
+function MapSizeUpdater() {
+	const map = useMap()
+
+	useEffect(() => {
+		const fixSize = () => {
+			if (map) {
+				map.invalidateSize()
+			}
+		}
+
+		// Несколько попыток с задержками для надежности
+		const timeouts = [
+			setTimeout(fixSize, 0),
+			setTimeout(fixSize, 100),
+			setTimeout(fixSize, 300),
+		]
+
+		// Обновляем при изменении размера окна
+		const handleResize = () => {
+			fixSize()
+		}
+		globalThis.addEventListener('resize', handleResize)
+
+		return () => {
+			timeouts.forEach(timeout => clearTimeout(timeout))
+			globalThis.removeEventListener('resize', handleResize)
+		}
+	}, [map])
+
+	return null
+}
+
 export function LocationPicker({
 	city,
 	initialCoordinates,
@@ -52,6 +91,16 @@ export function LocationPicker({
 	const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(
 		initialCoordinates || null
 	)
+	const [isMapReady, setIsMapReady] = useState(false)
+
+	// Задержка рендеринга карты до полного открытия модалки
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsMapReady(true)
+		}, 150)
+
+		return () => clearTimeout(timer)
+	}, [])
 
 	useEffect(() => {
 		if (city && !selectedCoords && cities.length > 0) {
@@ -106,27 +155,31 @@ export function LocationPicker({
 				</div>
 
 				<div className='flex-1 relative'>
-					<MapContainer
-						center={mapCenter}
-						// center={[61.524, 105.3188]}
-						zoom={city ? 12 : 4}
-						scrollWheelZoom
-						style={{ height: '100%', width: '100%' }}
-						maxBounds={[
-							[38, 15],
-							[82, 200],
-						]}
-						maxBoundsViscosity={1.0}
-					>
-						<TileLayer
-							attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-							url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-						/>
-						<MapClickHandler onSelect={handleMapClick} />
-						{selectedCoords && (
-							<Marker position={selectedCoords} icon={selectedMarkerIcon} />
-						)}
-					</MapContainer>
+					{isMapReady ? (
+						<MapContainer
+							key={`map-${selectedCoords?.[0] || mapCenter[0]}-${
+								selectedCoords?.[1] || mapCenter[1]
+							}`}
+							center={mapCenter}
+							zoom={city ? 12 : 4}
+							scrollWheelZoom
+							style={{ height: '100%', width: '100%' }}
+						>
+							<MapSizeUpdater />
+							<TileLayer
+								attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+								url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+							/>
+							<MapClickHandler onSelect={handleMapClick} />
+							{selectedCoords && (
+								<Marker position={selectedCoords} icon={selectedMarkerIcon} />
+							)}
+						</MapContainer>
+					) : (
+						<div className='h-full w-full flex items-center justify-center bg-slate-100'>
+							<div className='text-slate-500'>Загрузка карты...</div>
+						</div>
+					)}
 				</div>
 
 				<div className='p-4 border-t border-slate-200 flex items-center justify-between'>
