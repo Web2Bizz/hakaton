@@ -1,6 +1,7 @@
 import { MessageCircle, X } from 'lucide-react'
 import { useState } from 'react'
 import { ConnectionStatus } from './ConnectionStatus'
+import { CreateTicketForm } from './CreateTicketForm'
 import { SupportChatContent, type Message } from './SupportChatContent'
 
 interface SupportChatProps {
@@ -8,10 +9,19 @@ interface SupportChatProps {
 	readonly isClosing?: boolean
 }
 
+interface Ticket {
+	id: string
+	title: string
+	description: string
+	createdAt: Date
+}
+
 export function SupportChat({ onClose, isClosing = false }: SupportChatProps) {
+	const [ticket, setTicket] = useState<Ticket | null>(null)
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<Message[]>([])
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [isCreatingTicket, setIsCreatingTicket] = useState(false)
 
 	const handleSend = async () => {
 		if (!message.trim() || isSubmitting) return
@@ -54,6 +64,22 @@ export function SupportChat({ onClose, isClosing = false }: SupportChatProps) {
 		})
 	}
 
+	const handleCreateTicket = async (title: string, description: string) => {
+		setIsCreatingTicket(true)
+
+		// Имитация создания тикета (в реальном приложении здесь будет API запрос)
+		setTimeout(() => {
+			const newTicket: Ticket = {
+				id: Date.now().toString(),
+				title,
+				description,
+				createdAt: new Date(),
+			}
+			setTicket(newTicket)
+			setIsCreatingTicket(false)
+		}, 1000)
+	}
+
 	return (
 		<aside
 			className={`fixed right-5 top-[88px] bottom-20 w-[400px] max-w-[calc(100vw-40px)] z-[100] bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 overflow-hidden flex flex-col ${
@@ -91,15 +117,22 @@ export function SupportChat({ onClose, isClosing = false }: SupportChatProps) {
 				</div>
 			</header>
 
-			<SupportChatContent
-				messages={messages}
-				message={message}
-				setMessage={setMessage}
-				isSubmitting={isSubmitting}
-				onSend={handleSend}
-				onKeyPress={handleKeyPress}
-				formatTime={formatTime}
-			/>
+			{ticket ? (
+				<SupportChatContent
+					messages={messages}
+					message={message}
+					setMessage={setMessage}
+					isSubmitting={isSubmitting}
+					onSend={handleSend}
+					onKeyPress={handleKeyPress}
+					formatTime={formatTime}
+				/>
+			) : (
+				<CreateTicketForm
+					onCreateTicket={handleCreateTicket}
+					isCreating={isCreatingTicket}
+				/>
+			)}
 		</aside>
 	)
 }
