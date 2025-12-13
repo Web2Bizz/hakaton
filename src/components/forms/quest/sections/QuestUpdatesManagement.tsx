@@ -196,9 +196,9 @@ function UpdateCard({
 
 	return (
 		<div className='border border-slate-200 rounded-lg p-6 bg-white'>
-			<div className='flex items-start justify-between mb-3'>
-				<div className='flex-1'>
-					<h4 className='text-base font-semibold text-slate-900 m-0 mb-1'>
+			<div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3'>
+				<div className='flex-1 min-w-0'>
+					<h4 className='text-base font-semibold text-slate-900 m-0 mb-1 break-words'>
 						{update.title}
 					</h4>
 					{update.createdAt && (
@@ -207,10 +207,10 @@ function UpdateCard({
 						</p>
 					)}
 				</div>
-				<div className='flex items-center gap-2'>
+				<div className='flex items-center gap-2 flex-shrink-0'>
 					<Button type='button' variant='outline' size='sm' onClick={onEdit}>
-						<Edit2 className='h-4 w-4 mr-1' />
-						Редактировать
+						<Edit2 className='h-4 w-4 sm:mr-1' />
+						<span className='hidden sm:inline'>Редактировать</span>
 					</Button>
 					<Button
 						type='button'
@@ -220,8 +220,8 @@ function UpdateCard({
 						disabled={isDeleting}
 						className='text-red-600 hover:text-red-700 hover:border-red-300'
 					>
-						<Trash2 className='h-4 w-4 mr-1' />
-						Удалить
+						<Trash2 className='h-4 w-4 sm:mr-1' />
+						<span className='hidden sm:inline'>Удалить</span>
 					</Button>
 				</div>
 			</div>
